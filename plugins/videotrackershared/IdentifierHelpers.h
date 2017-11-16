@@ -33,6 +33,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <iterator>
 
 namespace osvr {
 namespace vbtracker {
@@ -42,9 +43,21 @@ namespace vbtracker {
     inline void truncateBrightnessListTo(BrightnessList &brightnesses,
                                          size_t n) {
         /// @todo has to be a more efficient method.
+        auto currentSize = brightnesses.size();
+        if (currentSize > n) {
+            auto excess = currentSize - n;
+            auto newBegin = brightnesses.begin();
+            std::advance(newBegin, excess);
+            brightnesses.erase(brightnesses.begin(), newBegin);
+            if (brightnesses.size() > n) {
+                throw std::logic_error("MATH FAIL");
+            }
+        }
+#if 0
         while (brightnesses.size() > n) {
             brightnesses.pop_front();
         }
+#endif
     }
 
     /// @brief Helper function for implementations of LedIdentifier to find

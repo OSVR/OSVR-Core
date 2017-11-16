@@ -50,4 +50,22 @@ inline comutils::Ptr<IPin> GetPin(IBaseFilter &pFilter,
     return comutils::Ptr<IPin>{};
 }
 
+template <typename IfaceType>
+inline comutils::Ptr<IfaceType>
+GetPinInterface(ICaptureGraphBuilder2 &builder, IBaseFilter &src,
+                const GUID *pinCategory = nullptr,
+                const GUID *mediaType = nullptr) {
+    comutils::Ptr<IfaceType> ret;
+    builder.FindInterface(pinCategory, mediaType, &src, __uuidof(IfaceType),
+                          AttachPtr(ret));
+    return ret;
+}
+
+template <typename IfaceType>
+inline comutils::Ptr<IfaceType>
+GetVideoCapturePinInterface(ICaptureGraphBuilder2 &builder, IBaseFilter &src) {
+    return GetPinInterface<IfaceType>(builder, src, &PIN_CATEGORY_CAPTURE,
+                                      &MEDIATYPE_Video);
+}
+
 #endif // INCLUDED_GetPin_h_GUID_5AABE0CF_8981_4785_0078_147205EEFABF

@@ -24,25 +24,48 @@
 
 // Internal Includes
 #include "PoseEstimator_RANSAC.h"
-#include "LED.h"
 #include "CameraParameters.h"
+#include "LED.h"
+#include "PinholeCameraFlip.h"
+#include "UsefulQuaternions.h"
 #include "cvToEigen.h"
 
 // Library/third-party includes
-#include <opencv2/core/core.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/core/affine.hpp>
+#include <opencv2/core/core.hpp>
 
 // Standard includes
 #include <algorithm>
+#include <iostream>
+
+/// This was enabled/primarily useful to reduce jitter when RANSAC was the only
+/// tracking method, for culling a little tighter than the RANSAC PNP itself
+/// did.
+#undef OSVR_UVBI_TEST_RANSAC_REPROJECTION
+
+static const float MAX_REPROJECTION_ERROR = 4.f;
 
 namespace osvr {
 namespace vbtracker {
-    bool RANSACPoseEstimator::operator()(CameraParameters const &camParams,
-                                         LedPtrList const &leds,
-                                         BeaconStateVec const &beacons,
-                                         std::vector<BeaconData> &beaconDebug,
-                                         Eigen::Vector3d &outXlate,
-                                         Eigen::Quaterniond &outQuat) {
+    bool RANSACPoseEstimator::
+    operator()(CameraParameters const &camParams, LedPtrList const &leds,
+               BeaconStateVec const &beacons,
+               std::vector<BeaconData> &beaconDebug, Eigen::Vector3d &outXlate,
+               Eigen::Quaterniond &outQuat, int skipBrightsCutoff,
+               std::size_t iterations) {
+
+        bool skipBrights = false;
+
+        if (skipBrightsCutoff > 0) {
+            int nonBrights =
+                std::count_if(begin(leds), end(leds),
+                              [](Led *ledPtr) { return !ledPtr->isBright(); });
+            if (nonBrights >= skipBrightsCutoff) {
+                skipBrights = true;
+                // std::cout << "will be skipping brights!" << std::endl;
+            }
+        }
 
         // We need to get a pair of matched vectors of points: 2D locations
         // with in the image and 3D locations in model space.  There needs to
@@ -55,6 +78,9 @@ namespace vbtracker {
         std::vector<cv::Point2f> imagePoints;
         std::vector<ZeroBasedBeaconId> beaconIds;
         for (auto const &led : leds) {
+            if (skipBrights && led->isBright()) {
+                continue;
+            }
             auto id = makeZeroBased(led->getID());
             auto index = asIndex(id);
             beaconDebug[index].variance = -1;
@@ -83,7 +109,6 @@ namespace vbtracker {
         // do okay without using it, so leaving it out.
         // @todo Make number of iterations into a parameter.
         bool usePreviousGuess = false;
-        int iterationsCount = 5;
         cv::Mat inlierIndices;
 
         cv::Mat rvec;
@@ -92,7 +117,7 @@ namespace vbtracker {
         cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, 8.0f,
+            iterations, MAX_REPROJECTION_ERROR,
             static_cast<int>(objectPoints.size() - m_permittedOutliers),
             inlierIndices);
 #elif CV_MAJOR_VERSION == 3
@@ -104,7 +129,7 @@ namespace vbtracker {
         auto ransacResult = cv::solvePnPRansac(
             objectPoints, imagePoints, camParams.cameraMatrix,
             camParams.distortionParameters, rvec, tvec, usePreviousGuess,
-            iterationsCount, 8.0f, confidence, inlierIndices);
+            iterations, MAX_REPROJECTION_ERROR, confidence, inlierIndices);
         if (!ransacResult) {
             return false;
         }
@@ -119,18 +144,19 @@ namespace vbtracker {
             return false;
         }
 
-        //==========================================================================
-        // Reproject the inliers into the image and make sure they are actually
-        // close to the expected location; otherwise, we have a bad pose.
-        const double pixelReprojectionErrorForSingleAxisMax = 4;
         if (inlierIndices.rows > 0) {
+
+#ifdef OSVR_UVBI_TEST_RANSAC_REPROJECTION
+            //==========================================================================
+            // Reproject the inliers into the image and make sure they are
+            // actually
+            // close to the expected location; otherwise, we have a bad pose.
+            const double pixelReprojectionErrorForSingleAxisMax = 4;
             std::vector<cv::Point3f> inlierObjectPoints;
             std::vector<cv::Point2f> inlierImagePoints;
-            std::vector<ZeroBasedBeaconId> inlierBeaconIds;
             for (int i = 0; i < inlierIndices.rows; i++) {
                 inlierObjectPoints.push_back(objectPoints[i]);
                 inlierImagePoints.push_back(imagePoints[i]);
-                inlierBeaconIds.push_back(beaconIds[i]);
             }
             std::vector<cv::Point2f> reprojectedPoints;
             cv::projectPoints(
@@ -140,12 +166,25 @@ namespace vbtracker {
             for (size_t i = 0; i < reprojectedPoints.size(); i++) {
                 if (reprojectedPoints[i].x - inlierImagePoints[i].x >
                     pixelReprojectionErrorForSingleAxisMax) {
+                    std::cout << "Reject on reprojected beacon id "
+                              << makeOneBased(inlierBeaconIds[i]).value()
+                              << " x axis." << std::endl;
                     return false;
                 }
                 if (reprojectedPoints[i].y - inlierImagePoints[i].y >
                     pixelReprojectionErrorForSingleAxisMax) {
+                    std::cout << "Reject on reprojected beacon id "
+                              << makeOneBased(inlierBeaconIds[i]).value()
+                              << " y axis." << std::endl;
                     return false;
                 }
+            }
+#endif
+
+            /// Make a vector of the inlier beacon IDs.
+            std::vector<ZeroBasedBeaconId> inlierBeaconIds;
+            for (int i = 0; i < inlierIndices.rows; i++) {
+                inlierBeaconIds.push_back(beaconIds[i]);
             }
 
             /// Now, we will sort that vector of inlier beacon IDs so we can
@@ -198,8 +237,52 @@ namespace vbtracker {
         // down, and Z pointing along the camera viewing direction, if the input
         // points are not inverted.
 
-        outXlate = cvToVector3d(tvec);
-        outQuat = cvRotVecToQuat(rvec);
+        /// Get to Eigen via OpenCV's Affine transform class.
+        Eigen::Affine3d xform = Eigen::Affine3d(cv::Affine3d(rvec, tvec));
+        Eigen::Vector3d xlate(xform.translation());
+        Eigen::Quaterniond quat(xform.rotation());
+        if (!xlate.array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite position with "
+                         "RANSAC."
+                      << std::endl;
+            return false;
+        }
+        if (!quat.coeffs().array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite orientation "
+                         "with RANSAC."
+                      << std::endl;
+            return false;
+        }
+
+        // -z means the wrong side of the pinhole
+        /// @todo find out why OpenCV is now returning these values sometimes
+        if (xlate.z() < 0) {
+
+#if 0
+            std::cout << "On the wrong side of the looking glass:"
+                      << xlate.transpose() << std::endl;
+#endif
+            pinholeCameraFlipPose(xlate, quat);
+        }
+
+        if (!xlate.array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite position with "
+                         "RANSAC post-pinhole-flip."
+                      << std::endl;
+            return false;
+        }
+        if (!quat.coeffs().array().allFinite()) {
+            std::cout << "[UnifiedTracker] Computed a non-finite orientation "
+                         "with RANSAC post-pinhole-flip."
+                      << std::endl;
+            return false;
+        }
+        if (quat.w() < 0) {
+            // arbitrarily choose w to be positive.
+            quat = Eigen::Quaterniond(-quat.coeffs());
+        }
+        outXlate = xlate;
+        outQuat = quat;
         return true;
     }
 

@@ -34,10 +34,8 @@
 namespace osvr {
 namespace vbtracker {
     ConfigParams::ConfigParams() {
-        // Apparently I can't non-static-data-initializer initialize an
-        // array member. Sad. GCC almost let me. MSVC said no way.
-        const double positionNoise = 3e-2;
-        const double rotationNoise = 1e+0;
+        const double positionNoise = 0.1661102065530816;
+        const double rotationNoise = 1.3e-1;
         processNoiseAutocorrelation[0] = positionNoise;
         processNoiseAutocorrelation[1] = positionNoise;
         processNoiseAutocorrelation[2] = positionNoise;
@@ -47,11 +45,10 @@ namespace vbtracker {
 
         /// If you use manual beacon offset (aka turn off offsetToCentroid),
         /// this is a good default since it's the best beacon offset for the
-        /// HDK we've found so far - centroid of front beacons, with only z
-        /// component retained.
+        /// HDK we've found so far.
         manualBeaconOffset[0] = 0;
         manualBeaconOffset[1] = 0;
-        manualBeaconOffset[2] = -0.0388676;
+        manualBeaconOffset[2] = 0;
 
         cameraPosition[0] = 0;
         /// @todo this is just a guess of how high my camera is.
@@ -59,5 +56,10 @@ namespace vbtracker {
         /// @todo this is just an estimate of how to not break most apps.
         cameraPosition[2] = -0.5;
     }
+
+    TuningParams::TuningParams()
+        : noveltyPenaltyBase(1.282636090487287),
+          distanceMeasVarianceBase(0.9163785097),
+          distanceMeasVarianceIntercept(308.2142264) {}
 } // namespace vbtracker
 } // namespace osvr

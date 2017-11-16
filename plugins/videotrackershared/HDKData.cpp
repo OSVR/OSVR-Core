@@ -37,53 +37,104 @@ namespace vbtracker {
     // clang-format off
     // Default 3D locations for the beacons on an OSVR HDK face plate, in
     // millimeters
-    // Appears to correspond to manufacturing specs starting at LED7
+    // LED9, LED10, LED14, and LED15 had their Z spec originally at 13.09,
+    // but the data here was changed during development with the comment
+    // "new position works better"
+
     const Point3Vector OsvrHdkLedLocations_SENSOR0 = {
-        cv::Point3f( -84.93, 2.65, 23.59 ), // LED7 - updated 20151211
-        cv::Point3f( -83.27, -14.33, 13.89 ), // LED8 - updated 20151211
-        cv::Point3f( -47, 51, 24.09 ),
-        cv::Point3f( 47, 51, 24.09 ),
-        cv::Point3f( 84.93, 2.65, 23.59 ),// LED11 - updated 20151211
-        cv::Point3f( 83.27, -14.33, 13.89 ), // LED12 - updated 20151211
-        cv::Point3f( 84.1, 19.76, 13.89 ), // LED13 - updated 20151211
-        cv::Point3f( 21, 51, 24.09 ),  // Original spec was 13.09, new position works better
-        cv::Point3f( -21, 51, 24.09 ), // Original spec was 13.09, new position works better
-        cv::Point3f( -84.1, 19.76, 13.89 ), // LED16
-        cv::Point3f( -60.41, 47.55, 44.6 ),
-        cv::Point3f( -80.42, 20.48, 42.9 ),
-        cv::Point3f( -82.01, 2.74, 42.4 ),
-        cv::Point3f( -80.42, -14.99, 42.9 ),
-        cv::Point3f( -60.41, -10.25, 48.1 ),
-        cv::Point3f( -60.41, 15.75, 48.1 ),
-        cv::Point3f( -30.41, 32.75, 50.5 ),
-        cv::Point3f( -31.41, 47.34, 47 ),
-        cv::Point3f( -0.41, -15.25, 51.3 ),
-        cv::Point3f( -30.41, -27.25, 50.5 ),
-        cv::Point3f( -60.44, -41.65, 45.1 ),
-        cv::Point3f( -22.41, -41.65, 47.8 ),
-        cv::Point3f( 21.59, -41.65, 47.8 ),
-        cv::Point3f( 59.59, -41.65, 45.1 ),
-        cv::Point3f( 79.63, -14.98, 42.9 ),
-        cv::Point3f( 29.59, -27.25, 50.5 ),
-        cv::Point3f( 81.19, 2.74, 42.4 ),
-        cv::Point3f( 79.61, 20.48, 42.9 ),
-        cv::Point3f( 59.59, 47.55, 44.6 ),
-        cv::Point3f( 30.59, 47.55, 47 ),
-        cv::Point3f( 29.59, 32.75, 50.5 ),
-        cv::Point3f( -0.41, 20.75, 51.3 ),
-        cv::Point3f( 59.59, 15.75, 48.1 ),
-        cv::Point3f( 59.59, -10.25, 48.1 )
+        cv::Point3f{-84.93f,   2.65f,  23.59f}, // LED7
+        cv::Point3f{-83.27f, -14.33f,  13.89f}, // LED8
+        cv::Point3f{-47.00f,  51.00f,  24.09f}, // LED9
+        cv::Point3f{ 47.00f,  51.00f,  24.09f}, // LED10
+        cv::Point3f{ 84.93f,   2.65f,  23.59f}, // LED11
+        cv::Point3f{ 83.27f, -14.33f,  13.89f}, // LED12
+        cv::Point3f{ 84.10f,  19.76f,  13.89f}, // LED13
+        cv::Point3f{ 21.00f,  51.00f,  24.09f}, // LED14
+        cv::Point3f{-21.00f,  51.00f,  24.09f}, // LED15
+        cv::Point3f{-84.10f,  19.76f,  13.89f}, // LED16
+        cv::Point3f{-60.41f,  47.55f,  44.60f}, // LED17
+        cv::Point3f{-80.42f,  20.48f,  42.90f}, // LED18
+        cv::Point3f{-82.01f,   2.74f,  42.40f}, // LED19
+        cv::Point3f{-80.42f, -14.99f,  42.90f}, // LED20
+        cv::Point3f{-60.41f, -10.25f,  48.10f}, // LED21
+        cv::Point3f{-60.41f,  15.75f,  48.10f}, // LED22
+        cv::Point3f{-30.41f,  32.75f,  50.50f}, // LED23
+        cv::Point3f{-31.41f,  47.34f,  47.00f}, // LED24
+        cv::Point3f{ -0.41f, -15.25f,  51.30f}, // LED25
+        cv::Point3f{-30.41f, -27.25f,  50.50f}, // LED26
+        cv::Point3f{-60.44f, -41.65f,  45.10f}, // LED27
+        cv::Point3f{-22.41f, -41.65f,  47.80f}, // LED28
+        cv::Point3f{ 21.59f, -41.65f,  47.80f}, // LED29
+        cv::Point3f{ 59.59f, -41.65f,  45.10f}, // LED30
+        cv::Point3f{ 79.63f, -14.98f,  42.90f}, // LED31
+        cv::Point3f{ 29.59f, -27.25f,  50.50f}, // LED32
+        cv::Point3f{ 81.19f,   2.74f,  42.40f}, // LED33
+        cv::Point3f{ 79.61f,  20.48f,  42.90f}, // LED34
+        cv::Point3f{ 59.59f,  47.55f,  44.60f}, // LED35
+        cv::Point3f{ 30.59f,  47.55f,  47.00f}, // LED36
+        cv::Point3f{ 29.59f,  32.75f,  50.50f}, // LED37
+        cv::Point3f{ -0.41f,  20.75f,  51.30f}, // LED38
+        cv::Point3f{ 59.59f,  15.75f,  48.10f}, // LED39
+        cv::Point3f{ 59.59f, -10.25f,  48.10f}  // LED40
     };
 
     // Default 3D locations for the beacons on an OSVR HDK back plate, in
     // millimeters
+    // the first and fourth LEDs do not actually exist in production
     const Point3Vector OsvrHdkLedLocations_SENSOR1 = {
-        cv::Point3f( 1, 23.8, 0 ), // never actually turns on in production
-        cv::Point3f( 11, 5.8, 0 ),
-        cv::Point3f( 9, -23.8, 0 ),
-        cv::Point3f( 0, -8.8, 0 ), // never actually turns on in production
-        cv::Point3f( -9, -23.8, 0 ),
-        cv::Point3f( -12, 5.8, 0 )
+        cv::Point3f{  1.00f,  23.80f,   0.00f}, // LED1
+        cv::Point3f{ 11.00f,   5.80f,   0.00f}, // LED2
+        cv::Point3f{  9.00f, -23.80f,   0.00f}, // LED3
+        cv::Point3f{  0.00f,  -8.80f,   0.00f}, // LED4
+        cv::Point3f{ -9.00f, -23.80f,   0.00f}, // LED5
+        cv::Point3f{-12.00f,   5.80f,   0.00f}  // LED6
+    };
+
+    /// Locations on the HDK2 chassis - for LEDs that the HDK2 lacks, the HDK1 values
+    /// were used as placeholders.
+    const Point3Vector OsvrHdk2LedLocations_SENSOR0 = {
+        cv::Point3f{-86.62f,   0.00f,  24.10f}, // LED7
+        cv::Point3f{-85.52f, -17.23f,  13.90f}, // LED8
+        cv::Point3f{-47.00f,  48.23f,  24.10f}, // LED9
+        cv::Point3f{ 47.00f,  48.23f,  24.10f}, // LED10
+        cv::Point3f{ 84.82f,   0.00f,  23.60f}, // LED11
+        cv::Point3f{ 83.24f, -17.23f,  13.90f}, // LED12
+        cv::Point3f{ 84.12f,  17.11f,  13.90f}, // LED13
+        cv::Point3f{ 21.00f,  48.23f,  24.15f}, // LED14
+        cv::Point3f{-21.00f,  48.23f,  24.15f}, // LED15
+        cv::Point3f{-85.22f,  17.06f,  13.90f}, // LED16
+        cv::Point3f{-60.04f,  44.91f,  43.74f}, // LED17
+        cv::Point3f{-80.42f,  20.48f,  42.90f}, // LED18
+        cv::Point3f{-82.01f,   2.74f,  42.40f}, // LED19
+        cv::Point3f{-80.42f, -14.99f,  42.90f}, // LED20
+        cv::Point3f{-60.19f, -14.35f,  47.80f}, // LED21
+        cv::Point3f{-60.17f,  11.65f,  47.70f}, // LED22
+        cv::Point3f{-30.09f,  28.65f,  50.04f}, // LED23
+        cv::Point3f{-31.33f,  44.81f,  46.03f}, // LED24
+        cv::Point3f{  0.00f, -19.35f,  50.81f}, // LED25
+        cv::Point3f{-30.12f, -31.35f,  50.06f}, // LED26
+        cv::Point3f{-60.08f, -47.00f,  44.32f}, // LED27
+        cv::Point3f{-22.00f, -47.11f,  46.89f}, // LED28
+        cv::Point3f{ 22.06f, -47.06f,  47.06f}, // LED29
+        cv::Point3f{ 60.08f, -47.20f,  44.13f}, // LED30
+        cv::Point3f{ 79.63f, -14.98f,  42.90f}, // LED31
+        cv::Point3f{ 30.10f, -31.35f,  50.01f}, // LED32
+        cv::Point3f{ 81.19f,   2.74f,  42.40f}, // LED33
+        cv::Point3f{ 79.61f,  20.48f,  42.90f}, // LED34
+        cv::Point3f{ 60.31f,  45.05f,  43.53f}, // LED35
+        cv::Point3f{ 31.05f,  44.89f,  45.99f}, // LED36
+        cv::Point3f{ 30.13f,  28.65f,  50.04f}, // LED37
+        cv::Point3f{  0.00f,  16.65f,  50.81f}, // LED38
+        cv::Point3f{ 60.19f,  11.65f,  47.72f}, // LED39
+        cv::Point3f{ 60.20f, -14.35f,  47.71f}  // LED40
+    };
+    const Point3Vector OsvrHdk2LedLocations_SENSOR1 = {
+        cv::Point3f{  1.00f,  23.80f,   0.00f}, // LED1
+        cv::Point3f{ 11.00f,   5.80f,   0.00f}, // LED2
+        cv::Point3f{  9.00f, -23.80f,   0.00f}, // LED3
+        cv::Point3f{  0.00f,  -8.80f,   0.00f}, // LED4
+        cv::Point3f{ -9.00f, -23.80f,   0.00f}, // LED5
+        cv::Point3f{-12.00f,   5.80f,   0.00f}  // LED6
     };
     // clang-format on
 
@@ -132,6 +183,12 @@ namespace vbtracker {
         5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 3.0, 8.0,
         8.0, 8.0, 8.0, 3.0, 3.0, 8.0, 3.0, 3.0, 8.0, 8.0, 8.0, 8.0,
         8.0, 3.0, 8.0, 8.0, 8.0, 8.0, 3.0, 3.0, 3.0, 3.0};
+
+    static const std::initializer_list<std::size_t> HDK2_Missing_Beacons = {
+        12, 13, 14, 25, 26, 28};
+    std::initializer_list<std::size_t> getOneBasedIDsOfMissingBeaconsHDK2() {
+        return HDK2_Missing_Beacons;
+    }
 
 } // namespace vbtracker
 } // namespace osvr

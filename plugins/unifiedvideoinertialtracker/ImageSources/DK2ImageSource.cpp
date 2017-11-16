@@ -46,9 +46,11 @@ namespace vbtracker {
 
         bool ok() const override { return m_camera && m_camera->ok(); }
         bool grab() override;
-        void retrieve(cv::Mat &color, cv::Mat &gray) override;
+        void retrieve(cv::Mat &color, cv::Mat &gray,
+                      osvr::util::time::TimeValue &timestamp) override;
         cv::Size resolution() const override;
-        void retrieveColor(cv::Mat &color) override;
+        void retrieveColor(cv::Mat &color,
+                           osvr::util::time::TimeValue &timestamp) override;
 
       private:
         ImageSourcePtr m_camera;
@@ -73,17 +75,22 @@ namespace vbtracker {
         return m_camera->grab();
     }
 
-    void DK2WrappedImageSource::retrieve(cv::Mat &color, cv::Mat &gray) {
+    void
+    DK2WrappedImageSource::retrieve(cv::Mat &color, cv::Mat &gray,
+                                    osvr::util::time::TimeValue &timestamp) {
 
-        m_camera->retrieveColor(m_scratch);
+        m_camera->retrieveColor(m_scratch, timestamp);
 
         gray = osvr::oculus_dk2::unscramble_image(m_scratch);
         cv::cvtColor(gray, color, CV_GRAY2RGB);
     }
 
-    void DK2WrappedImageSource::retrieveColor(cv::Mat &color) {
+    void DK2WrappedImageSource::retrieveColor(
+        cv::Mat &color, osvr::util::time::TimeValue &timestamp) {
+        // Here we implement retrieveColor by implementing retrieve and just
+        // tossing the gray result...
         cv::Mat dummy;
-        retrieve(color, dummy);
+        retrieve(color, dummy, timestamp);
     }
 
     cv::Size DK2WrappedImageSource::resolution() const {

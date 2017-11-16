@@ -29,8 +29,9 @@
 // - none
 
 // Library/third-party includes
-#include <osvr/Util/EigenCoreGeometry.h>
 #include <boost/assert.hpp>
+#include <osvr/Util/Angles.h>
+#include <osvr/Util/EigenCoreGeometry.h>
 
 // Standard includes
 #include <array>
@@ -42,6 +43,8 @@ namespace vbtracker {
     /// angular velocity measurement without needing special alignment
     class CannedIMUMeasurement {
       public:
+        void setYawCorrection(util::Angle y) { m_yawCorrection = y; }
+        util::Angle getYawCorrection() const { return m_yawCorrection; }
         void setOrientation(Eigen::Quaterniond const &quat,
                             Eigen::Vector3d const &variance) {
             Eigen::Vector4d::Map(m_quat.data()) = quat.coeffs();
@@ -86,6 +89,7 @@ namespace vbtracker {
         }
 
       private:
+        util::Angle m_yawCorrection = 0;
         bool m_orientationValid = false;
         std::array<double, 4> m_quat;
         std::array<double, 3> m_quatVar;

@@ -34,11 +34,11 @@
 #include <oaidl.h>
 
 // Standard includes
-#include <type_traits>
-#include <stdexcept>
-#include <memory>
-#include <utility>
 #include <cassert>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 namespace comutils {
 namespace variant {
@@ -82,6 +82,28 @@ template <> struct VariantTypeTraits<const char *> {
                 auto bs = v.bstrVal;
                 return std::wstring(static_cast<const wchar_t *>(bs),
                                     SysStringLen(bs));
+            }
+        };
+        template <typename Dest> struct VariantArrayTypeTraits {};
+        template <> struct VariantArrayTypeTraits<BSTR> {
+            static const auto vt = VT_BSTR;
+        };
+
+        template <>
+        struct VariantArrayTypeTraits<std::wstring>
+            : VariantArrayTypeTraits<BSTR> {
+            static std::wstring get(SAFEARRAY &arr, std::size_t i) {
+                BSTR bs = nullptr;
+                auto idx = static_cast<long>(i);
+                std::wstring ret;
+                auto hr =
+                    SafeArrayGetElement(&arr, &idx, static_cast<void *>(&bs));
+                if (SUCCEEDED(hr) && bs) {
+                    ret = std::wstring(static_cast<const wchar_t *>(bs),
+                                       SysStringLen(bs));
+                    SysFreeString(bs);
+                }
+                return ret;
             }
         };
 
@@ -215,6 +237,104 @@ template <> struct VariantTypeTraits<const char *> {
             T data_;
         };
 
+        /// Proxy class to let you use range-based for loops on SafeArrays like
+        /// those coming out of VARIANTs. Construct with getArray below.
+        template <typename Dest> struct VariantSafeArrayRange {
+          public:
+            explicit VariantSafeArrayRange(SAFEARRAY &arr) : arr_(arr) {
+                if (SafeArrayGetDim(&arr_) != numDims_) {
+                    // assumes dimensions = 1;
+                    throw std::runtime_error(
+                        "Can't use this class on this array: "
+                        "we assume a 1-dimensional array, "
+                        "which this is not!");
+                }
+                if (!SUCCEEDED(SafeArrayGetUBound(&arr_, dim_, &uBound_))) {
+                    throw std::runtime_error(
+                        "Couldn't get 0th dimension upper bound.");
+                }
+
+                if (!SUCCEEDED(SafeArrayGetLBound(&arr_, dim_, &lBound_))) {
+                    throw std::runtime_error(
+                        "Couldn't get 0th dimension lower bound.");
+                }
+            }
+            using type = VariantSafeArrayRange<Dest>;
+
+            Dest get(std::size_t i) const {
+                return detail::VariantArrayTypeTraits<Dest>::get(arr_, i);
+            }
+            struct SafeArrayRangeIterator {
+                // default constructor: invalid/end iterator
+                SafeArrayRangeIterator() {}
+                // Construct with index.
+                SafeArrayRangeIterator(type const &range, long idx)
+                    : elt_(idx), range_(&range) {
+                    checkIndex();
+                }
+
+                explicit operator bool() const { return range_ != nullptr; }
+
+                bool operator==(SafeArrayRangeIterator const &other) const {
+                    return (elt_ == other.elt_) && (range_ == other.range_);
+                }
+                bool operator!=(SafeArrayRangeIterator const &other) const {
+                    return elt_ != other.elt_ || range_ != other.range_;
+                }
+
+                Dest operator*() const { return range_->get(elt_); }
+
+                SafeArrayRangeIterator &operator++() {
+                    increment();
+                    return *this;
+                }
+                SafeArrayRangeIterator &operator++(int) {
+                    SafeArrayRangeIterator copy(*this);
+                    increment();
+                    return copy;
+                }
+
+              private:
+                void increment() {
+                    if (*this) {
+                        ++elt_;
+                        checkIndex();
+                    }
+                }
+                void checkIndex() {
+                    if (range_) {
+                        if (!range_->inBounds(elt_)) {
+                            range_ = nullptr;
+                        }
+                    }
+                    if (!range_) {
+                        elt_ = INVALID_ELEMENT;
+                    }
+                }
+                static const long INVALID_ELEMENT = -1;
+                long elt_ = INVALID_ELEMENT;
+                type const *range_ = nullptr;
+            };
+            bool inBounds(long idx) const {
+                return idx >= lBound_ && idx <= uBound_;
+            }
+
+            using iterator = SafeArrayRangeIterator;
+            using const_iterator = SafeArrayRangeIterator;
+            SafeArrayRangeIterator begin() const {
+                return SafeArrayRangeIterator(*this, lBound_);
+            }
+            SafeArrayRangeIterator end() const {
+                return SafeArrayRangeIterator();
+            }
+
+          private:
+            SAFEARRAY &arr_;
+            const UINT numDims_ = 1;
+            const UINT dim_ = 1;
+            long uBound_ = 0;
+            long lBound_ = 0;
+        };
     } // namespace detail
 
     /// @brief A wrapper for VARIANT/VARIANTARG on Windows that is both copy and
@@ -357,7 +477,7 @@ template <> struct VariantTypeTraits<const char *> {
     /// an array of the type parameter @p Dest (without coercion)
     template <typename Dest, typename T>
     inline detail::enable_for_variants_t<T, bool> containsArray(T const &v) {
-        return (v.vt == detail::VariantTypeTraits<Dest>::vt & VT_ARRAY);
+        return (v.vt == (detail::VariantTypeTraits<Dest>::vt | VT_ARRAY));
     }
     /// @overload
     /// For wrapped variants.
@@ -400,6 +520,56 @@ template <> struct VariantTypeTraits<const char *> {
                 "you are trying to access!");
         }
         return get<Dest>(v.get());
+    }
+    /// @brief Get the array element data of type @p Dest from the variant: no
+    /// conversion/coercion applied.
+    template <typename Dest, typename T>
+    inline detail::enable_for_variants_t<T, Dest> getArray(T const &v,
+                                                           std::size_t i) {
+        if (!containsArray<Dest>(v)) {
+            throw std::invalid_argument(
+                "Variant does not contain an array of the type of data "
+                "you are trying to access!");
+        }
+        SAFEARRAY *arr = V_ARRAY(&v);
+        return detail::VariantArrayTypeTraits<Dest>::get(*arr, i);
+    }
+    /// @overload
+    /// For wrapped variants.
+    template <typename Dest, typename T>
+    inline Dest getArray(VariantWrapper<T> const &v, std::size_t i) {
+        if (!containsArray<Dest>(v)) {
+            throw std::invalid_argument(
+                "Variant does not contain an array of the type of data "
+                "you are trying to access!");
+        }
+        return getArray<Dest>(v.get());
+    }
+
+    /// @brief Get a range for easily accessing array element data of type @p
+    /// Dest from the variant: no conversion/coercion applied.
+    template <typename Dest, typename T>
+    inline detail::enable_for_variants_t<T, detail::VariantSafeArrayRange<Dest>>
+    getArray(T const &v) {
+        if (!containsArray<Dest>(v)) {
+            throw std::invalid_argument(
+                "Variant does not contain an array of the type of data "
+                "you are trying to access!");
+        }
+        SAFEARRAY *arr = V_ARRAY(&v);
+        return detail::VariantSafeArrayRange<Dest>(*arr);
+    }
+    /// @overload
+    /// For wrapped variants.
+    template <typename Dest, typename T>
+    inline detail::VariantSafeArrayRange<Dest>
+    getArray(VariantWrapper<T> const &v) {
+        if (!containsArray<Dest>(v)) {
+            throw std::invalid_argument(
+                "Variant does not contain an array of the type of data "
+                "you are trying to access!");
+        }
+        return getArray<Dest>(v.get());
     }
 } // namespace variant
 

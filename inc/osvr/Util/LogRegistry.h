@@ -29,6 +29,7 @@
 // Internal Includes
 #include <osvr/Util/Log.h> // for LoggerPtr forward declaration
 #include <osvr/Util/LogLevel.h>
+#include <osvr/Util/Export.h>
 
 // Library/third-party includes
 // - none
@@ -62,7 +63,7 @@ namespace util {
             LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
             LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
 
-            static LogRegistry &instance(std::string const * = nullptr);
+            OSVR_UTIL_EXPORT static LogRegistry &instance(std::string const * = nullptr);
 
             /**
              * @brief Gets or creates a logger named @c logger_name.
@@ -73,7 +74,7 @@ namespace util {
              * @param logger_name The name of the logger.
              *
              */
-            LoggerPtr getOrCreateLogger(const std::string &logger_name);
+            OSVR_UTIL_EXPORT LoggerPtr getOrCreateLogger(const std::string &logger_name);
 
             /**
              * @brief Drops a logger from the registry.
@@ -82,7 +83,7 @@ namespace util {
              * (e.g., goes out of scope). This function is useful if you want to
              * destroy a logger before the program terminates.
              */
-            void drop(const std::string &name);
+            OSVR_UTIL_EXPORT void drop(const std::string &name);
 
             /**
              * @brief Removes all the registered loggers from the registry.
@@ -90,29 +91,29 @@ namespace util {
              * Each logger will survive until the last copy of it is destroyed
              * (e.g., goes out of scope).
              */
-            void dropAll();
+            OSVR_UTIL_EXPORT void dropAll();
 
             /**
              * @brief Flush all sinks manually.
              */
-            void flush();
+            OSVR_UTIL_EXPORT void flush();
 
             /**
              * @brief Sets the output pattern on all registered loggers.
              */
-            void setPattern(const std::string &pattern);
+            OSVR_UTIL_EXPORT void setPattern(const std::string &pattern);
 
             /**
              * @brief Sets the minimum level of messages to be logged on all
              * registered loggers.
              */
-            void setLevel(LogLevel severity);
+            OSVR_UTIL_EXPORT void setLevel(LogLevel severity);
 
             /**
              * @brief Sets the minimum level of messages to be logged to the
              * console.
              */
-            void setConsoleLevel(LogLevel severity);
+            OSVR_UTIL_EXPORT void setConsoleLevel(LogLevel severity);
 
             std::string const &getLogFileBaseName() const {
                 return logFileBaseName_;
@@ -121,8 +122,8 @@ namespace util {
             bool couldOpenLogFile() const { return sinks_.size() > 1; }
 
           protected:
-            LogRegistry(std::string const &logFileBaseName);
-            ~LogRegistry();
+            OSVR_UTIL_EXPORT LogRegistry(std::string const &logFileBaseName);
+            OSVR_UTIL_EXPORT ~LogRegistry();
 
           private:
             void setLevelImpl(LogLevel severity);

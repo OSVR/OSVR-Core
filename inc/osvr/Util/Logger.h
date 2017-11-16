@@ -101,10 +101,10 @@ namespace util {
                           spdlog::sinks_init_list sinks);
 
             /// Non-copyable
-            OSVR_UTIL_EXPORT Logger(const Logger &) = delete;
+            Logger(const Logger &) = delete;
 
             /// Non-copy-assignable
-            OSVR_UTIL_EXPORT Logger &operator=(const Logger &) = delete;
+            Logger &operator=(const Logger &) = delete;
 
             /// Destructor
             OSVR_UTIL_EXPORT ~Logger();
@@ -203,7 +203,7 @@ namespace util {
             OSVR_UTIL_EXPORT void flush();
 
             /// Get the logger name
-            OSVR_UTIL_EXPORT std::string const &getName() const {
+            std::string const &getName() const {
                 return name_;
             }
 

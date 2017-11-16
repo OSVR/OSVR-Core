@@ -27,8 +27,8 @@
 
 // Internal Includes
 #include "ConfigParams.h"
-#include "PoseEstimatorTypes.h"
 #include "ModelTypes.h"
+#include "PoseEstimatorTypes.h"
 #include "TrackedBodyTarget.h"
 
 // Library/third-party includes
@@ -45,8 +45,8 @@ namespace vbtracker {
         enum class TriBool { False, True, Unknown };
         enum class TrackingHealth {
             Functioning,
-            NeedsResetNow,
-            ResetWhenBeaconsSeen
+            NeedsHardResetNow,
+            SoftResetWhenBeaconsSeen
         };
         SCAATKalmanPoseEstimator(ConfigParams const &params);
         bool operator()(EstimatorInOutParams const &p, LedPtrList const &leds,
@@ -65,6 +65,10 @@ namespace vbtracker {
             m_framesWithoutIdentifiedBlobs = 0;
             m_framesWithoutUtilizedMeasurements = 0;
             m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
+            m_ledsUsed = 0;
+            m_ledsConsideredMisidentifiedLastFrame = 0;
+            m_ledsUsedLastFrame = 0;
+            m_misIDConsideredOurFault = false;
         }
 
         /// Determines whether the Kalman filter is in good working condition,
@@ -75,22 +79,38 @@ namespace vbtracker {
 
       private:
         TriBool inBoundingBoxRatioRange(Led const &led);
+
+        void markAsPossiblyMisidentified(Led &led);
+        void markAsUsed(Led &led);
+        void handlePossiblyMisidentifiedLeds();
+        double getVarianceFromBeaconDepth(double depth);
+
         float m_maxBoxRatio;
         float m_minBoxRatio;
         const bool m_shouldSkipBright;
+        const double m_maxResidual;
         const double m_maxSquaredResidual;
         const double m_maxZComponent;
         const double m_highResidualVariancePenalty;
         const double m_beaconProcessNoise;
+        const double m_noveltyPenaltyBase;
+        const double m_noBeaconLinearVelocityDecayCoefficient;
         const double m_measurementVarianceScaleFactor;
         const double m_brightLedVariancePenalty;
+        const double m_distanceMeasVarianceBase;
+        const double m_distanceMeasVarianceIntercept;
         const bool m_extraVerbose;
-        std::default_random_engine m_randEngine;
+        std::mt19937 m_randEngine;
         static const int SIGNAL_HAVE_NOT_SEEN_BEACONS_YET = -1;
         int m_lastUsableBeaconsSeen = SIGNAL_HAVE_NOT_SEEN_BEACONS_YET;
         std::size_t m_framesInProbation = 0;
         std::size_t m_framesWithoutIdentifiedBlobs = 0;
         std::size_t m_framesWithoutUtilizedMeasurements = 0;
+        std::vector<Led *> m_possiblyMisidentified;
+        std::size_t m_ledsUsed = 0;
+        std::size_t m_ledsConsideredMisidentifiedLastFrame = 0;
+        std::size_t m_ledsUsedLastFrame = 0;
+        bool m_misIDConsideredOurFault = false;
     };
 } // namespace vbtracker
 } // namespace osvr

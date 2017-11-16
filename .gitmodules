@@ -18,6 +18,9 @@
 	path = vendor/UIforETWbins
 	url = https://github.com/OSVR/UIforETWbins.git
 	branch = master
+[submodule "vendor/folly"]
+	path = vendor/folly
+	url = https://github.com/facebook/folly.git
 [submodule "vendor/spdlog"]
 	path = vendor/spdlog
 	url = https://github.com/OSVR/spdlog.git

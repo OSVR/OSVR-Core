@@ -55,23 +55,23 @@ namespace connection {
         static const vrpn_uint32 CLASS_OF_SERVICE = vrpn_CONNECTION_LOW_LATENCY;
 
         virtual bool setValue(value_type val, OSVR_ChannelCount chan,
-                              util::time::TimeValue const &timestamp) {
+                              util::time::TimeValue const &tv) {
             if (chan >= m_getNumChannels()) {
                 return false;
             }
             Base::channel[chan] = val;
-            m_reportChanges(timestamp);
+            m_reportChanges(tv);
             return true;
         }
         virtual void setValues(value_type val[], OSVR_ChannelCount chans,
-                               util::time::TimeValue const &timestamp) {
+                               util::time::TimeValue const &tv) {
             if (chans > m_getNumChannels()) {
                 chans = m_getNumChannels();
             }
             for (OSVR_ChannelCount i = 0; i < chans; ++i) {
                 Base::channel[i] = val[i];
             }
-            m_reportChanges(timestamp);
+            m_reportChanges(tv);
         }
 
       private:
@@ -81,9 +81,9 @@ namespace connection {
         void m_setNumChannels(OSVR_ChannelCount chans) {
             Base::num_channel = chans;
         }
-        void m_reportChanges(util::time::TimeValue const &timestamp) {
+        void m_reportChanges(util::time::TimeValue const &tv) {
             struct timeval t;
-            util::time::toStructTimeval(t, timestamp);
+            util::time::toStructTimeval(t, tv);
             Base::report_changes(CLASS_OF_SERVICE, t);
         }
     };

@@ -32,49 +32,106 @@
 // - none
 
 // Standard includes
+#include <cstdint>
 #include <string>
 
 namespace osvr {
 namespace vbtracker {
 
+    static const double BaseMeasurementVariance = 3.0;
+
     struct IMUInputParams {
         std::string path =
             "/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd";
 
+        /// Should we use the IMU orientation data for calibration even if
+        /// useOrientation is false?
+        bool calibrateAnyway = false;
+
         /// Should orientation reports be used once calibration completes?
-        bool useOrientation = false;
+        bool useOrientation = true;
 
         /// units: rad^2
-        double orientationVariance = 1.0e-5;
+        double orientationVariance = 1.0e-7;
+
+        std::int32_t orientationMicrosecondsOffset = 0;
 
         /// Should angular velocity reports be used once calibration completes?
         bool useAngularVelocity = true;
 
         /// units: (rad/sec)^2
-        double angularVelocityVariance = 1.0e-8;
+        double angularVelocityVariance = 1.0e-1;
+
+        std::int32_t angularVelocityMicrosecondsOffset = 0;
     };
+
+    struct TuningParams {
+        TuningParams();
+        double noveltyPenaltyBase;
+
+        double distanceMeasVarianceBase;
+        double distanceMeasVarianceIntercept;
+    };
+
+    /// If you add an entry here, must also update both
+    /// getConfigStringForTargetSet and AllBuiltInTargetSets in
+    /// ConfigurationParser.h
+    enum class BuiltInTargetSets { HDK1xChassis, HDK2Chassis };
 
     /// General configuration parameters
     struct ConfigParams {
+        /// Not intended to be manually configurable - enabled when doing things
+        /// like running an optimization algorithm so some things like a debug
+        /// view might need to change.
+        bool performingOptimization = false;
+
+        /// For optimization usage.
+        bool silent = false;
+
+        /// For recording tuning data - whether we should record the raw blob
+        /// data.
+        bool logRawBlobs = false;
+
+        /// For recording tuning data - whether we should record the data from
+        /// just the usable LEDs each frame after they're associated.
+        bool logUsableLeds = false;
+
+        TuningParams tuning;
+
         /// Parameters specific to the blob-detection step of the algorithm
         BlobParams blobParams;
 
-        /// Seconds beyond the current time to predict, using the Kalman state.
-        double additionalPrediction = 24. / 1000.;
+        /// Parameters specific to the edge hole based LED extraction algorithm.
+        EdgeHoleParams extractParams;
 
-        /// Max residual (pixel units) for a beacon before applying a variance
-        /// penalty.
-        double maxResidual = 75;
+        /// When using hard-coded target sets, which one to use.
+        BuiltInTargetSets targetSet = BuiltInTargetSets::HDK1xChassis;
+
+        /// Should we have the tracking thread update the reporting vector for
+        /// every (IMU) message, instead of waiting/buffering for a few
+        /// milliseconds between updates?
+        bool continuousReporting = true;
+
+        /// Should we open the camera in high-gain mode?
+        bool highGain = true;
+
+        /// Seconds beyond the current time to predict, using the Kalman state.
+        double additionalPrediction = 0.;
+
+        /// Max residual, in meters at the expected XY plane of the beacon in
+        /// space, for a beacon before applying a variance penalty.
+        double maxResidual = 0.03631354168383816;
+
         /// Initial beacon error for autocalibration (units: m^2).
         /// 0 effectively turns off beacon auto-calib.
         /// This is a variance number, so std deviation squared, but it's
         /// pretty likely to be between 0 and 1, so the variance will be smaller
         /// than the standard deviation.
-        double initialBeaconError = 1e-9; // 0.001;
+        double initialBeaconError = 1e-7; // 0.001;
 
         /// Maximum distance a blob can move, in multiples of its previous
         /// "keypoint diameter", and still be considered the same blob.
-        double blobMoveThreshold = 4.;
+        double blobMoveThreshold = 3.5;
 
         /// Whether to show the debug windows and debug messages.
         bool debug = false;
@@ -91,23 +148,29 @@ namespace vbtracker {
         /// The value used in exponential decay of linear velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double linearVelocityDecayCoefficient = 0.8;
+        double linearVelocityDecayCoefficient = 0.9040551503451977;
 
         /// The value used in exponential decay of angular velocity: it's the
         /// proportion of that velocity remaining at the end of 1 second. Thus,
         /// smaller = faster decay/higher damping. In range [0, 1]
-        double angularVelocityDecayCoefficient = 0.9;
+        double angularVelocityDecayCoefficient = 0.8945437897688864;
+
+        /// The value used in an additional exponential decay of linear velocity
+        /// when we've lost sight of all beacons, to quickly attenuate coasting.
+        /// it's the proportion of that velocity remaining at the end of 1
+        /// second. Thus, smaller = faster decay/higher damping. In range [0, 1]
+        double noBeaconLinearVelocityDecayCoefficient = 0.005878868009089861;
 
         /// The measurement variance (units: m^2) is included in the plugin
-        /// along with the coordinates of the beacons. Some beacons are observed
-        /// with higher variance than others, due to known difficulties in
-        /// tracking them, etc. However, for testing you may fine-tine the
+        /// along with the coordinates of the beacons. Some beacons are
+        /// observed with higher variance than others, due to known difficulties
+        /// in tracking them, etc. However, for testing you may fine-tine the
         /// measurement variances globally by scaling them here.
-        double measurementVarianceScaleFactor = 1.;
+        double measurementVarianceScaleFactor = 1.5;
 
         /// Whether the tracking algorithm internally adjusts beacon positions
         /// based on the centroid of the input beacon positions.
-        bool offsetToCentroid = true;
+        bool offsetToCentroid = false;
 
         /// Manual beacon offset (in m) - only really sensible if you only have
         /// one target, only used if offsetToCentroid is false.
@@ -117,7 +180,7 @@ namespace vbtracker {
         /// including the beacons at the back of the head "rigidly" as a part of
         /// it. If true, recommend offsetToCentroid = false, and
         /// manualBeaconOffset to be 0, 0, -75.
-        bool includeRearPanel = false;
+        bool includeRearPanel = true;
 
         /// Head circumference at the head strap, in cm - 55.75 is our estimate
         /// for an average based on some hat sizing guidelines. Only matters if
@@ -132,17 +195,17 @@ namespace vbtracker {
 
         /// This used to be different than the other beacons, but now it's
         /// mostly the same.
-        double backPanelMeasurementError = 3.0; // 3.0e-6;
+        double backPanelMeasurementError = BaseMeasurementVariance;
 
         /// This is the process-model noise in the beacon-auto-calibration, in
         /// mm^2/s. Not fully accurate, since it only gets applied when a beacon
         /// gets used for a measurement, but it should be enough to keep beacons
         /// from converging in a bad local minimum.
-        double beaconProcessNoise = 1e-13;
+        double beaconProcessNoise = 1.e-19;
 
         /// This is the multiplicative penalty applied to the variance of
         /// measurements with a "bad" residual
-        double highResidualVariancePenalty = 10.;
+        double highResidualVariancePenalty = 7.513691210865344;
 
         /// When true, will stream debug info (variance, pixel measurement,
         /// pixel residual) on up to the first 34 beacons of your first sensor
@@ -169,7 +232,7 @@ namespace vbtracker {
         /// increase the measurement variance of bright LEDs, to account for the
         /// fact that they are less accurate because they tend to refract
         /// through surrounding materials, etc.
-        double brightLedVariancePenalty = 16;
+        double brightLedVariancePenalty = 28.32749811268542;
 
         /// If this option is set to true, then while some of the pattern
         /// identifier is run each frame, an "early-out" will be taken if the
@@ -180,9 +243,7 @@ namespace vbtracker {
         /// Defaulting to off because it adds some jitter for some reason.
         bool blobsKeepIdentity = false;
 
-        /// Extra verbose developer debugging messages (right now just "hey, you
-        /// can't possibly be that beacon, I shouldn't be able to see you"
-        /// messages)
+        /// Extra verbose developer debugging messages
         bool extraVerbose = false;
 
         /// If non-empty, the file to load (or save to) for calibration data.
@@ -198,6 +259,27 @@ namespace vbtracker {
         /// Whether we should adjust transforms to assume the camera looks along
         /// the YZ plane in the +Z direction.
         bool cameraIsForward = true;
+
+        /// Should we permit the whole system to enter Kalman mode? Not doing so
+        /// is usually a bad idea, unless you're doing something special like
+        /// development on the tracker itself...
+        bool permitKalman = true;
+
+        /// Time offset for the camera timestamp, in microseconds.
+        /// Default is measured on Windows 10 version 1511.
+        std::int32_t cameraMicrosecondsOffset = -27000;
+
+        /// Should we permit a reset to be "soft" (blended by a Kalman) rather
+        /// than a hard state setting, in certain conditions? Only available in
+        /// the Unified tracker.
+        bool softResets = false;
+
+        /// Soft reset data incorporation parameter: Positional variance scale -
+        /// multiplied by the square of the distance from the camera.
+        double softResetPositionVarianceScale = 1.e-1;
+
+        /// Soft reset data incorporation parameter: Orientation variance
+        double softResetOrientationVariance = 1.e0;
 
         ConfigParams();
     };

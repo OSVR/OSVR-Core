@@ -37,6 +37,8 @@ option(BUILD_WITH_OPENCV "Should we build the stock and example plugins and apps
 
 option(BUILD_HEADER_DEPENDENCY_TESTS "Should we add targets to ensure that every public header compiles cleanly on its own? Increases number of targets greatly..." ${OSVR_ON_UNLESS_SUBPROJECT})
 
+option(BUILD_ADVANCED_DEV_TOOLS "Should we build tools designed for core developers?" OFF)
+
 # Logging options
 option(BUILD_WITH_LOGGING_SINGLETON "Enable the logging singleton - required for optimal logging performance and logging to file." TRUE)
 mark_as_advanced(BUILD_WITH_LOGGING_SINGLETON)

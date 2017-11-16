@@ -24,24 +24,24 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/WideToUTF8.h>
 #include "directx_camera_server.h"
+#include "ConnectTwoFilters.h"
+#include "NullRenderFilter.h"
+#include "PropertyBagHelper.h"
 #include "dibsize.h"
 #include "directx_samplegrabber_callback.h"
-#include "ConnectTwoFilters.h"
-#include "PropertyBagHelper.h"
-#include "NullRenderFilter.h"
+#include <osvr/Util/WideToUTF8.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <chrono>
 #include <cmath>
 #include <iostream>
-#include <chrono>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Uncomment to get a full device name and path listing in enumeration, instead
 // of silently enumerating and early-exiting when we find one we like.
@@ -105,7 +105,8 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         }
         if ((hr != S_OK) && (hr != S_FALSE)) {
             fprintf(stderr, "directx_camera_server::read_one_frame(): Can't "
-                            "run filter graph\n");
+                            "run filter graph, got %#010x\n",
+                    static_cast<uint32_t>(hr));
             _status = false;
             return false;
         }
@@ -145,6 +146,10 @@ bool directx_camera_server::read_one_frame(unsigned minX, unsigned maxX,
         _status = false;
         return false;
     }
+
+    // Store the timestamp
+    ts_ = sampleWrapper.getTimestamp();
+
     // Step through each line of the video and copy it into the buffer.  We
     // do one line at a time here because there can be padding at the end of
     // each line on some video formats.
@@ -172,7 +177,6 @@ inline std::string getDeviceHumanDesc(PropertyBagHelper &prop) {
 }
 
 bool directx_camera_server::start_com_and_graphbuilder() {
-    HRESULT hr;
 //-------------------------------------------------------------------
 // Create COM and DirectX objects needed to access a video stream.
 
@@ -365,12 +369,43 @@ bool directx_camera_server::open_and_find_parameters(
 #endif
         return false;
     }
+    {
+        /// Try to get and save the device path for later usage.
+        auto props = PropertyBagHelper{*pMoniker};
+        if (props) {
+            devicePath_ = getDevicePath(props);
+        }
+    }
 
 #ifdef DEBUG
     std::cout << "directx_camera_server::open_and_find_parameters(): Accepted!"
               << std::endl;
 #endif
     return open_moniker_and_finish_setup(pMoniker, sourceConfig, width, height);
+}
+
+inline bool setBufferLatency(ICaptureGraphBuilder2 &builder,
+                             IBaseFilter &filter, std::size_t numBuffers) {
+
+    auto negotiation =
+        GetVideoCapturePinInterface<IAMBufferNegotiation>(builder, filter);
+
+    if (!negotiation) {
+        // failure
+        std::cerr << "Could not get IAMBufferNegotiation" << std::endl;
+        return false;
+    }
+
+    ALLOCATOR_PROPERTIES props;
+    props.cbBuffer = -1;
+    props.cBuffers = numBuffers;
+    props.cbAlign = -1;
+    props.cbPrefix = -1;
+    auto hr = negotiation->SuggestAllocatorProperties(&props);
+    if (FAILED(hr)) {
+        return false;
+    }
+    return true;
 }
 
 bool directx_camera_server::open_moniker_and_finish_setup(
@@ -390,6 +425,15 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     // Bind the chosen moniker to a filter object.
     auto pSrc = comutils::Ptr<IBaseFilter>{};
     pMoniker->BindToObject(nullptr, nullptr, IID_IBaseFilter, AttachPtr(pSrc));
+
+    // Try to set it up with minimal latency by reducing buffers.
+    if (setBufferLatency(*_pBuilder, *pSrc, 1)) {
+        // std::cout << "Call to set buffer latency succeeded..." << std::endl;
+    } else {
+        std::cout << "directx_camera_server: Call to set capture buffer "
+                     "latency failed."
+                  << std::endl;
+    }
 
     //-------------------------------------------------------------------
     // Construct the sample grabber that will be used to snatch images from
@@ -474,7 +518,12 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     BOOST_ASSERT_MSG(SUCCEEDED(hr), "Adding NullRenderer filter to graph");
 
     // Connect the output of the video reader to the sample grabber input
-    ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
+    // ConnectTwoFilters(*_pGraph, *pSrc, *sampleGrabberFilter);
+    auto capturePin = GetVideoCapturePinInterface<IPin>(*_pBuilder, *pSrc);
+    {
+        auto pIn = GetPin(*sampleGrabberFilter, PINDIR_INPUT);
+        _pGraph->Connect(capturePin.get(), pIn.get());
+    }
 
     // Connect the output of the sample grabber to the null renderer input
     ConnectTwoFilters(*_pGraph, *sampleGrabberFilter, *pNullRender);
@@ -486,9 +535,7 @@ bool directx_camera_server::open_moniker_and_finish_setup(
     //-------------------------------------------------------------------
     // XXX See if this is a video tuner card by querying for that interface.
     // Set it to read the video channel if it is one.
-    auto pTuner = comutils::Ptr<IAMTVTuner>{};
-    hr = _pBuilder->FindInterface(nullptr, nullptr, pSrc.get(), IID_IAMTVTuner,
-                                  AttachPtr(pTuner));
+    auto pTuner = GetPinInterface<IAMTVTuner>(*_pBuilder, *pSrc);
     if (pTuner) {
 #ifdef DEBUG
         printf("directx_camera_server::open_and_find_parameters(): Found a TV "
@@ -511,80 +558,88 @@ bool directx_camera_server::open_moniker_and_finish_setup(
         }
     }
 
-    //-------------------------------------------------------------------
-    // Find _num_rows and _num_columns in the video stream.
-    AM_MEDIA_TYPE mt = {0};
-    _pSampleGrabberWrapper->getConnectedMediaType(mt);
-    VIDEOINFOHEADER *pVih;
-    if (mt.formattype == FORMAT_VideoInfo ||
-        mt.formattype == FORMAT_VideoInfo2) {
-        pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
-    } else {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Can't get video header type\n");
-        fprintf(stderr, "  (Expected %x or %x, got %x)\n", FORMAT_VideoInfo,
-                FORMAT_VideoInfo2, mt.formattype);
-        fprintf(stderr, "  (GetConnectedMediaType is not valid for DirectX "
-                        "headers later than version 7)\n");
-        fprintf(stderr, "  (We need to re-implement reading video in some "
-                        "other interface)\n");
-        return false;
-    }
+    {
+        //-------------------------------------------------------------------
+        // Find _num_rows and _num_columns in the video stream.
+        AM_MEDIA_TYPE mt = {0};
+        _pSampleGrabberWrapper->getConnectedMediaType(mt);
+        VIDEOINFOHEADER *pVih;
+        if (mt.formattype == FORMAT_VideoInfo ||
+            mt.formattype == FORMAT_VideoInfo2) {
+            pVih = reinterpret_cast<VIDEOINFOHEADER *>(mt.pbFormat);
+        } else {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Can't get video header type\n");
+            fprintf(stderr, "  (Expected %x or %x, got %x)\n", FORMAT_VideoInfo,
+                    FORMAT_VideoInfo2, mt.formattype);
+            fprintf(stderr, "  (GetConnectedMediaType is not valid for DirectX "
+                            "headers later than version 7)\n");
+            fprintf(stderr, "  (We need to re-implement reading video in some "
+                            "other interface)\n");
+            return false;
+        }
 
-    // Number of rows and columns.  This is different if we are using a target
-    // rectangle (rcTarget) than if we are not.
-    if (IsRectEmpty(&pVih->rcTarget)) {
-        _num_columns = pVih->bmiHeader.biWidth;
-        _num_rows = pVih->bmiHeader.biHeight;
-    } else {
-        _num_columns = pVih->rcTarget.right;
-        _num_rows = pVih->bmiHeader.biHeight;
-        printf("XXX directx_camera_server::open_and_find_parameters(): "
-               "Warning: may not work correctly with target rectangle\n");
-    }
+        // Number of rows and columns.  This is different if we are using a
+        // target
+        // rectangle (rcTarget) than if we are not.
+        if (IsRectEmpty(&pVih->rcTarget)) {
+            _num_columns = pVih->bmiHeader.biWidth;
+            _num_rows = pVih->bmiHeader.biHeight;
+        } else {
+            _num_columns = pVih->rcTarget.right;
+            _num_rows = pVih->bmiHeader.biHeight;
+            printf("XXX directx_camera_server::open_and_find_parameters(): "
+                   "Warning: may not work correctly with target rectangle\n");
+        }
 #ifdef DEBUG
-    printf("Got %dx%d video\n", _num_columns, _num_rows);
+        printf("Got %dx%d video\n", _num_columns, _num_rows);
 #endif
 
-    // Make sure that the image is not compressed and that we have 8 bits
-    // per pixel.
-    if (pVih->bmiHeader.biCompression != BI_RGB) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Compression not RGB\n");
-        switch (pVih->bmiHeader.biCompression) {
-        case BI_RLE8:
-            fprintf(stderr, "  (It is BI_RLE8)\n");
-            break;
-        case BI_RLE4:
-            fprintf(stderr, "  (It is BI_RLE4)\n");
-        case BI_BITFIELDS:
-            fprintf(stderr, "  (It is BI_BITFIELDS)\n");
-            break;
-        default:
-            fprintf(stderr, "  (Unknown compression type)\n");
+        // Make sure that the image is not compressed and that we have 8 bits
+        // per pixel.
+        if (pVih->bmiHeader.biCompression != BI_RGB) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Compression not RGB\n");
+            switch (pVih->bmiHeader.biCompression) {
+            case BI_RLE8:
+                fprintf(stderr, "  (It is BI_RLE8)\n");
+                break;
+            case BI_RLE4:
+                fprintf(stderr, "  (It is BI_RLE4)\n");
+            case BI_BITFIELDS:
+                fprintf(stderr, "  (It is BI_BITFIELDS)\n");
+                break;
+            default:
+                fprintf(stderr, "  (Unknown compression type)\n");
+            }
+            return false;
         }
-        return false;
-    }
-    int BytesPerPixel = pVih->bmiHeader.biBitCount / 8;
-    if (BytesPerPixel != 3) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Not 3 bytes per pixel (%d)\n",
-                pVih->bmiHeader.biBitCount);
-        return false;
-    }
+        int BytesPerPixel = pVih->bmiHeader.biBitCount / 8;
+        if (BytesPerPixel != 3) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Not 3 bytes per pixel (%d)\n",
+                    pVih->bmiHeader.biBitCount);
+            return false;
+        }
 
-    // A negative height indicates that the images are stored non-inverted in Y
-    // Not sure what to do with images that have negative height -- need to
-    // read the book some more to find out.
-    if (_num_rows < 0) {
-        fprintf(stderr, "directx_camera_server::open_and_find_parameters(): "
-                        "Num Rows is negative (internal error)\n");
-        return false;
-    }
+        // A negative height indicates that the images are stored non-inverted
+        // in Y
+        // Not sure what to do with images that have negative height -- need to
+        // read the book some more to find out.
+        if (_num_rows < 0) {
+            fprintf(stderr,
+                    "directx_camera_server::open_and_find_parameters(): "
+                    "Num Rows is negative (internal error)\n");
+            return false;
+        }
 
-    // Find the stride to take when moving from one row of video to the
-    // next.  This is rounded up to the nearest DWORD.
-    _stride = (_num_columns * BytesPerPixel + 3) & ~3;
+        // Find the stride to take when moving from one row of video to the
+        // next.  This is rounded up to the nearest DWORD.
+        _stride = (_num_columns * BytesPerPixel + 3) & ~3;
+    }
 
     return true;
 }

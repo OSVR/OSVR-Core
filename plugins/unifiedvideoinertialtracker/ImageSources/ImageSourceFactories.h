@@ -41,7 +41,7 @@ namespace vbtracker {
 
 #ifdef _WIN32
     /// Factory method to get the HDK camera as an image source, via DirectShow.
-    ImageSourcePtr openHDKCameraDirectShow();
+    ImageSourcePtr openHDKCameraDirectShow(bool highGain = true);
 #endif
 
     /// Factory method to open a directory of tif files named 0001.tif and

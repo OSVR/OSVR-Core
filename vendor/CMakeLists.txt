@@ -12,6 +12,12 @@ if(NOT BUILD_WITH_LOGGING_THREAD_ID_SUPPORT)
 endif()
 
 if(BUILD_TESTING)
+    if(BUILD_SHARED_LIBS)
+        set(OSVR_GTEST_SHARED_LIB ON)
+    else()
+        set(OSVR_GTEST_SHARED_LIB OFF)
+    endif()
+    set(OSVR_GTEST_SHARED_LIB ${OSVR_GTEST_SHARED_LIB} CACHE INTERNAL "" FORCE)
     if(WIN32)
         set(gtest_force_shared_crt ON)
     endif()
@@ -23,6 +29,10 @@ if(BUILD_TESTING)
     if(ANDROID)
         set(CMAKE_CXX_FLAGS "${ORIG_FLAGS}")
     endif()
+
+    # Create an interface target to consume Catch
+    add_library(vendored-catch INTERFACE)
+    target_include_directories(vendored-catch INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/catch-single-header-1.5.8")
 endif()
 set(BUILD_SHARED_LIBS OFF)
 
@@ -32,6 +42,11 @@ endif()
 
 # Build VRPN as subproject
 set(VRPN_GPL_SERVER FALSE CACHE INTERNAL "" FORCE)
+if(MSVC AND MSVC_VERSION GREATER 1800)
+    # VS2015 and newer have high-performance std::chrono, and we want it.
+    set(VRPN_USE_STD_CHRONO TRUE CACHE INTERNAL "" FORCE)
+endif()
+
 if(BUILD_CLIENT AND NOT BUILD_SERVER)
     set(VRPN_BUILD_SERVER_LIBRARY FALSE CACHE INTERNAL "" FORCE)
     set(VRPN_BUILD_CLIENT_LIBRARY TRUE CACHE INTERNAL "" FORCE)
@@ -55,6 +70,10 @@ else()
 endif()
 target_include_directories(vendored-vrpn INTERFACE ${VRPN_INCLUDE_DIRS})
 target_compile_definitions(vendored-vrpn INTERFACE ${VRPN_DEFINITIONS})
+# Same for quatlib.
+add_library(vendored-quatlib INTERFACE)
+target_include_directories(vendored-quatlib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vrpn/quat")
+target_link_libraries(vendored-quatlib INTERFACE quat)
 
 # Interface target for hidapi compiled as part of VRPN.
 add_library(vendored-hidapi INTERFACE)
@@ -73,6 +92,11 @@ target_include_directories(util-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/u
 add_library(util-runloopmanager INTERFACE)
 target_include_directories(util-runloopmanager INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/util-headers")
 target_link_libraries(util-runloopmanager INTERFACE boost_thread)
+
+# Interface target for the header-only functionality in Folly
+add_library(folly-headers INTERFACE)
+target_include_directories(folly-headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/folly")
+target_compile_definitions(folly-headers INTERFACE FOLLY_NO_CONFIG) # we don't build a folly/folly-config.h
 
 # Interface target for the C++11/14 headers backported from libc++
 add_library(libcxx_backports INTERFACE)

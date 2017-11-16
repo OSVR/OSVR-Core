@@ -46,9 +46,10 @@ target_link_libraries(directshow-camera
     PUBLIC
     vendored-vrpn
     comutils
+    osvrUtil
     PRIVATE
     osvrUtilCpp
-    ${OSVR_CODECVT_LIBRARIES}
+    osvr_codecvt
     ${DIRECTSHOW_STRMIIDS_LIBRARY}
     )
 

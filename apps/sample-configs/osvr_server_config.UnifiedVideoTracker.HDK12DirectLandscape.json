@@ -1,0 +1,25 @@
+{
+    "description": "This configuration supports video (so-called 'positional') and IMU fusion tracking, in addition to orientation-only tracking, with the OSVR HDK. It is configured for RenderManager applications in direct mode (landscape) on HDK 1.1/1.2 optics.",
+    "display": "displays/OSVR_HDK_1_1.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.landscape.newtracker.json",
+    "drivers": [
+        {
+            "plugin": "org_osvr_unifiedvideoinertial",
+            "driver": "UnifiedTrackingSystem",
+            "params": {
+                "showDebug": false,
+                "headCircumference": 58.42,
+
+                "imu": {
+                    "useOrientation": true,
+                    "orientationMicrosecondsOffset": -5000,
+                    "useAngularVelocity": true,
+                    "angularVelocityMicrosecondsOffset": -5000
+                }
+            }
+        }
+    ],
+    "aliases": {
+        "/trackingCamera": "/org_osvr_unifiedvideoinertial/UnifiedTrackingSystem/semantic/camera"
+    }
+}

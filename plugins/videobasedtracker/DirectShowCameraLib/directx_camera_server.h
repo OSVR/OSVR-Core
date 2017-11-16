@@ -28,21 +28,23 @@
 #define INCLUDED_directx_camera_server_h_GUID_9322F126_0DA4_4DB9_11F3_DDBF76A6D9D9
 
 // Internal Includes
-#include "base_camera_server.h"
 #include "MediaSampleExchange.h"
 #include "SampleGrabberWrapper.h"
-#include "comutils/ComPtr.h"
+#include "base_camera_server.h"
 #include "comutils/ComInit.h"
+#include "comutils/ComPtr.h"
 
 // Library/third-party includes
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
-#include <stdexcept>
-#include <memory>
-#include <vector>
 #include <functional>
+#include <memory>
+#include <stdexcept>
+#include <vector>
 
 // Include files for DirectShow video input
+#define NO_DSHOW_STRSAFE
 #include <dshow.h>
 
 // All we need from the "deprecated" qedit.h header file are these few lousy
@@ -124,9 +126,16 @@ class directx_camera_server : public base_camera_server {
     /// Get the actual memory buffer.
     BufferType &get_pixel_buffer() { return _buffer; }
 
+    /// Get a timestamp recorded when the frame was first signalled as ready.
+    osvr::util::time::TimeValue const &get_buffer_timestamp() const {
+        return ts_;
+    }
+
     /// Matches a method on the OpenCV camera, to let us easily integrate into
     /// existing code.
     bool isOpened(void) const { return _started_graph; }
+
+    std::string const &getPath() const { return devicePath_; }
 
   protected:
     bool start_com_and_graphbuilder();
@@ -174,6 +183,8 @@ class directx_camera_server : public base_camera_server {
 
   private:
     void allocate_buffer();
+    std::string devicePath_;
+    osvr::util::time::TimeValue ts_ = {};
 };
 
 #endif // INCLUDED_directx_camera_server_h_GUID_9322F126_0DA4_4DB9_11F3_DDBF76A6D9D9

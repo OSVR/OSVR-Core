@@ -29,19 +29,29 @@
 #include "Types.h"
 
 // Library/third-party includes
-// - none
+#include <opencv2/core/core.hpp>
 
 // Standard includes
-// - none
+#include <cstddef>
+#include <initializer_list>
 
 namespace osvr {
 namespace vbtracker {
-    /// @name Default 3D locations for the beacons on an OSVR HDK, in
-    /// millimeters
+    /// @name Default 3D locations for the beacons on an OSVR HDK 1.x chassis,
+    /// in millimeters
     /// @{
     extern const Point3Vector OsvrHdkLedLocations_SENSOR0;
     extern const Point3Vector OsvrHdkLedLocations_SENSOR1;
     /// @}
+
+    /// @name Default 3D locations for the beacons on an OSVR HDK2 chassis, in
+    /// millimeters
+    /// @{
+    extern const Point3Vector OsvrHdk2LedLocations_SENSOR0;
+    extern const Point3Vector OsvrHdk2LedLocations_SENSOR1;
+    /// @}
+
+    std::initializer_list<std::size_t> getOneBasedIDsOfMissingBeaconsHDK2();
 
     /// @name Emission directions for the beacons on an OSVR HDK
     /// @{
@@ -50,6 +60,22 @@ namespace vbtracker {
     /// @}
 
     extern const std::vector<double> OsvrHdkLedVariances_SENSOR0;
+
+    inline std::size_t getNumHDKFrontPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR0.size();
+    }
+
+    inline std::size_t getNumHDKRearPanelBeacons() {
+        return OsvrHdkLedLocations_SENSOR1.size();
+    }
+
+    /// distance between front and back panel target origins, in mm.
+    inline double
+    computeDistanceBetweenPanels(double headCircumference,
+                                 double headToFrontBeaconOriginDistance) {
+        return headCircumference / CV_PI * 10. +
+               headToFrontBeaconOriginDistance;
+    }
 
 } // namespace vbtracker
 } // namespace osvr

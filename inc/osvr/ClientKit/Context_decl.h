@@ -62,6 +62,13 @@ namespace clientkit {
         /// @param flags initialization options (reserved, optional)
         ClientContext(const char applicationIdentifier[], uint32_t flags = 0u);
 
+        /// @brief Initialize the library.
+        /// @param applicationIdentifier A string identifying your application.
+        /// @param host Remote server to connect to 
+        /// Reverse DNS format strongly suggested.
+        /// @param flags initialization options (reserved, optional)
+        ClientContext(const char applicationIdentifier[], const char host[], uint32_t flags = 0u);
+
         /// @brief Initialize the context with an existing context.
         /// @note The ClientContext class will take ownership of the context.
         ClientContext(OSVR_ClientContext context);

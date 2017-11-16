@@ -124,6 +124,9 @@ namespace vbtracker {
             /// Get number of entries in history.
             size_type size() const { return m_history.size(); }
 
+            /// Get the maximum number of entries ever recorded.
+            size_type highWaterMark() const { return m_sizeHighWaterMark; }
+
             /// Gets whether history is empty or not.
             bool empty() const { return m_history.empty(); }
 
@@ -180,6 +183,8 @@ namespace vbtracker {
             const_iterator cbegin() const { return m_history.cbegin(); }
             const_iterator end() const { return m_history.cend(); }
             const_iterator cend() const { return m_history.cend(); }
+
+            void clear() { m_history.clear(); }
 
           private:
             /// Needed due to some pre-modern-C++ library differences (like
@@ -346,6 +351,7 @@ namespace vbtracker {
                              value_type const &value) {
                 if (is_valid_to_push_newest(tv)) {
                     m_history.emplace_back(tv, value);
+                    updateSizeHighWaterMark();
                 } else {
                     throw std::logic_error(
                         "Can't push_newest a value that's older "
@@ -354,7 +360,12 @@ namespace vbtracker {
             }
 
           private:
+            void updateSizeHighWaterMark() {
+                m_sizeHighWaterMark =
+                    (std::max)(m_history.size(), m_sizeHighWaterMark);
+            }
             container_type m_history;
+            size_type m_sizeHighWaterMark = 0;
         };
     } // namespace history
 

@@ -34,10 +34,11 @@
 #include <osvr/Util/Pose3C.h>
 #include <osvr/Util/StdInt.h>
 
+#include <osvr/Util/BoolC.h>
+#include <osvr/Util/ChannelCountC.h>
+#include <osvr/Util/SkeletonC.h>
 #include <osvr/Util/Vec2C.h>
 #include <osvr/Util/Vec3C.h>
-#include <osvr/Util/ChannelCountC.h>
-#include <osvr/Util/BoolC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -99,7 +100,7 @@ typedef struct OSVR_VelocityState {
 typedef OSVR_Vec3 OSVR_LinearAccelerationState;
 
 /** @brief Type of angular acceleration state
-*/
+ */
 typedef OSVR_IncrementalQuaternion OSVR_AngularAccelerationState;
 
 /** @brief Struct for combined acceleration state */
@@ -173,7 +174,7 @@ typedef struct OSVR_VelocityReport {
 } OSVR_VelocityReport;
 
 /** @brief Report type for a linear velocity callback on a tracker interface
-*/
+ */
 typedef struct OSVR_LinearVelocityReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -182,7 +183,7 @@ typedef struct OSVR_LinearVelocityReport {
 } OSVR_LinearVelocityReport;
 
 /** @brief Report type for an angular velocity callback on a tracker interface
-*/
+ */
 typedef struct OSVR_AngularVelocityReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -203,7 +204,7 @@ typedef struct OSVR_AccelerationReport {
 } OSVR_AccelerationReport;
 
 /** @brief Report type for a linear acceleration callback on a tracker interface
-*/
+ */
 typedef struct OSVR_LinearAccelerationReport {
     /** @brief Identifies the sensor that the report comes from */
     int32_t sensor;
@@ -339,6 +340,39 @@ typedef struct OSVR_NaviPositionReport {
      * starting position */
     OSVR_NaviPositionState state;
 } OSVR_NaviPositionReport;
+
+/** @brief integer type specifying joint count/index(Id) */
+typedef uint32_t OSVR_SkeletonJointCount;
+
+/** @brief integer type specifying bone count/index(Id) */
+typedef uint32_t OSVR_SkeletonBoneCount;
+
+/** @brief A state of a single skeleton joint */
+typedef struct OSVR_SkeletonJointState {
+    OSVR_SkeletonJointCount jointId;
+    /** @brief A tracker pose state */
+    OSVR_Pose3 pose;
+} OSVR_SkeletonJointState;
+
+/** @brief A state of a single skeleton bone*/
+typedef struct OSVR_SkeletonBonetState {
+    OSVR_SkeletonBoneCount boneId;
+    /** @brief A tracker pose state */
+    OSVR_Pose3 pose;
+} OSVR_SkeletonBoneState;
+
+/** @brief Type of Skeleton state */
+typedef struct OSVR_SkeletonState {
+    OSVR_Skeleton skeleton;
+} OSVR_SkeletonState;
+
+/** @brief Report type for a skeleton callback. Provided whenever skeleton data
+ * for given sensor becomes available (When tracker sensors for each joint/site
+ * have finished reporting */
+typedef struct OSVR_SkeletonReport {
+    OSVR_ChannelCount sensor;
+    OSVR_SkeletonState state;
+} OSVR_SkeletonReport;
 
 /** @} */
 

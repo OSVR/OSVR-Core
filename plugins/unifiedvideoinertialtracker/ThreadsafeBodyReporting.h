@@ -29,12 +29,13 @@
 #include "ModelTypes.h"
 
 // Library/third-party includes
-#include <osvr/Util/TimeValue.h>
-#include <osvr/Util/ClientReportTypesC.h>
 #include <boost/optional.hpp>
+#include <folly/ProducerConsumerQueue.h>
+#include <osvr/Util/ClientReportTypesC.h>
+#include <osvr/Util/TimeValue.h>
 
 // Standard includes
-#include <mutex>
+#include <array>
 #include <memory>
 
 namespace osvr {
@@ -56,8 +57,7 @@ namespace vbtracker {
         ReportStatus status;
         util::time::TimeValue timestamp;
         OSVR_PoseState pose;
-        // OSVR_VelocityState vel;
-        // OSVR_AngularVelocityState angVel;
+        OSVR_VelocityState vel;
     };
 
     /// A per-body class intended to marshall data coming from the
@@ -71,32 +71,26 @@ namespace vbtracker {
         /// @name mainloop-thread methods
         /// @{
 
-        /// Before using the contents of the report, check the status field -
-        /// only if it is ReportStatus::Valid does it contain anything useful,
-        /// for the timestamp it says on the object.
-        ///
-        /// Otherwise either the mutex was locked (you're in a
-        /// fast-spinning loop, just get it next time), or there's nothing worth
-        /// reporting - in both cases, the other fields are not initialized!
-        BodyReport getReport(double additionalPrediction);
+        /// Attempts to receive a report: "consumes" as many as there are
+        /// available, using the last one produced for further computation. If a
+        /// process model and non-zero velocity are available, the state is
+        /// predicted from the reported timestamp to "now" (or now +
+        /// additionalPrediction if nonzero). If false is returned, no reports
+        /// were available to consume.
+        bool getReport(double additionalPrediction, BodyReport &report);
         /// @}
 
         /// @name processing-thread methods
-        /// @brief These all block on the mutex, because the processing thread
-        /// needs to get its message through.
         /// @{
-        /// Sets the flag that the mainloop should not report. Doesn't touch the
-        /// other members since they're unusuable by definition if you should
-        /// not report.
-        void markShouldNotReport();
-        /// Updates the state, implicitly setting the flag that the mainloop
-        /// should report.
-        void updateState(util::time::TimeValue const &tv,
-                         BodyState const &state,
-                         BodyProcessModel const &process);
-        /// @overload
-        void updateState(util::time::TimeValue const &tv,
+
+        /// "Produces" an updated state.
+        /// @return false if there was no room in the queue.
+        bool updateState(util::time::TimeValue const &tv,
                          BodyState const &state);
+
+        /// One-time call: sets up the process model, allowing the consumer end
+        /// of this class to predict to "now".
+        void initProcessModel(BodyProcessModel const &process);
 
         /// This only needs to be called once - it sets a transform that will be
         /// applied to each report just before it is used by the receiving
@@ -105,14 +99,29 @@ namespace vbtracker {
         /// @}
       private:
         BodyReporting();
-        std::mutex m_mutex;
-        /// @name Protected by mutex
+        /// @name One-time initialization
         /// @{
-        bool m_shouldReport = false;
-        util::time::TimeValue m_dataTime;
-        BodyState m_state;
+        bool m_hasProcessModel = false;
         BodyProcessModel m_process;
         Eigen::Isometry3d m_trackerToRoom;
+        /// @}
+
+        template <std::size_t ArraySize> struct QueueValue {
+            util::time::TimeValue timestamp;
+            std::array<double, ArraySize> stateData;
+        };
+        /// 13 elements, instead of 12, because we're shipping a quaternion
+        /// instead of an incremental rotation.
+        using QueueValueType = QueueValue<13>;
+        using QueueValueVec = Eigen::Matrix<double, 13, 1>;
+        /// The communication channel between threads.
+        folly::ProducerConsumerQueue<QueueValueType> m_queue;
+
+        /// @name Convenience members used by the consumer side, so they don't
+        /// have to create them each time.
+        /// @{
+        BodyState m_state;
+        util::time::TimeValue m_dataTime;
         /// @}
     };
     using BodyReportingPtr = std::unique_ptr<BodyReporting>;

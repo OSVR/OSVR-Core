@@ -29,10 +29,10 @@
 #include "BodyIdTypes.h"
 
 // Library/third-party includes
+#include <osvr/Util/Angles.h>
 #include <osvr/Util/EigenCoreGeometry.h>
 #include <osvr/Util/EigenFilters.h>
 #include <osvr/Util/TimeValue.h>
-#include <osvr/Util/Angles.h>
 
 #include <boost/optional.hpp>
 
@@ -47,7 +47,8 @@ namespace vbtracker {
     /// the pose of the camera in space and the yaw offset of the IMU.
     class RoomCalibration {
       public:
-        RoomCalibration(Eigen::Vector3d const& camPosition, bool cameraIsForward = true);
+        RoomCalibration(Eigen::Vector3d const &camPosition,
+                        bool cameraIsForward = true);
 
         /// Since during startup, we only want video data on a single target, we
         /// can save processing power by asking before we compute.
@@ -68,9 +69,7 @@ namespace vbtracker {
         /// calibration has finished and perform updates accordingly.
         bool postCalibrationUpdate(TrackingSystem &sys);
 
-        bool calibrationComplete() const {
-            return m_calibComplete;
-        }
+        bool calibrationComplete() const { return m_calibComplete; }
 
         /// @name Accessors only valid once postCalibrationUpdate() has returned
         /// true!
@@ -83,15 +82,11 @@ namespace vbtracker {
         /// Gets the pose of the camera in the room (the transform from camera
         /// space to room space)
         Eigen::Isometry3d getCameraPose() const;
-        /// Gets the transform from the IMU to the room/pose of the IMU in the
-        /// room - translation components are at the time of room calibration.
-        Eigen::Isometry3d getIMUToRoom() const;
         /// @}
 
       private:
         bool finished() const;
-        /// This gets a live transform from camera space to IMU space.
-        Eigen::Isometry3d getCameraToIMUCalibrationPoint() const;
+
         /// The stream used by msg() and friends
         std::ostream &msgStream() const;
         /// A nicely prefixed stream
@@ -106,6 +101,8 @@ namespace vbtracker {
         bool haveIMUData() const { return !m_imuBody.empty(); }
         std::size_t m_steadyVideoReports = 0;
 
+        double m_linVel = 0;
+        double m_angVel = 0;
         void handleExcessVelocity(double zTranslation);
         enum class InstructionState {
             Uninstructed,
@@ -120,14 +117,15 @@ namespace vbtracker {
         util::time::TimeValue m_lastVideoData;
         /// @}
 
-        /// @name Input filters on camera in room/IMU space
-        /// @{
-        util::filters::OneEuroFilter<Eigen::Vector3d> m_positionFilter;
-        util::filters::OneEuroFilter<Eigen::Quaterniond> m_orientationFilter;
-        /// @}
+        /// Filter on pose in camera space (video data)
+        util::filters::PoseOneEuroFilterd m_poseFilter =
+            util::filters::PoseOneEuroFilterd{
+                util::filters::one_euro::Params{3, 0.03},
+                util::filters::one_euro::Params{1, 0.01}};
+        Eigen::Vector3d m_rTc_ln_accum = Eigen::Vector3d::Zero();
 
         BodyId m_imuBody;
-        Eigen::Quaterniond m_imuOrientation;
+        Eigen::Quaterniond m_imuOrientation = Eigen::Quaterniond::Identity();
 
         /// @name Supplied config
         /// @{
@@ -138,9 +136,9 @@ namespace vbtracker {
         bool m_calibComplete = false;
         /// @name Output
         /// @{
-        util::Angle m_imuYaw;
-        Eigen::Isometry3d m_cameraPose;
-        Eigen::Isometry3d m_rTi;
+        util::Angle m_imuYaw = 0 * util::radians;
+        Eigen::Isometry3d m_cameraPose = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3d m_rTi = Eigen::Isometry3d::Identity();
         /// @}
     };
 

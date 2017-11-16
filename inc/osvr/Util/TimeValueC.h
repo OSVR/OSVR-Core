@@ -31,12 +31,12 @@
 #define INCLUDED_TimeValueC_h_GUID_A02C6917_124D_4CB3_E63E_07F2DA7144E9
 
 /* Internal Includes */
-#include <osvr/Util/Export.h>
 #include <osvr/Util/APIBaseC.h>
 #include <osvr/Util/AnnotationMacrosC.h>
+#include <osvr/Util/BoolC.h>
+#include <osvr/Util/Export.h>
 #include <osvr/Util/PlatformConfig.h>
 #include <osvr/Util/StdInt.h>
-#include <osvr/Util/BoolC.h>
 
 /* Library/third-party includes */
 /* none */
@@ -198,16 +198,16 @@ osvrTimeValueGreater(OSVR_IN_PTR const OSVR_TimeValue *tvA,
         return OSVR_FALSE;
     }
     return ((tvA->seconds > tvB->seconds) ||
-            (tvA->seconds == tvB->seconds &&
-             tvA->microseconds > tvB->microseconds))
+            ((tvA->seconds == tvB->seconds) &&
+             (tvA->microseconds > tvB->microseconds)))
                ? OSVR_TRUE
                : OSVR_FALSE;
 }
 
 #ifdef __cplusplus
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 /// Returns true if the time value is normalized. Typically used in assertions.
 inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
@@ -216,9 +216,13 @@ inline bool osvrTimeValueIsNormalized(const OSVR_TimeValue &tv) {
     // ambiguous otherwise
     return std::abs(double(tv.microseconds)) < 1000000 &&
 #else
-    return std::abs(tv.microseconds) < 1000000 &&
+    return (std::abs(tv.microseconds) < 1000000) &&
 #endif
-           ((tv.seconds > 0) == (tv.microseconds > 0));
+           (
+               // zeros can be paired with a positive or negative
+               (tv.seconds == 0) || (tv.microseconds == 0) ||
+               // if both non-zero, then both must have same sign.
+               ((tv.seconds > 0) == (tv.microseconds > 0)));
 }
 
 /// True if A is later than B

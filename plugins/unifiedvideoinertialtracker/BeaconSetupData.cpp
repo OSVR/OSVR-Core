@@ -52,26 +52,52 @@ namespace vbtracker {
             std::tie(ret.minSize, ret.maxSize) = std::minmax(sizes);
             return ret;
         }
+
+        enum class BeaconPatternStatus {
+            PatternOK,
+            PatternEmpty,
+            PatternContainsInvalidCharacter
+        };
+        inline BeaconPatternStatus
+        judgeBeaconPattern(std::string const &pattern) {
+
+            if (pattern.empty()) {
+                return BeaconPatternStatus::PatternEmpty;
+            }
+            if (pattern.find_first_not_of(".*") != std::string::npos) {
+                /// This pattern was disabled by adding an invalid
+                /// character to it.
+                /// Not an error (though when validating, we will clear the
+                /// pattern for the ease of downstream code.)
+                return BeaconPatternStatus::PatternContainsInvalidCharacter;
+            }
+            return BeaconPatternStatus::PatternOK;
+        }
         class TargetDataChecker {
           public:
             using size_type = Vec3Vector::size_type;
             TargetDataChecker(TargetSetupData &data, TargetDataSummary &summary)
                 : d(data), m_summary(summary),
                   m_sizes(getMinMaxSetupDataSizes(data)) {}
+
             /// Main function - contains two loops (one for
             /// all-vectors-populated, another for uneven tails)
-            void process() {
+            void process(bool silent) {
                 /// Only iterate through the min at first
                 for (size_type i = 0; i < m_sizes.minSize; ++i) {
                     if (disabledBeacon(i)) {
+                        d.patterns[i].clear();
                         continue;
                     }
                     if (0 == m_patternLength) {
                         /// Initialize pattern length if it hasn't been
                         /// initialized already.
                         m_patternLength = d.patterns[i].size();
-                        OSVR_DEV_VERBOSE("Determined that patterns are "
-                                         << m_patternLength << " bits long.");
+                        if (!silent) {
+                            OSVR_DEV_VERBOSE("Determined that patterns are "
+                                             << m_patternLength
+                                             << " bits long.");
+                        }
                     }
                     bool gotError = false;
                     checkPatternLength(i, gotError);
@@ -134,21 +160,22 @@ namespace vbtracker {
             /// because you need to check its return value and potentially
             /// skip the rest of a beacon if it returns true.
             bool disabledBeacon(size_type i) {
-                if (d.patterns[i].empty()) {
+                switch (judgeBeaconPattern(d.patterns[i])) {
+                case BeaconPatternStatus::PatternEmpty:
                     m_summary.disabledByEmptyPattern.push_back(wrapIndex(i));
                     return true;
-                }
-                if (d.patterns[i].find_first_not_of(".*") !=
-                    std::string::npos) {
+                case BeaconPatternStatus::PatternContainsInvalidCharacter:
                     /// This pattern was disabled by adding an invalid
                     /// character to it.
                     /// Not an error (though we will clear the pattern for
                     /// the ease of downstream code.)
                     m_summary.disabledByPattern.push_back(wrapIndex(i));
                     return true;
+                case BeaconPatternStatus::PatternOK:
+                    return false;
                 }
-                return false;
             }
+
             void checkPatternLength(size_type i, bool &gotError) {
                 /// Check pattern length.
                 if (d.patterns[i].size() != m_patternLength) {
@@ -178,6 +205,9 @@ namespace vbtracker {
             }
 
             void checkMeasVariance(size_type i, bool &gotError) {
+                if (d.baseMeasurementVariances.size() <= i) {
+                    d.baseMeasurementVariances.resize(i + 1, 1.);
+                }
                 if (d.baseMeasurementVariances[i] <= 0) {
                     gotError = true;
                     recordError(
@@ -237,10 +267,32 @@ namespace vbtracker {
             size_type m_maxSize = 0;
         };
     } // namespace
-    TargetDataSummary TargetSetupData::cleanAndValidate() {
+
+    bool TargetSetupData::isBeaconActive(OneBasedBeaconId beacon) {
+        auto zeroId = makeZeroBased(beacon);
+        if (!(zeroId.value() < patterns.size())) {
+            /// no such beacon pattern
+            return false;
+        }
+        return (judgeBeaconPattern(patterns[zeroId.value()]) ==
+                BeaconPatternStatus::PatternOK);
+    }
+
+    void TargetSetupData::markBeaconInactive(ZeroBasedBeaconId beacon) {
+        if (!(beacon.value() < patterns.size())) {
+            /// no such beacon pattern
+            /// well, so nothing to do...
+            return;
+        }
+        /// Clear the pattern string to mark it as inactive.
+        patterns[beacon.value()].clear();
+    }
+
+    // Implementation of method in BeaconSetupData.h
+    TargetDataSummary TargetSetupData::cleanAndValidate(bool silent) {
         TargetDataSummary ret;
         TargetDataChecker checker(*this, ret);
-        checker.process();
+        checker.process(silent);
         return ret;
     }
 } // namespace vbtracker

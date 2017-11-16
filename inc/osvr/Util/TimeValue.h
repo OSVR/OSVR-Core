@@ -33,7 +33,8 @@
 // - none
 
 // Standard includes
-// - none
+#include <iomanip>
+#include <sstream>
 
 namespace osvr {
 namespace util {
@@ -61,6 +62,37 @@ namespace util {
         inline double duration(TimeValue const &a, TimeValue const &b) {
             return osvrTimeValueDurationSeconds(&a, &b);
         }
+
+        /// @brief Converts to a precise decimal string.
+        inline std::string toDecimalString(TimeValue tv) {
+            std::ostringstream os;
+            osvrTimeValueNormalize(&tv);
+            // Ensure we have only non-negative components, pulling out the
+            // negatives. (Normalize ensures we have 0 or the same sign between
+            // components)
+            bool negative = false;
+            if (tv.seconds < 0) {
+                negative = true;
+                tv.seconds *= -1;
+            }
+            if (tv.microseconds < 0) {
+                negative = true;
+                tv.microseconds *= -1;
+            }
+            // Output sign
+            if (negative) {
+                os << "-";
+            }
+            // Output seconds
+            os << tv.seconds << ".";
+            // set up decimal padding
+            os << std::setw(6) << std::setfill('0');
+            // Output microseconds
+            os << tv.microseconds;
+
+            return os.str();
+        }
+
 #ifdef OSVR_HAVE_STRUCT_TIMEVAL
         /// @brief Convert a TimeValue to a struct timeval
         inline void toStructTimeval(struct timeval &dest,

@@ -27,10 +27,10 @@
 
 // Internal Includes
 #include "ProjectPoint.h"
-#include <osvr/Kalman/FlexibleKalmanBase.h>
-#include <osvr/Kalman/PureVectorState.h>
 #include <osvr/Kalman/AugmentedState.h>
+#include <osvr/Kalman/FlexibleKalmanBase.h>
 #include <osvr/Kalman/PoseState.h>
+#include <osvr/Kalman/PureVectorState.h>
 
 // Library/third-party includes
 // - none
@@ -62,7 +62,8 @@ namespace vbtracker {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         explicit ImagePointMeasurement(CameraModel const &cam,
                                        Eigen::Vector3d const &targetFromBody)
-            : m_variance(2.0), m_cam(cam), m_targetFromBody(targetFromBody) {}
+            : m_variance(SquareMatrix::Identity()), m_cam(cam),
+              m_targetFromBody(targetFromBody) {}
 
         /// Updates some internal cached partial solutions.
         void updateFromState(State const &state) {
@@ -116,25 +117,27 @@ namespace vbtracker {
 
         /// This version assumes incrot == 0
         Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrot() const {
-            auto v1 = m_rotatedObjPoint[0] + m_xlate[0];
-            auto v2 = m_rotatedObjPoint[2] + m_xlate[2];
-            auto v3 = 1 / (v2 * v2);
-            auto v4 = 1 / v2;
-            auto v5 = m_rotatedObjPoint[1] + m_xlate[1];
+            auto fl = m_cam.focalLength;
+            auto tmp0 = fl / (m_rotatedTranslatedPoint.z() *
+                              m_rotatedTranslatedPoint.z());
+            auto tmp1 = 1.0 / m_rotatedTranslatedPoint.z();
+            auto tmp2 = fl * tmp1;
             Eigen::Matrix<double, 2, 3> ret;
-            ret << -v1 * m_rotatedObjPoint[1] * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[2] * v4 * m_cam.focalLength +
-                    m_rotatedObjPoint[0] * v1 * v3 * m_cam.focalLength,
-                -m_rotatedObjPoint[1] * v4 * m_cam.focalLength,
-                (-m_rotatedObjPoint[2] * v4 * m_cam.focalLength) -
-                    m_rotatedObjPoint[1] * v5 * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[0] * v5 * v3 * m_cam.focalLength,
-                m_rotatedObjPoint[0] * v4 * m_cam.focalLength;
+            ret << -m_rotatedObjPoint.y() * tmp0 * m_rotatedTranslatedPoint.x(),
+                tmp2 * (m_rotatedObjPoint.x() * tmp1 *
+                            m_rotatedTranslatedPoint.x() +
+                        m_rotatedObjPoint.z()),
+                -m_rotatedObjPoint.y() * tmp2,
+                -tmp2 * (m_rotatedObjPoint.y() * tmp1 *
+                             m_rotatedTranslatedPoint.y() +
+                         m_rotatedObjPoint.z()),
+                m_rotatedObjPoint.x() * tmp0 * m_rotatedTranslatedPoint.y(),
+                m_rotatedObjPoint.x() * tmp2;
             return ret;
         }
 
         /// This version also assumes incrot == 0 but does the computation in a
-        /// much more elegant way.
+        /// more elegant (manually factored) way.
         Eigen::Matrix<double, 2, 3> getRotationJacobianNoIncrotElegant() const {
             // just grabbing x and y as an array for component-wise manip right
             // now.
@@ -242,7 +245,8 @@ namespace vbtracker {
 #endif
 
         Eigen::Matrix<double, 2, 3> getRotationJacobian() const {
-            return getRotationJacobianNoIncrotElegant();
+            // return getRotationJacobianNoIncrotElegant();
+            return getRotationJacobianNoIncrot();
         }
 
         Jacobian getJacobian(State const &state) const {
@@ -250,7 +254,8 @@ namespace vbtracker {
             ret <<
                 // with respect to change in x or y
                 Eigen::Matrix2d::Identity() *
-                    (m_cam.focalLength / m_rotatedTranslatedPoint.z()),
+                    (m_cam.focalLength /
+                     std::abs(m_rotatedTranslatedPoint.z())),
                 // with respect to change in z
                 -m_rotatedTranslatedPoint.head<2>() * m_cam.focalLength /
                     (m_rotatedTranslatedPoint.z() *
@@ -266,16 +271,21 @@ namespace vbtracker {
 
         void setVariance(double s) {
             if (s > 0) {
-                m_variance = s;
+#if 0
+                static const auto VARIANCE_Y_FACTOR = 3.;
+                m_variance << s, 0, 0, (s / VARIANCE_Y_FACTOR);
+#else
+                m_variance = SquareMatrix::Identity() * s;
+#endif
             }
         }
-        SquareMatrix getCovariance(State &state) const {
+        SquareMatrix const &getCovariance(State &state) const {
             /// @todo make this better, perhaps state dependent?
-            return Vector::Constant(m_variance).asDiagonal();
+            return m_variance;
         }
 
       private:
-        double m_variance;
+        SquareMatrix m_variance;
         Vector m_measurement;
         CameraModel m_cam;
         Eigen::Vector3d m_targetFromBody;

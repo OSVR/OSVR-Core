@@ -1,0 +1,19 @@
+{
+    "description": "This configuration supports the unified (single-filter) IMU and video-based position and orientation tracking with the OSVR HDK. It is configured for RenderManager applications in direct mode (portrait) on HDK 1.3 optics.",
+    "display": "displays/OSVR_HDK_1_3_with_mesh.json",
+    "renderManagerConfig": "sample-configs/renderManager.direct.portrait.json",
+    "drivers": [{
+        "plugin": "org_osvr_unifiedvideoinertial",
+        "driver": "UnifiedTrackingSystem",
+        "params": {
+            "cameraMicrosecondsOffset": -6000,
+            "showDebug": false,
+            "includeRearPanel": true,
+            "headCircumference": 55.75,
+            "calibrationFile": "videotrackerCombinedCalibrationFile13.json",
+            "cameraIsForward": true,
+            "cameraPosition": [0, 1.2, -0.5],
+            "additionalPrediction": 0
+        }
+    }]
+}
