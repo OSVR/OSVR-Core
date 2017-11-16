@@ -69,6 +69,14 @@ OSVR_ReturnCode osvrClientCheckStatus(OSVR_ClientContext ctx) {
     return ctx->getStatus() ? OSVR_RETURN_SUCCESS : OSVR_RETURN_FAILURE;
 }
 
+OSVR_ClientContext osvrClientInitHost(const char applicationIdentifier[],
+                                      const char host[],
+                                      uint32_t /*flags*/) {
+
+    OSVR_DEV_VERBOSE("Connecting to non-default host " << host);
+    return ::osvr::client::createContext(applicationIdentifier, host);
+}
+
 OSVR_ReturnCode osvrClientUpdate(OSVR_ClientContext ctx) {
     osvr::common::tracing::ClientUpdate region;
     ctx->update();
