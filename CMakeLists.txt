@@ -144,6 +144,9 @@ endif()
 # Must be before MapImportedReleaseVariants
 find_package(OpenGL)
 find_package(SDL2)
+if(BUILD_WITH_OPENCV)
+    find_package(OpenCV)
+endif()
 
 include(MapImportedReleaseVariants)
 include(EnableExtraCompilerWarnings)
@@ -191,7 +194,6 @@ endif()
 
 set(OSVR_COPY_OPENCV OFF)
 if(BUILD_WITH_OPENCV)
-    find_package(OpenCV)
     if(NOT OpenCV_FOUND)
         message(FATAL_ERROR "BUILD_WITH_OPENCV is enabled, but OpenCV was not found! Either help CMake find OpenCV or disable BUILD_WITH_OPENCV.")
     endif()
