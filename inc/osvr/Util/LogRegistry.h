@@ -58,10 +58,10 @@ namespace util {
 
         class LogRegistry {
           public:
-            OSVR_UTIL_EXPORT LogRegistry(LogRegistry const &) = delete; // copy construct
-            OSVR_UTIL_EXPORT LogRegistry(LogRegistry &&) = delete;      // move construct
-            OSVR_UTIL_EXPORT LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
-            OSVR_UTIL_EXPORT LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
+            LogRegistry(LogRegistry const &) = delete; // copy construct
+            LogRegistry(LogRegistry &&) = delete;      // move construct
+            LogRegistry &operator=(LogRegistry const &) = delete; // copy assign
+            LogRegistry &operator=(LogRegistry &&) = delete;      // move assign
 
             OSVR_UTIL_EXPORT static LogRegistry &instance(std::string const * = nullptr);
 
@@ -115,11 +115,11 @@ namespace util {
              */
             OSVR_UTIL_EXPORT void setConsoleLevel(LogLevel severity);
 
-            OSVR_UTIL_EXPORT std::string const &getLogFileBaseName() const {
+            std::string const &getLogFileBaseName() const {
                 return logFileBaseName_;
             }
 
-            OSVR_UTIL_EXPORT bool couldOpenLogFile() const { return sinks_.size() > 1; }
+            bool couldOpenLogFile() const { return sinks_.size() > 1; }
 
           protected:
             OSVR_UTIL_EXPORT LogRegistry(std::string const &logFileBaseName);

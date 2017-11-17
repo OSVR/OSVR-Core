@@ -46,6 +46,11 @@ namespace clientkit {
                                         uint32_t flags)
         : m_context(osvrClientInit(applicationIdentifier, flags)) {}
 
+    inline ClientContext::ClientContext(const char applicationIdentifier[],
+                                        const char host[],
+                                        uint32_t flags)
+        : m_context(osvrClientInitHost(applicationIdentifier, host, flags)) {}       
+        
     inline ClientContext::ClientContext(OSVR_ClientContext context)
         : m_context(context) {}
 

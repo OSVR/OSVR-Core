@@ -63,6 +63,21 @@ OSVR_EXTERN_C_BEGIN
 OSVR_CLIENTKIT_EXPORT OSVR_ClientContext osvrClientInit(
     const char applicationIdentifier[], uint32_t flags OSVR_CPP_ONLY(= 0));
 
+               
+/** @brief Initialize the library.
+
+    @param applicationIdentifier A null terminated string identifying your
+   application. Reverse DNS format strongly suggested.
+    @param host A null terminated string identifying host with the server to connect to.
+    @param flags initialization options (reserved) - pass 0 for now.
+
+    @returns Client context - will be needed for subsequent calls
+*/
+OSVR_CLIENTKIT_EXPORT OSVR_ClientContext
+osvrClientInitHost(const char applicationIdentifier[],
+                   const char host[],
+                   uint32_t flags OSVR_CPP_ONLY(= 0));
+
 /** @brief Updates the state of the context - call regularly in your mainloop.
 
     @param ctx Client context
