@@ -6,11 +6,11 @@
   },
   "hmd": {
     "device": {
-      "vendor": "OSVR",
-      "model": "HDK",
+      "vendor": "Epson",
+      "model": "Moverio BT-300 series",
       "num_displays": 1,
-      "Version": "1.3",
-      "Note": "Specific to the optics of 1.3, with Render Manager compatible distortion parameters"
+      "Version": "1.0",
+      "Note": "This is not the native FOV of the device but a higher FOV for 'magic window' style display."
     },
     "field_of_view": {
       "monocular_horizontal": 90,
