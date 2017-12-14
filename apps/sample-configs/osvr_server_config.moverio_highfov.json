@@ -1,0 +1,81 @@
+{
+  "description": "This is a non-physical FOV style configuration for the Moverio BT-300 series AR devices.",
+  "#": "The display and renderManagerConfig sections below are embedded as a workaround to missing relative path functionality on Android.",
+  "display": {
+    "meta": {
+      "schemaVersion": 1
+    },
+    "hmd": {
+      "device": {
+        "vendor": "Epson",
+        "model": "Moverio BT-300 series",
+        "num_displays": 1
+      },
+      "field_of_view": {
+        "monocular_horizontal": 90,
+        "monocular_vertical": 50.98299243,
+        "overlap_percent": 100,
+        "pitch_tilt": 0
+      },
+      "resolutions": [
+        {
+          "width": 1280,
+          "height": 720,
+          "video_inputs": 1,
+          "display_mode": "horz_side_by_side"
+        }
+      ],
+      "eyes": [
+        {
+          "center_proj_x": 0.5,
+          "center_proj_y": 0.5
+        },
+        {
+          "center_proj_x": 0.5,
+          "center_proj_y": 0.5
+        }
+      ]
+    }
+  },
+  "renderManagerConfig": {
+    "meta": {
+      "schemaVersion": 1
+    },
+    "renderManagerConfig": {
+      "directModeEnabled": false,
+      "directDisplayIndex": 0,
+      "directHighPriorityEnabled": false,
+      "numBuffers": 2,
+      "verticalSyncEnabled": false,
+      "verticalSyncBlockRenderingEnabled": false,
+      "renderOverfillFactor": 1.0,
+      "renderOversampleFactor": 1.0,
+      "window": {
+        "title": "OSVR",
+        "fullScreenEnabled": true,
+        "xPosition": 0,
+        "yPosition": 0
+      },
+      "display": {
+        "rotation": 0,
+        "bitsPerColor": 8
+      },
+      "prediction": {
+        "enabled": false,
+        "staticDelayMS": 26,
+        "leftEyeDelayMS": 0,
+        "rightEyeDelayMS": 0,
+        "localTimeOverride": true
+      },
+      "timeWarp": {
+        "enabled": false,
+        "asynchronous": false,
+        "maxMsBeforeVSync": 4
+      }
+    }
+  },
+  "plugins": [
+    "org_osvr_android_moverio",
+    "com_osvr_android_jniImaging"
+  ]
+}
