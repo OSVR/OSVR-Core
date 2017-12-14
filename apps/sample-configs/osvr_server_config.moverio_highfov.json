@@ -1,5 +1,5 @@
 {
-  "description": "This is a 'magic window' style configuration for the Moverio BT-300 series AR devices.",
+  "description": "This is a non-physical FOV style configuration for the Moverio BT-300 series AR devices.",
   "#": "The display and renderManagerConfig sections below are embedded as a workaround to missing relative path functionality on Android.",
   "display": {
     "meta": {
@@ -9,8 +9,7 @@
       "device": {
         "vendor": "Epson",
         "model": "Moverio BT-300 series",
-        "num_displays": 1,
-        "Note": "This is not the native FOV of the device but a higher FOV for 'magic window' style display."
+        "num_displays": 1
       },
       "field_of_view": {
         "monocular_horizontal": 90,

@@ -1,5 +1,5 @@
 {
-  "description": "This is a native FOV configuration for the Moverio BT-300 series AR devices.",
+  "description": "This is a native FOV configuration for the Moverio BT-300 series AR devices. This is a speciallized configuration that is more accurate for scale, but may result in visibility issues due to low FOV. The highfov configuration is recommended for most purposes.",
   "#": "The display and renderManagerConfig sections below are embedded as a workaround to missing relative path functionality on Android.",
   "display": {
     "meta": {
@@ -9,8 +9,7 @@
       "device": {
         "vendor": "Epson",
         "model": "Moverio BT-300 series",
-        "num_displays": 1,
-        "Note": "This configuration represents the native FOV of the Moverio BT-300 series. This is a speciallized configuration that is more accurate for scale, but may result in visibility issues due to low FOV. The highfov configuration is recommended for most purposes."
+        "num_displays": 1
       },
       "field_of_view": {
         "monocular_horizontal": 20.121542144531,
