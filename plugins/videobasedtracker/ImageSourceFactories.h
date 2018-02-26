@@ -42,6 +42,13 @@ namespace vbtracker {
 #ifdef _WIN32
     /// Factory method to get the HDK camera as an image source, via DirectShow.
     ImageSourcePtr openHDKCameraDirectShow();
+#else
+    /// Factory method to open a USB video class (UVC) device as an image
+    /// source.
+    ImageSourcePtr openUVCCamera(int vendor_id = 0, int product_id = 0, const char* serial_number = nullptr);
+
+    /// Factory method to open the HDK camera as an image source via libuvc.
+    ImageSourcePtr openHDKCameraUVC(const char* serial_number = nullptr);
 #endif
 
     /// Factory method to open a directory of tif files named 0001.tif and

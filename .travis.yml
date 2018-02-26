@@ -49,6 +49,13 @@ before_install:
         else
           git clone https://github.com/OSVR/libfunctionality.git;
         fi;
+        if [ -d libuvc ]; then
+          pushd libuvc;
+            git pull;
+          popd;
+        else
+          git clone https://github.com/ktossell/libuvc.git;
+        fi;
         if [ ! -d opencv-${OPENCV_VER} ]; then
           curl -LR https://github.com/Itseez/opencv/archive/${OPENCV_VER}.zip -o opencv-${OPENCV_VER}.zip;
           unzip opencv-${OPENCV_VER}.zip;
@@ -73,6 +80,11 @@ install:
           cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DBUILD_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON -DJSONCPP_WITH_CMAKE_PACKAGE=ON;
           make -j2 install;
         popd;
+        mkdir -p libuvc/build;
+	pushd libuvc/build;
+	  cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DINSTALL_CMAKE_DIR=$INSTPRF/lib/cmake/libuvc;
+	  make -j2 install;
+	popd;
         mkdir -p opencv-${OPENCV_VER}/build;
         pushd opencv-${OPENCV_VER}/build;
           cmake .. -DCMAKE_INSTALL_PREFIX=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} \
