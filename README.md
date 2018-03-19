@@ -36,3 +36,6 @@ Some directories under `/vendor` are in fact not external libraries vendored-in,
 - `/vendor/UIforETWbins` - Distributed binary releases of UIforETW <https://github.com/google/UIforETW> extracted to a Git repo (submodule) unmodified. Apache License, Version 2.0.
 - `/vendor/util-headers` - Subset of headers installed from <https://github.com/rpavlik/util-headers>. BSL 1.0.
 - `/vendor/vrpn` - Git submodule, accessed from <https://github.com/vrpn/vrpn>. BSL 1.0. Contains optional recursive submodules HIDAPI and libjsoncpp.
+
+
+allo
