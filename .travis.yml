@@ -17,6 +17,7 @@ cache:
     $HOME/deps-rel
     $HOME/deps-dbg
 before_install:
+  - pip install --user cpp-coveralls
   - if [ $CC = gcc ]; then export CXX="g++-5" CC="gcc-5"; fi
   - if [ $TRAVIS_OS_NAME = 'linux' -a $CC = 'clang' ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
   - $CC -v
@@ -100,8 +101,8 @@ script:
   - "git submodule update --init --recursive;"
   - "mkdir build;"
   - "cd build;"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
-  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_PREFIX_PATH=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG}; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCOVERAGE=1; fi"
+  - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_PREFIX_PATH=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG} -DCOVERAGE=1; fi"
   - "make all -j2"
 # TODO need to sort out false-failures due to container/platform issues.
 #  - "ctest -V"
@@ -132,3 +133,5 @@ addons:
     - gcc-5
     - g++-5
     - clang-3.7
+after_success:
+  - coveralls --root . -E ".*osvrGtest.*" -E ".*CMakeFiles.*"

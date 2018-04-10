@@ -1,0 +1,22 @@
+component_depth: 3
+languages:
+- name: cpp
+  production:
+    exclude:
+      - /tests/.*
+  test:
+    include:
+      - /tests/.*
+exclude:
+- /apps/.*
+- /assets/.*
+- /cmake/.*
+- /cmake-local/.*
+- /devtools/.*
+- /doc/.*
+- /doc-internal/.*
+- /examples/.*
+- /inc/.*
+- /json-schemas/.*
+- /plugins/.*
+- /vendor/.*
