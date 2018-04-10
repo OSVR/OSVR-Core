@@ -1,6 +1,12 @@
 component_depth: 3
 languages:
-- cpp
+- name: cpp
+  production:
+    exclude:
+      - /tests/.*
+  test:
+    include:
+      - /tests/.*
 exclude:
 - /apps/.*
 - /assets/.*
