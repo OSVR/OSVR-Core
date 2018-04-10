@@ -1,5 +1,16 @@
-component_depth: 1
+component_depth: 3
 languages:
 - cpp
-- python
-- script
+exclude:
+- /apps/.*
+- /assets/.*
+- /cmake/.*
+- /cmake-local/.*
+- /devtools/.*
+- /doc/.*
+- /doc-internal/.*
+- /examples/.*
+- /inc/.*
+- /json-schemas/.*
+- /plugins/.*
+- /vendor/.*
