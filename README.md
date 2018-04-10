@@ -38,4 +38,4 @@ Some directories under `/vendor` are in fact not external libraries vendored-in,
 - `/vendor/vrpn` - Git submodule, accessed from <https://github.com/vrpn/vrpn>. BSL 1.0. Contains optional recursive submodules HIDAPI and libjsoncpp.
 
 
-allo
+allo2
