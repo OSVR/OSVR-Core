@@ -21,7 +21,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export OPENCV_VER=3.0.0; fi
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update; fi"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap d235j/osvr; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew tap OSVR/osvr; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
        if [ $CONFIG = 'Release' ]; then
          export DEPSDIR=$HOME/deps-rel;
