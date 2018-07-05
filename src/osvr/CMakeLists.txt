@@ -33,3 +33,5 @@ endif()
 if(BUILD_JOINTCLIENTKIT)
     add_subdirectory(JointClientKit)
 endif()
+
+add_subdirectory(ResetYaw)
