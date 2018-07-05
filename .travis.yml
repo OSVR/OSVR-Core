@@ -64,6 +64,8 @@ before_install:
 install:
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall --ignore-dependencies json-c; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew upgrade libusb; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install 'python@2'; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then /usr/bin/yes | pip uninstall numpy; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install opencv; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install jsoncpp; fi"
   - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew install libfunctionality --HEAD; fi"
