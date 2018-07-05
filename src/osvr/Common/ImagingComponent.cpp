@@ -202,6 +202,7 @@ namespace common {
     }
     ImagingComponent::ImagingComponent(OSVR_ChannelCount numChan)
         : m_numSensor(numChan) {}
+    ImagingComponent::~ImagingComponent() = default;
 
     void ImagingComponent::sendImageData(OSVR_ImagingMetadata metadata,
                                          OSVR_ImageBufferElement *imageData,

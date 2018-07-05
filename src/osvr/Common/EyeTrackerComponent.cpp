@@ -68,6 +68,7 @@ namespace common {
 
     EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
         : m_numSensor(numChan) {}
+    EyeTrackerComponent::~EyeTrackerComponent() = default;
 
     void
     EyeTrackerComponent::sendNotification(OSVR_ChannelCount sensor,

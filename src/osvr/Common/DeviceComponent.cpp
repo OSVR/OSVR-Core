@@ -36,6 +36,8 @@ namespace osvr {
 namespace common {
     DeviceComponent::DeviceComponent() : m_parent(nullptr) {}
 
+    DeviceComponent::~DeviceComponent() = default;
+
     void DeviceComponent::recordParent(Parent &dev) {
         BOOST_ASSERT_MSG(nullptr == m_parent,
                          "recordParent should only be called once!");

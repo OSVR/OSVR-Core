@@ -102,6 +102,8 @@ namespace common {
 
     LocomotionComponent::LocomotionComponent() {}
 
+    LocomotionComponent::~LocomotionComponent() = default;
+
     void LocomotionComponent::sendNaviVelocityData(
         OSVR_NaviVelocityState naviVelocityState, OSVR_ChannelCount sensor,
         OSVR_TimeValue const &timestamp) {

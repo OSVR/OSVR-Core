@@ -73,6 +73,8 @@ namespace common {
     DirectionComponent::DirectionComponent(OSVR_ChannelCount numChan)
         : m_numSensor(numChan) {}
 
+    DirectionComponent::~DirectionComponent() = default;
+
     void
     DirectionComponent::sendDirectionData(OSVR_DirectionState direction,
                                           OSVR_ChannelCount sensor,

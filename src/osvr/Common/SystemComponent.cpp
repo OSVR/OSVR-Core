@@ -104,6 +104,8 @@ namespace common {
         return ret;
     }
 
+    SystemComponent::~SystemComponent() = default;
+
     SystemComponent::SystemComponent() {}
 
     void SystemComponent::sendRoutes(std::string const &routes) {
