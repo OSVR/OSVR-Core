@@ -34,6 +34,7 @@
 
 // Standard includes
 #include <string>
+#include <type_traits>
 
 using osvr::common::Buffer;
 
@@ -197,22 +198,26 @@ TYPED_TEST(ArithmeticRawSerialization, RoundTripBigger) {
 }
 
 TYPED_TEST(ArithmeticRawSerialization, RoundTripNegative) {
-    Buffer<> buf;
-    TypeParam inVal = static_cast<TypeParam>(-50.5); // OK that it will truncate
-                                                     // for integers, since we
-                                                     // compare inVal vs outVal,
-                                                     // not the literal.
-    osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    // Only do the body of this test for signed types.
+    if (std::is_signed<TypeParam>()) {
+        Buffer<> buf;
+        TypeParam inVal =
+            static_cast<TypeParam>(-50.5); // OK that it will truncate
+                                           // for integers, since we
+                                           // compare inVal vs outVal,
+                                           // not the literal.
+        osvr::common::serialization::serializeRaw(buf, inVal);
+        ASSERT_EQ(buf.size(), sizeof(TypeParam));
 
-    auto reader = buf.startReading();
+        auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(0);
-    osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+        ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
+        TypeParam outVal(0);
+        osvr::common::serialization::deserializeRaw(reader, outVal);
+        ASSERT_EQ(inVal, outVal);
+        ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
+        ASSERT_EQ(reader.bytesRemaining(), 0);
+    }
 }
 #ifdef _MSC_VER
 /// Disable "truncation of constant value" warning here.
