@@ -1,3 +1,10 @@
+# Git bits.
+*.orig
+
+# VS
+.vs/
+/CMakeSettings.json
+
 # VS Code
 .vscode/
 
