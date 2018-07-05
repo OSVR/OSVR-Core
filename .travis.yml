@@ -36,10 +36,12 @@ before_install:
       pushd $DEPSDIR;
         if [ -d jsoncpp ]; then
           pushd jsoncpp;
+            git checkout 1.8.4;
             git pull;
           popd;
         else
           git clone https://github.com/open-source-parsers/jsoncpp.git;
+          git checkout 1.8.4;
         fi;
         if [ -d libfunctionality ]; then
           pushd libfunctionality;
