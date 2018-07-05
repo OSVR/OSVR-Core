@@ -26,13 +26,13 @@
 #define INCLUDED_ImagingComponent_h_GUID_BA26C922_01FD_43B3_8EB7_A9AB2777CEBC
 
 // Internal Includes
-#include <osvr/Common/Export.h>
 #include <osvr/Common/DeviceComponent.h>
+#include <osvr/Common/Export.h>
+#include <osvr/Common/IPCRingBuffer.h>
+#include <osvr/Common/ImagingComponentConfig.h>
 #include <osvr/Common/SerializationTags.h>
 #include <osvr/Util/ChannelCountC.h>
 #include <osvr/Util/ImagingReportTypesC.h>
-#include <osvr/Common/IPCRingBuffer.h>
-#include <osvr/Common/ImagingComponentConfig.h>
 
 // Library/third-party includes
 #include <vrpn_BaseClass.h>
@@ -78,8 +78,7 @@ namespace common {
         ///
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
-        static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent>
-        create();
+        static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent> create();
 
         /// @brief Explicit virtual destructor
         ///
@@ -95,8 +94,8 @@ namespace common {
         messages::ImagePlacedInSharedMemory imagePlacedInSharedMemory;
 
 #ifdef OSVR_COMMON_IN_PROCESS_IMAGING
-        /// @brief Message from server to client, notifying of image data in process
-        /// memory (assumes joint client kit)
+        /// @brief Message from server to client, notifying of image data in
+        /// process memory (assumes joint client kit)
         messages::ImagePlacedInProcessMemory imagePlacedInProcessMemory;
 #endif
 
@@ -105,7 +104,8 @@ namespace common {
             OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
 
         typedef std::function<void(ImageData const &,
-                                   util::time::TimeValue const &)> ImageHandler;
+                                   util::time::TimeValue const &)>
+            ImageHandler;
         OSVR_COMMON_EXPORT void registerImageHandler(ImageHandler cb);
 
       private:
@@ -126,14 +126,13 @@ namespace common {
 
 #ifdef OSVR_COMMON_IN_PROCESS_IMAGING
         /// @return true if we could send it.
-        bool m_sendImageDataViaInProcessMemory(OSVR_ImagingMetadata metadata,
-                                               OSVR_ImageBufferElement *imageData,
-                                               OSVR_ChannelCount sensor,
-                                               OSVR_TimeValue const &timestamp);
+        bool m_sendImageDataViaInProcessMemory(
+            OSVR_ImagingMetadata metadata, OSVR_ImageBufferElement *imageData,
+            OSVR_ChannelCount sensor, OSVR_TimeValue const &timestamp);
 #endif
 
-        static int VRPN_CALLBACK
-        m_handleImageRegion(void *userdata, vrpn_HANDLERPARAM p);
+        static int VRPN_CALLBACK m_handleImageRegion(void *userdata,
+                                                     vrpn_HANDLERPARAM p);
 
         static int VRPN_CALLBACK
         m_handleImagePlacedInSharedMemory(void *userdata, vrpn_HANDLERPARAM p);
