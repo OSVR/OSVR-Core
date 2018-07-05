@@ -79,6 +79,7 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<ImagingComponent>
+        create();
 
         /// @brief Explicit virtual destructor
         ///
@@ -108,7 +109,7 @@ namespace common {
         OSVR_COMMON_EXPORT void registerImageHandler(ImageHandler cb);
 
       private:
-        ImagingComponent(OSVR_ChannelCount numChan);
+        ImagingComponent();
         virtual void m_parentSet();
 
         /// @return true if we could send it.
@@ -145,7 +146,6 @@ namespace common {
         void m_checkFirst(OSVR_ImagingMetadata const &metadata);
         void m_growShmVecIfRequired(OSVR_ChannelCount sensor);
 
-        OSVR_ChannelCount m_numSensor;
         std::vector<ImageHandler> m_cb;
         bool m_gotOne;
         /// @brief One for each sensor

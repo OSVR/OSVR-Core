@@ -50,7 +50,7 @@ struct OSVR_ImagingDeviceInterfaceObject
 OSVR_ReturnCode
 osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
                            OSVR_OUT_PTR OSVR_ImagingDeviceInterface *iface,
-                           OSVR_IN OSVR_ChannelCount numSensors) {
+                           OSVR_IN OSVR_ChannelCount /*numSensors*/) {
 
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceImagingConfigure", opts);
     OSVR_PLUGIN_HANDLE_NULL_CONTEXT("osvrDeviceImagingConfigure", iface);
@@ -58,7 +58,7 @@ osvrDeviceImagingConfigure(OSVR_INOUT_PTR OSVR_DeviceInitOptions opts,
         opts->makeInterfaceObject<OSVR_ImagingDeviceInterfaceObject>();
     *iface = ifaceObj;
 
-    auto imaging = osvr::common::ImagingComponent::create(numSensors);
+    auto imaging = osvr::common::ImagingComponent::create();
     ifaceObj->imaging = imaging.get();
     opts->addComponent(imaging);
     return OSVR_RETURN_SUCCESS;

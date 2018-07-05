@@ -61,13 +61,13 @@ namespace common {
     } // namespace messages
 
     shared_ptr<EyeTrackerComponent>
-    EyeTrackerComponent::create(OSVR_ChannelCount numChan) {
-        shared_ptr<EyeTrackerComponent> ret(new EyeTrackerComponent(numChan));
+    EyeTrackerComponent::create() {
+        shared_ptr<EyeTrackerComponent> ret(new EyeTrackerComponent());
         return ret;
     }
 
-    EyeTrackerComponent::EyeTrackerComponent(OSVR_ChannelCount numChan)
-        : m_numSensor(numChan) {}
+    EyeTrackerComponent::EyeTrackerComponent() {}
+
     EyeTrackerComponent::~EyeTrackerComponent() = default;
 
     void

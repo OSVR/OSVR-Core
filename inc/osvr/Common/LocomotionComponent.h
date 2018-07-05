@@ -128,9 +128,6 @@ namespace common {
 
         std::vector<NaviVelocityHandler> m_cb_vel;
         std::vector<NaviPositionHandler> m_cb_posn;
-
-        /// @brief Common component for system device
-        common::CommonComponent *m_commonComponent;
     };
 
 } // namespace common
