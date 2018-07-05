@@ -107,15 +107,14 @@ namespace client {
         NodeToTrackerPathVisitor() : boost::static_visitor<std::string>() {}
 
         std::string
-        operator()(osvr::common::PathNode const &node,
+        operator()(osvr::common::PathNode const &,
                    osvr::common::elements::ArticulationElement const &elt) {
             return elt.getTrackerPath();
         }
 
         /// @brief Catch-all for other element types.
         template <typename T>
-        std::string operator()(osvr::common::PathNode const &node,
-                               T const &elt) {
+        std::string operator()(osvr::common::PathNode const &, T const &) {
             return std::string();
         }
     };
