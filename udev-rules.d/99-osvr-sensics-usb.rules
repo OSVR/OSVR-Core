@@ -1,0 +1,26 @@
+# udev file for USB interfaces on Sensics-based HMDs and emulated devices
+# Copyright 2015-2016, Sensics, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+###
+# Section to permit access to HID streaming
+###
+
+# OSVR HDK (via HIDAPI/libusb)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", MODE="0660", GROUP="plugdev"
+
+# OSVR HDK (via HIDAPI/hidraw)
+KERNEL=="hidraw*", ATTRS{busnum}=="1", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", MODE="0660", GROUP="plugdev"
+
+###
+# Section for the usb-serial interface: useful name, ignored by modemmanager
+###
+
+# OSVR HDK
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0b00", SYMLINK+="ttyUSB.OSVRHDK"
+
+# Sensics zSight
+SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0515", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0515", SYMLINK+="ttyUSB.zSight"
+
