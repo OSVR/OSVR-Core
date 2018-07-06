@@ -103,9 +103,20 @@ if(BUILD_SERVER_PLUGINS AND BUILD_WITH_OPENCV)
             endif()
         endif()
     elseif(NOT ANDROID)
-        # Non-Windows desktop platforms can use the experimental OpenCV capture.
-        # TODO get alternate capture libraries, like libuvc, that let us be choosier about our input.
-        set(BUILD_VIDEOTRACKER_PLUGIN ON)
+        # Non-Windows desktop platforms can use libuvc
+        find_package(libuvc)
+        if(libuvc_INCLUDE_DIRS AND libuvc_LIBRARIES)
+            set(LIBUVC_FOUND ON)
+        else()
+            set(LIBUVC_FOUND OFF)
+        endif()
+        find_package(Libusb1)
+        if(LIBUSB1_FOUND AND LIBUVC_FOUND)
+            set(BUILD_VIDEOTRACKER_PLUGIN ON)
+        else()
+            message(STATUS "HDK video tracker plugin disabled due to missing libuvc or libusb1")
+            set(BUILD_VIDEOTRACKER_PLUGIN OFF)
+        endif()
     endif()
 endif()
 

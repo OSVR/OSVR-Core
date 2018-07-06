@@ -11,11 +11,6 @@ set(SOURCES
     Oculus_DK2.cpp
     Oculus_DK2.h)
 
-if(NOT WIN32)
-    find_package(libuvc REQUIRED)
-    find_package(Libusb1 REQUIRED)
-endif()
-
 if(WIN32)
     list(APPEND SOURCES
         CheckFirmwareVersion.h
