@@ -138,33 +138,53 @@ namespace server {
 
         return ret;
     }
+    inline void debugDumpSearchPath(::osvr::util::log::LoggerPtr log) {
+        log->debug() << "Search path for relative file names:";
+        for (auto &path : getConfigDirectories()) {
+            log->debug() << path;
+        }
+    }
+    inline ServerPtr
+    internalConfigureServerFromFile(std::string const &configName,
+                                    ::osvr::util::log::LoggerPtr log) {
+        for (auto const &resolvedPath : tryResolvingPath(configName)) {
+            log->trace() << "Trying path '" << resolvedPath << "'";
+            std::ifstream config(resolvedPath);
+            if (!config.good()) {
+                log->trace() << "Config file '" << configName
+                            << "' not found at " << resolvedPath;
+                continue;
+            }
 
+            std::stringstream sstr;
+            sstr << config.rdbuf();
+            return configureServerFromString(sstr.str());
+        }
+        return nullptr;
+    }
     ServerPtr configureServerFromFile(std::string const &configName) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
-
-        ServerPtr ret;
+        debugDumpSearchPath(log);
         log->info() << "Attempting to load config file '" << configName << "'.";
-        std::ifstream config(configName);
-        if (!config.good()) {
-            log->error() << "Config file '" << configName << "' not found";
-            return nullptr;
+        auto ret = internalConfigureServerFromFile(configName, log);
+        if (ret) {
+            return ret;
         }
-
-        std::stringstream sstr;
-        sstr << config.rdbuf();
-        return configureServerFromString(sstr.str());
+        log->error() << "Config file '" << configName
+                     << "' not found in any of the config search paths.";
+        return nullptr;
     }
 
     ServerPtr configureServerFromFirstFileInList(
         std::vector<std::string> const &configNames) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
-
-        for (const auto name : configNames) {
-            std::ifstream config(name);
-            if (config.good()) {
-                return configureServerFromFile(name);
+        debugDumpSearchPath(log);
+        for (const auto &name : configNames) {
+            auto ret = internalConfigureServerFromFile(name, log);
+            if (ret) {
+                return ret;
             }
         }
         log->error() << "Could not find a valid config file!";
