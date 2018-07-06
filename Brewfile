@@ -1,4 +1,4 @@
 brew 'libusb'
 brew 'jsoncpp'
 tap 'OSVR/osvr'
-brew 'libfunctionality'
+brew 'libfunctionality', args: ['HEAD']
