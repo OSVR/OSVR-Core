@@ -1,0 +1,6 @@
+# udev file for OSVR HDK positional tracking camera
+# Copyright 2018 Collabora
+# SPDX-License-Identifier: Apache-2.0
+
+# OSVR HDK Camera (via libusb/libuvc)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="57e8", MODE="0660", GROUP="plugdev"
