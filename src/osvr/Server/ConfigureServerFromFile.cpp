@@ -54,11 +54,10 @@ namespace server {
         try {
             srvConfig.loadConfig(json);
             ret = srvConfig.constructServer();
-        }
-        catch (std::exception &e) {
+        } catch (std::exception &e) {
             log->error()
                 << "Caught exception constructing server from JSON config "
-                "file: "
+                   "file: "
                 << e.what();
             return nullptr;
         }
@@ -81,7 +80,7 @@ namespace server {
                 log->warn() << "Failed to load the following plugins:";
                 for (auto const &pluginError : srvConfig.getFailedPlugins()) {
                     log->warn() << " - " << pluginError.first << "\t"
-                        << pluginError.second;
+                                << pluginError.second;
                 }
             }
         }
@@ -92,15 +91,15 @@ namespace server {
             if (!srvConfig.getSuccessfulInstantiations().empty()) {
                 log->info() << "Successes:";
                 for (auto const &driver :
-                    srvConfig.getSuccessfulInstantiations()) {
+                     srvConfig.getSuccessfulInstantiations()) {
                     log->info() << " - " << driver;
                 }
             }
             if (!srvConfig.getFailedInstantiations().empty()) {
                 log->error() << "Errors:";
                 for (auto const &error : srvConfig.getFailedInstantiations()) {
-                    log->error() << " - " << error.first << "\t"
-                        << error.second;
+                    log->error()
+                        << " - " << error.first << "\t" << error.second;
                 }
             }
         }
@@ -124,13 +123,13 @@ namespace server {
         } else {
             log->info()
                 << "Using OSVR HDK for display configuration. "
-                "Did not find an alternate valid 'display' object in config "
-                "file.";
+                   "Did not find an alternate valid 'display' object in config "
+                   "file.";
         }
 
         if (srvConfig.processRenderManagerParameters()) {
             log->info() << "RenderManager config found and parsed from the "
-                "config file.";
+                           "config file.";
         }
 
         log->info() << "Triggering automatic hardware detection...";
@@ -152,7 +151,7 @@ namespace server {
             std::ifstream config(resolvedPath);
             if (!config.good()) {
                 log->trace() << "Config file '" << configName
-                            << "' not found at " << resolvedPath;
+                             << "' not found at " << resolvedPath;
                 continue;
             }
 
