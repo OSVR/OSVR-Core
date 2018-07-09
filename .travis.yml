@@ -1,13 +1,4 @@
 language: cpp
-compiler:
-  - clang
-  - gcc
-os:
-  - osx
-  - linux
-env:
-  - CONFIG=Release
-  - CONFIG=Debug
 matrix:
   include:
   - os: osx
