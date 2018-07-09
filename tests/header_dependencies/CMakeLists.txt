@@ -15,6 +15,7 @@ if(BUILD_WITH_OPENCV)
 else()
     list(APPEND IGNORED_HEADERS
         osvr/Util/OpenCVTypeDispatch.h
+        osvr/Util/OpenCVVersion.h
         osvr/PluginKit/ImagingInterface.h)
 endif()
 
