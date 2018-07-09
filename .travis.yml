@@ -4,15 +4,32 @@ compiler:
   - gcc
 os:
   - osx
-    osx_image: xcode9.4
   - linux
 env:
   - CONFIG=Release
   - CONFIG=Debug
 matrix:
-  exclude:
+  include:
   - os: osx
+    osx_image: xcode9.4
+    compiler: clang
+    env: CONFIG=Release
+  - os: osx
+    osx_image: xcode9.4
+    compiler: clang
+    env: CONFIG=Debug
+  - os: linux
+    compiler: clang
+    env: CONFIG=Release
+  - os: linux
+    compiler: clang
+    env: CONFIG=Debug
+  - os: linux
     compiler: gcc
+    env: CONFIG=Release
+  - os: linux
+    compiler: gcc
+    env: CONFIG=Debug
 cache:
   directories:
     $HOME/deps-rel
