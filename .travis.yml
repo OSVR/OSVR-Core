@@ -103,7 +103,7 @@ script:
   - "git submodule update --init --recursive;"
   - "mkdir build;"
   - "cd build;"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64; fi"
+  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then cmake .. -DCMAKE_BUILD_TYPE=${CONFIG} -DCMAKE_OSX_ARCHITECTURES=x86_64 -DBUILD_WITH_OPENCV=OFF; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then cmake .. -DCMAKE_PREFIX_PATH=$INSTPRF -DCMAKE_BUILD_TYPE=${CONFIG}; fi"
   - "make all -j2"
 # TODO need to sort out false-failures due to container/platform issues.
