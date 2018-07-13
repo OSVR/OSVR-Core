@@ -74,7 +74,7 @@ macro(osvr_add_library)
         ${CMAKE_INSTALL_INCLUDEDIR}/osvr/${LIBNAME}
         COMPONENT Devel)
 
-    osvr_install_symbols_for_target(${LIBNAME_FULL})
+    install_debug_symbols(TARGETS ${LIBNAME_FULL})
 
     osvr_append_target(BUILDTREE ${LIBNAME_FULL})
 endmacro()
