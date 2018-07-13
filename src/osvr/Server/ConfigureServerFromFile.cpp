@@ -54,11 +54,10 @@ namespace server {
         try {
             srvConfig.loadConfig(json);
             ret = srvConfig.constructServer();
-        }
-        catch (std::exception &e) {
+        } catch (std::exception &e) {
             log->error()
                 << "Caught exception constructing server from JSON config "
-                "file: "
+                   "file: "
                 << e.what();
             return nullptr;
         }
@@ -81,7 +80,7 @@ namespace server {
                 log->warn() << "Failed to load the following plugins:";
                 for (auto const &pluginError : srvConfig.getFailedPlugins()) {
                     log->warn() << " - " << pluginError.first << "\t"
-                        << pluginError.second;
+                                << pluginError.second;
                 }
             }
         }
@@ -92,15 +91,15 @@ namespace server {
             if (!srvConfig.getSuccessfulInstantiations().empty()) {
                 log->info() << "Successes:";
                 for (auto const &driver :
-                    srvConfig.getSuccessfulInstantiations()) {
+                     srvConfig.getSuccessfulInstantiations()) {
                     log->info() << " - " << driver;
                 }
             }
             if (!srvConfig.getFailedInstantiations().empty()) {
                 log->error() << "Errors:";
                 for (auto const &error : srvConfig.getFailedInstantiations()) {
-                    log->error() << " - " << error.first << "\t"
-                        << error.second;
+                    log->error()
+                        << " - " << error.first << "\t" << error.second;
                 }
             }
         }
@@ -124,13 +123,13 @@ namespace server {
         } else {
             log->info()
                 << "Using OSVR HDK for display configuration. "
-                "Did not find an alternate valid 'display' object in config "
-                "file.";
+                   "Did not find an alternate valid 'display' object in config "
+                   "file.";
         }
 
         if (srvConfig.processRenderManagerParameters()) {
             log->info() << "RenderManager config found and parsed from the "
-                "config file.";
+                           "config file.";
         }
 
         log->info() << "Triggering automatic hardware detection...";
@@ -138,33 +137,56 @@ namespace server {
 
         return ret;
     }
+    inline void debugDumpSearchPath(::osvr::util::log::LoggerPtr log) {
+        log->debug() << "Search path for relative file names:";
+        for (auto &path : getConfigDirectories()) {
+            log->debug() << path;
+        }
+    }
+
+    inline ServerPtr
+    internalConfigureServerFromFile(std::string const &configName,
+                                    ::osvr::util::log::LoggerPtr log) {
+        for (auto const &candidateConfigFilePath :
+             getCandidateConfigFilePaths(configName)) {
+            log->trace() << "Trying path '" << candidateConfigFilePath << "'";
+            std::ifstream config(candidateConfigFilePath);
+            if (!config.good()) {
+                log->trace() << "Config file '" << configName
+                             << "' not found at " << candidateConfigFilePath;
+                continue;
+            }
+
+            std::stringstream sstr;
+            sstr << config.rdbuf();
+            return configureServerFromString(sstr.str());
+        }
+        return nullptr;
+    }
 
     ServerPtr configureServerFromFile(std::string const &configName) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
-
-        ServerPtr ret;
+        debugDumpSearchPath(log);
         log->info() << "Attempting to load config file '" << configName << "'.";
-        std::ifstream config(configName);
-        if (!config.good()) {
-            log->error() << "Config file '" << configName << "' not found";
-            return nullptr;
+        auto ret = internalConfigureServerFromFile(configName, log);
+        if (ret) {
+            return ret;
         }
-
-        std::stringstream sstr;
-        sstr << config.rdbuf();
-        return configureServerFromString(sstr.str());
+        log->error() << "Config file '" << configName
+                     << "' not found in any of the config search paths.";
+        return nullptr;
     }
 
     ServerPtr configureServerFromFirstFileInList(
         std::vector<std::string> const &configNames) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);
-
-        for (const auto name : configNames) {
-            std::ifstream config(name);
-            if (config.good()) {
-                return configureServerFromFile(name);
+        debugDumpSearchPath(log);
+        for (const auto &name : configNames) {
+            auto ret = internalConfigureServerFromFile(name, log);
+            if (ret) {
+                return ret;
             }
         }
         log->error() << "Could not find a valid config file!";

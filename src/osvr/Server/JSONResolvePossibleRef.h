@@ -26,7 +26,7 @@
 #define INCLUDED_JSONResolvePossibleRef_h_GUID_64F277A1_33F0_4986_6EEE_09E17C09AA52
 
 // Internal Includes
-// - none
+#include <osvr/Server/ConfigFilePaths.h>
 
 // Library/third-party includes
 #include <json/value.h>
@@ -72,16 +72,13 @@ namespace server {
     /// (false, default)
     /// @param searchPath Optional list of directories to look for any mentioned
     /// files.
-    Json::Value resolvePossibleRef(Json::Value const &input,
-                                   bool stringAcceptableResult = false,
-                                   std::vector<std::string> const &searchPath =
-                                       std::vector<std::string>());
+    Json::Value resolvePossibleRef(
+        Json::Value const &input, bool stringAcceptableResult = false,
+        std::vector<std::string> const &searchPath = getConfigDirectories());
 
-    ResolveRefResult
-    resolvePossibleRefWithDetails(Json::Value const &input,
-                                  bool stringAcceptableResult = false,
-                                  std::vector<std::string> const &searchPath =
-                                      std::vector<std::string>());
+    ResolveRefResult resolvePossibleRefWithDetails(
+        Json::Value const &input, bool stringAcceptableResult = false,
+        std::vector<std::string> const &searchPath = getConfigDirectories());
 
 } // namespace server
 } // namespace osvr

@@ -9,6 +9,7 @@
 */
 
 // Copyright 2017 Sensics, Inc.
+// Copyright 2018 Collabora
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,8 +39,17 @@
 namespace osvr {
 namespace server {
 
+    /// @brief Get list of directories to search for config files.
+    OSVR_SERVER_EXPORT std::vector<std::string> getConfigDirectories();
+
     /// @brief this returns a vector of default server configuration file paths.
     OSVR_SERVER_EXPORT std::vector<std::string> getDefaultConfigFilePaths();
-}
-}
+
+    /// @brief given a input filename/path, returns potential full paths from
+    /// combining relative input paths with potential config file locations.
+    OSVR_SERVER_EXPORT std::vector<std::string>
+    getCandidateConfigFilePaths(std::string const &inputFilename);
+
+} // namespace server
+} // namespace osvr
 #endif // INCLUDED_ConfigFilePaths_h_GUID_241E9C9C_0E0E_46B0_9DED_8F8059306192
