@@ -95,7 +95,7 @@ namespace server {
         return ret;
     }
     std::vector<std::string>
-    tryResolvingPath(std::string const &inputFilename) {
+    getCandidateConfigFilePaths(std::string const &inputFilename) {
         namespace fs = boost::filesystem;
 
         std::vector<std::string> paths;
@@ -111,7 +111,7 @@ namespace server {
     }
     std::vector<std::string> getDefaultConfigFilePaths() {
         const auto configFileName = getDefaultConfigFilename();
-        return tryResolvingPath(configFileName);
+        return getCandidateConfigFilePaths(configFileName);
     }
 } // namespace server
 } // namespace osvr

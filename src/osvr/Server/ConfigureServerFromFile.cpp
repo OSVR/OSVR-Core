@@ -143,15 +143,17 @@ namespace server {
             log->debug() << path;
         }
     }
+
     inline ServerPtr
     internalConfigureServerFromFile(std::string const &configName,
                                     ::osvr::util::log::LoggerPtr log) {
-        for (auto const &resolvedPath : tryResolvingPath(configName)) {
-            log->trace() << "Trying path '" << resolvedPath << "'";
-            std::ifstream config(resolvedPath);
+        for (auto const &candidateConfigFilePath :
+             getCandidateConfigFilePaths(configName)) {
+            log->trace() << "Trying path '" << candidateConfigFilePath << "'";
+            std::ifstream config(candidateConfigFilePath);
             if (!config.good()) {
                 log->trace() << "Config file '" << configName
-                             << "' not found at " << resolvedPath;
+                             << "' not found at " << candidateConfigFilePath;
                 continue;
             }
 
@@ -161,6 +163,7 @@ namespace server {
         }
         return nullptr;
     }
+
     ServerPtr configureServerFromFile(std::string const &configName) {
         auto log =
             ::osvr::util::log::make_logger(::osvr::util::log::OSVR_SERVER_LOG);

@@ -48,7 +48,7 @@ namespace server {
     /// @brief given a input filename/path, returns potential full paths from
     /// combining relative input paths with potential config file locations.
     OSVR_SERVER_EXPORT std::vector<std::string>
-    tryResolvingPath(std::string const &inputFilename);
+    getCandidateConfigFilePaths(std::string const &inputFilename);
 
 } // namespace server
 } // namespace osvr
