@@ -50,13 +50,16 @@ namespace client {
     class ArticulationTreeTraverser : public boost::static_visitor<> {
       public:
         /// @brief Constructor
-        ArticulationTreeTraverser(osvr::common::RegisteredStringMap *jointMap,
-                                  osvr::common::RegisteredStringMap *boneMap,
-                                  InterfaceMap *jointInterfaces,
+        ArticulationTreeTraverser(osvr::common::RegisteredStringMap &jointMap,
+                                  osvr::common::RegisteredStringMap &boneMap,
+                                  InterfaceMap &jointInterfaces,
                                   OSVR_ClientContext &ctx)
             : boost::static_visitor<>(), m_jointMap(jointMap),
               m_boneMap(boneMap), m_jointInterfaces(jointInterfaces),
               m_ctx(ctx) {}
+        ArticulationTreeTraverser(ArticulationTreeTraverser const &) = delete;
+        ArticulationTreeTraverser &
+        operator=(ArticulationTreeTraverser const &) = delete;
 
         /// @brief ignore null element
         void operator()(osvr::common::PathNode const &,
@@ -71,30 +74,30 @@ namespace client {
 
                 /// register joint ID
                 util::StringID jointID =
-                    m_jointMap->registerStringID(node.getName());
+                    m_jointMap.registerStringID(node.getName());
                 /// get an interface for tracker path
 
                 /// store the id, interface association
-                m_jointInterfaces->push_back(std::make_pair(
+                m_jointInterfaces.push_back(std::make_pair(
                     jointID, InternalInterfaceOwner(
                                  m_ctx, elt.getTrackerPath().c_str())));
 
                 /// Specifying bone name for each joint is optional
                 if (!elt.getBoneName().empty()) {
                     /// register boneId
-                    m_boneMap->registerStringID(elt.getBoneName());
+                    m_boneMap.registerStringID(elt.getBoneName());
                 }
             }
         }
 
         /// @brief Catch-all for other element types.
         template <typename T>
-        void operator()(osvr::common::PathNode const &node, T const &elt) {}
+        void operator()(osvr::common::PathNode const &, T const &) {}
 
       private:
-        osvr::common::RegisteredStringMap *m_jointMap;
-        osvr::common::RegisteredStringMap *m_boneMap;
-        InterfaceMap *m_jointInterfaces;
+        osvr::common::RegisteredStringMap &m_jointMap;
+        osvr::common::RegisteredStringMap &m_boneMap;
+        InterfaceMap &m_jointInterfaces;
         OSVR_ClientContext m_ctx;
     };
 
@@ -104,15 +107,14 @@ namespace client {
         NodeToTrackerPathVisitor() : boost::static_visitor<std::string>() {}
 
         std::string
-        operator()(osvr::common::PathNode const &node,
+        operator()(osvr::common::PathNode const &,
                    osvr::common::elements::ArticulationElement const &elt) {
             return elt.getTrackerPath();
         }
 
         /// @brief Catch-all for other element types.
         template <typename T>
-        std::string operator()(osvr::common::PathNode const &node,
-                               T const &elt) {
+        std::string operator()(osvr::common::PathNode const &, T const &) {
             return std::string();
         }
     };
@@ -138,9 +140,8 @@ namespace client {
         /// get the path tree
         osvr::common::clonePathTree(articulationTree, cfg->m_articulationTree);
 
-        ArticulationTreeTraverser traverser(&cfg->m_jointMap, &cfg->m_boneMap,
-                                            &cfg->m_jointInterfaces,
-                                            cfg->m_ctx);
+        ArticulationTreeTraverser traverser(cfg->m_jointMap, cfg->m_boneMap,
+                                            cfg->m_jointInterfaces, cfg->m_ctx);
         osvr::util::traverseWith(
             articulationTree.getRoot(),
             [&traverser](osvr::common::PathNode const &node) {
@@ -161,8 +162,8 @@ namespace client {
 
         /// get the path tree
         osvr::common::clonePathTree(articulationTree, m_articulationTree);
-        ArticulationTreeTraverser traverser(&m_jointMap, &m_boneMap,
-                                            &m_jointInterfaces, m_ctx);
+        ArticulationTreeTraverser traverser(m_jointMap, m_boneMap,
+                                            m_jointInterfaces, m_ctx);
         osvr::util::traverseWith(
             m_articulationTree.getRoot(),
             [&traverser](osvr::common::PathNode const &node) {

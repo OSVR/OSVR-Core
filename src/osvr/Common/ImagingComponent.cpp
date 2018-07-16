@@ -196,12 +196,13 @@ namespace common {
     } // namespace messages
 
     shared_ptr<ImagingComponent>
-    ImagingComponent::create(OSVR_ChannelCount numChan) {
-        shared_ptr<ImagingComponent> ret(new ImagingComponent(numChan));
+    ImagingComponent::create() {
+        shared_ptr<ImagingComponent> ret(new ImagingComponent());
         return ret;
     }
-    ImagingComponent::ImagingComponent(OSVR_ChannelCount numChan)
-        : m_numSensor(numChan) {}
+    ImagingComponent::ImagingComponent() {}
+
+    ImagingComponent::~ImagingComponent() = default;
 
     void ImagingComponent::sendImageData(OSVR_ImagingMetadata metadata,
                                          OSVR_ImageBufferElement *imageData,

@@ -67,6 +67,12 @@ namespace common {
         static OSVR_COMMON_EXPORT shared_ptr<Location2DComponent>
         create(OSVR_ChannelCount numSensor = 1);
 
+        /// @brief Explicit virtual destructor
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        virtual OSVR_COMMON_EXPORT ~Location2DComponent();
+
         /// @brief Message from server to client, containing 2D location data.
         messages::LocationRecord locationRecord;
 

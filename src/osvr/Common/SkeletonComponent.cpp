@@ -94,6 +94,8 @@ namespace common {
         return ret;
     }
 
+    SkeletonComponent::~SkeletonComponent() = default;
+
     SkeletonComponent::SkeletonComponent(std::string const &jsonSpec)
         : m_spec(jsonSpec) {}
 

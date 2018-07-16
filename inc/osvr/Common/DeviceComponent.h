@@ -43,6 +43,12 @@ namespace common {
       public:
         typedef BaseDevice Parent;
 
+        /// @brief Explicit virtual destructor
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        virtual OSVR_COMMON_EXPORT ~DeviceComponent();
+
         /// @brief Called (only) by BaseDevice when being added: effectively
         /// records a "parent pointer" that does not convey ownership.
         void recordParent(Parent &dev);

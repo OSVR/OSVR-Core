@@ -93,8 +93,7 @@ namespace client {
     }
 
     void SkeletonRemoteHandler::m_handleSkeletonSpec(
-        common::SkeletonSpec const &data,
-        util::time::TimeValue const &timestamp) {
+        common::SkeletonSpec const &data, util::time::TimeValue const &) {
         // need to verify that sensor id and spec exist,
         // otherwise don't get anything
         if (!data.spec) {

@@ -73,6 +73,8 @@ namespace common {
     Location2DComponent::Location2DComponent(OSVR_ChannelCount numChan)
         : m_numSensor(numChan) {}
 
+    Location2DComponent::~Location2DComponent() = default;
+
     void
     Location2DComponent::sendLocationData(OSVR_Location2DState location,
                                           OSVR_ChannelCount sensor,

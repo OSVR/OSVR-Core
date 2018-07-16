@@ -83,6 +83,12 @@ namespace common {
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<SystemComponent> create();
 
+        /// @brief Explicit virtual destructor
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        virtual OSVR_COMMON_EXPORT ~SystemComponent();
+
         /// @brief Message from server to client, replacing all routes.
         messages::RoutesFromServer routesOut;
 

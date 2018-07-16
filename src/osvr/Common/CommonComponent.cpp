@@ -66,6 +66,8 @@ namespace common {
         return ret;
     }
 
+    CommonComponent::~CommonComponent() = default;
+
     void CommonComponent::registerPingHandler(Handler const &handler) {
         /// Just forward to the templated implementation.
         registerHandler(ping, handler);

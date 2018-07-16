@@ -64,7 +64,13 @@ namespace common {
         /// Required to ensure that allocation and deallocation stay on the same
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<EyeTrackerComponent>
-        create(OSVR_ChannelCount numSensor = 2);
+        create();
+
+        /// @brief Explicit virtual destructor
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        virtual OSVR_COMMON_EXPORT ~EyeTrackerComponent();
 
         /// @brief Message from server to client, containing eye data.
         messages::EyeRegion eyeRegion;
@@ -78,15 +84,13 @@ namespace common {
         OSVR_COMMON_EXPORT void registerEyeHandler(EyeHandler cb);
 
       private:
-        EyeTrackerComponent(OSVR_ChannelCount numChan);
+        EyeTrackerComponent();
         virtual void m_parentSet();
 
         static int VRPN_CALLBACK
         m_handleEyeRegion(void *userdata, vrpn_HANDLERPARAM p);
 
-        OSVR_ChannelCount m_numSensor;
         std::vector<EyeHandler> m_cb;
-        bool m_gotOne;
     };
 
 } // namespace common

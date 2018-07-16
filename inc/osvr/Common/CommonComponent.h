@@ -87,6 +87,12 @@ namespace common {
         /// side of a DLL line.
         static OSVR_COMMON_EXPORT shared_ptr<CommonComponent> create();
 
+        /// @brief Explicit virtual destructor
+        ///
+        /// Required to ensure that allocation and deallocation stay on the same
+        /// side of a DLL line.
+        virtual OSVR_COMMON_EXPORT ~CommonComponent();
+
         typedef std::function<void()> Handler;
 
         messages::VRPNPing ping;
