@@ -406,7 +406,9 @@ class ConfiguredDeviceConstructor {
         /// camera firmware v7 and up). Presumably eventually use libuvc on
         /// other platforms instead, at least for the HDK IR camera.
 
-        auto cam = osvr::vbtracker::openOpenCVCamera(0);
+        //auto cam = osvr::vbtracker::openOpenCVCamera(0);
+        auto cam = osvr::vbtracker::openHDKCameraUVC();
+
 #endif
 
         if (!cam || !cam->ok()) {
@@ -417,12 +419,11 @@ class ConfiguredDeviceConstructor {
         }
 
         auto trackingSystem = osvr::vbtracker::makeHDKTrackingSystem(config);
+        
         // OK, now that we have our parameters, create the device.
         osvr::pluginkit::PluginContext context(ctx);
         auto newTracker = osvr::pluginkit::registerObjectForDeletion(
-            ctx, new UnifiedVideoInertialTracker(ctx, std::move(cam), config,
-                                                 std::move(trackingSystem)));
-
+            ctx, new UnifiedVideoInertialTracker(ctx, std::move(cam), config, std::move(trackingSystem)));
         return OSVR_RETURN_SUCCESS;
     }
 };
