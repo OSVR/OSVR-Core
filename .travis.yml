@@ -25,10 +25,6 @@ cache:
   directories:
     $HOME/deps-rel
     $HOME/deps-dbg
-addons:
-  homebrew:
-    update: true
-    brewfile: true
 before_install:
   - $CC -v
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
@@ -112,6 +108,9 @@ script:
 #  - "ctest -V"
 sudo: false
 addons:
+  homebrew:
+    update: true
+    brewfile: true
   apt:
     # Details and approved sources are
     # from https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
