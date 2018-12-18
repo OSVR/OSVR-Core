@@ -29,8 +29,6 @@ before_install:
   - $CC -v
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export INSTPRF=$HOME/p; mkdir -p $INSTPRF; fi
   - if [ $TRAVIS_OS_NAME = 'linux' ]; then export OPENCV_VER=3.0.0; fi
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew uninstall --ignore-dependencies json-c; fi"
-  - "if [ $TRAVIS_OS_NAME = 'osx' ]; then brew update && brew bundle && brew install --HEAD libfunctionality; fi"
   - "if [ $TRAVIS_OS_NAME = 'linux' ]; then
        if [ $CONFIG = 'Release' ]; then
          export DEPSDIR=$HOME/deps-rel;
@@ -110,6 +108,9 @@ script:
 #  - "ctest -V"
 sudo: false
 addons:
+  homebrew:
+    update: true
+    brewfile: true
   apt:
     # Details and approved sources are
     # from https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
