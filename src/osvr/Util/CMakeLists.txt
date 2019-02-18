@@ -63,6 +63,7 @@ set(API
     "${HEADER_LOCATION}/DefaultPort.h"
     "${HEADER_LOCATION}/Deletable.h"
     "${HEADER_LOCATION}/DeviceCallbackTypesC.h"
+    "${HEADER_LOCATION}/Directories.h"
     "${HEADER_LOCATION}/EigenCoreGeometry.h"
     "${HEADER_LOCATION}/EigenExtras.h"
     "${HEADER_LOCATION}/EigenFilters.h"
@@ -147,6 +148,7 @@ set(SOURCE
     AnyMap.cpp
     BinaryLocation.cpp
     Deletable.cpp
+    Directories.cpp
     GetEnvironmentVariable.cpp
     GuardInterface.cpp
     TimeValueC.cpp
@@ -197,6 +199,7 @@ target_link_libraries(${LIBNAME_FULL}
     eigen-headers
     spdlog
     boost_filesystem
+    ${Boost_SYSTEM_LIBRARY}
     osvrTypePack)
 
 if(ANDROID)

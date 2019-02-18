@@ -68,5 +68,17 @@ namespace util {
         return ret;
     }
 #endif // end of if windows non-desktop
+
+    std::string
+    getEnvironmentVariable(std::string const &var, std::string const &fallback)
+    {
+        const auto value = getEnvironmentVariable(var);
+        if (!value)
+            return fallback;
+        return *value;
+    }
+
+
 } // namespace util
 } // namespace osvr
+
