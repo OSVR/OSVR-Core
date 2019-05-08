@@ -138,11 +138,17 @@ if(WIN32 AND NOT OSVR_OFFICIAL)
     target_include_directories(FloatExceptions INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/FloatExceptions")
 endif()
 
-# Interface target for Eigen 3.2.8
+# Interface target for Eigen
 add_library(eigen-headers INTERFACE)
+# Bundled 3.3.7
 set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen" CACHE INTERNAL "" FORCE)
-target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
+find_package(Eigen3 QUIET)
+if(EIGEN3_FOUND)
+    target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
+else()
+    target_include_directories(eigen-headers INTERFACE "${EIGEN3_INCLUDE_DIR}")
+endif()
 
 ###
 # ETWProviders from UIforETW

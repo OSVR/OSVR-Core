@@ -13,7 +13,7 @@ core
 core.*
 *.bak
 *~
-build*
+*build*
 *.moc.*
 *.moc
 ui_*
@@ -30,3 +30,5 @@ log
 patch
 a
 a.*
+lapack/testing
+lapack/reference
