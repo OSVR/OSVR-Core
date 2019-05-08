@@ -16,6 +16,7 @@ endif()
 set(LOCAL_CMAKE_MODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-local")
 # Custom CMake modules from https://github.com/rpavlik/cmake-modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${LOCAL_CMAKE_MODULE_DIR}")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ###
 # Package Options
