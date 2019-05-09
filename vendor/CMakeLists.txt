@@ -145,9 +145,9 @@ set(OSVR_VENDORED_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/eigen" CACHE INTERNAL 
 target_compile_definitions(eigen-headers INTERFACE EIGEN_MPL2_ONLY)
 find_package(Eigen3 QUIET)
 if(EIGEN3_FOUND)
-    target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
-else()
     target_include_directories(eigen-headers INTERFACE "${EIGEN3_INCLUDE_DIR}")
+else()
+    target_include_directories(eigen-headers INTERFACE "${OSVR_VENDORED_EIGEN_ROOT}")
 endif()
 
 ###
