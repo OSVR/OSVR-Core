@@ -11,10 +11,13 @@ set(API
     "${HEADER_LOCATION}/FlexibleKalmanBase.h"
     "${HEADER_LOCATION}/FlexibleKalmanCorrect.h"
     "${HEADER_LOCATION}/FlexibleKalmanFilter.h"
+    "${HEADER_LOCATION}/MatrixExponentialMap.h"
     "${HEADER_LOCATION}/OrientationConstantVelocity.h"
     "${HEADER_LOCATION}/OrientationState.h"
     "${HEADER_LOCATION}/PoseConstantVelocity.h"
     "${HEADER_LOCATION}/PoseDampedConstantVelocity.h"
+    "${HEADER_LOCATION}/PoseSeparatelyDampedConstantVelocity.h"
+    "${HEADER_LOCATION}/PoseStateExponentialMap.h"
     "${HEADER_LOCATION}/PoseState.h"
     "${HEADER_LOCATION}/PureVectorState.h")
 
