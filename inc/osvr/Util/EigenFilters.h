@@ -102,7 +102,7 @@ namespace util {
                 /// Computing the alpha value for a step in the one euro filter
                 /// for any scalar type.
                 template <typename T> inline T computeAlpha(T dt, T cutoff) {
-                    auto tau = T(1) / (T(2) * M_PI * cutoff);
+                    auto tau = T(1) / (T(2) * EIGEN_PI * cutoff);
                     return T(1) / (T(1) + tau / dt);
                 }
 
