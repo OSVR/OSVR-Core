@@ -19,6 +19,7 @@ cache:
   - c:\Tools\vcpkg\installed
 
 install:
+  - git submodule update --init --recursive
   - choco install -y ninja
   # Add the libfunctionality port
   - ps: mkdir \tools\vcpkg\ports\libfunctionality
