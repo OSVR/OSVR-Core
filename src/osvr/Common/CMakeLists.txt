@@ -215,6 +215,12 @@ target_link_libraries(${LIBNAME_FULL}
     osvr_cxx11_flags
     ${OSVR_CODECVT_LIBRARIES})
 
+target_compile_definitions(${LIBNAME_FULL} PRIVATE BOOST_DATE_TIME_NO_LIB)
+if(WIN32)
+    target_link_libraries(${LIBNAME_FULL} PRIVATE 
+        ${Boost_DATE_TIME_LIBRARY})
+endif()
+
 if(OSVR_COMMON_TRACING_ETW)
     target_link_libraries(${LIBNAME_FULL} PRIVATE ETWProviders)
     add_custom_command(TARGET ${LIBNAME_FULL} POST_BUILD
