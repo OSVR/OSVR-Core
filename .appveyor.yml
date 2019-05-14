@@ -38,11 +38,11 @@ install:
 build_script:
 - cmd: >-
     call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\%VCVARS%.bat" &&
-    cmake -GNinja -Bbuild -H.
-      -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-      -DBUILD_TESTING=OFF
-      -DCMAKE_BUILD_TYPE=Release
-      -DPYTHON_EXECUTABLE=C:/Python37-x64/python.exe
-      -DCMAKE_PREFIX_PATH=C:/Libraries/boost_%BOOST_VER%;C:/Tools/vcpkg/installed/%VCPKG_PLATFORM%;C:/projects &&
-      -DVCPKG_TARGET_TRIPLET=%VCPKG_PLATFORM%
+    cmake -GNinja -Bbuild -H. \
+      -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake \
+      -DBUILD_TESTING=OFF \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DPYTHON_EXECUTABLE=C:/Python37-x64/python.exe \
+      -DCMAKE_PREFIX_PATH=C:/Libraries/boost_%BOOST_VER%;C:/Tools/vcpkg/installed/%VCPKG_PLATFORM%;C:/projects \
+      -DVCPKG_TARGET_TRIPLET=%VCPKG_PLATFORM% &&
     ninja -C build
