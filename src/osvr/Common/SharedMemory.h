@@ -29,9 +29,6 @@
 /// see http://stackoverflow.com/a/2335693/265522
 #define BOOST_CB_DISABLE_DEBUG
 
-/// Allows header-only usage of Interprocess
-#define BOOST_DATE_TIME_NO_LIB
-
 /// @todo This is a workaround for Clang and Boost pre-1.50, to fix a build
 /// error caused by a syntax error in Boost.Containers allocator traits.
 #include <boost/version.hpp>
