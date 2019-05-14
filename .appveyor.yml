@@ -30,6 +30,8 @@ install:
   - ps: iwr https://raw.githubusercontent.com/rpavlik/vcpkg/openxr/ports/libfunctionality/portfile.cmake -OutFile \tools\vcpkg\ports\libfunctionality\portfile.cmake
   - vcpkg install jsoncpp:%VCPKG_PLATFORM%-static opencv:%VCPKG_PLATFORM% libfunctionality:%VCPKG_PLATFORM%
   - vcpkg install boost-algorithm:%VCPKG_BOOST_PLATFORM% boost-any:%VCPKG_BOOST_PLATFORM% boost-assert:%VCPKG_BOOST_PLATFORM% boost-chrono:%VCPKG_BOOST_PLATFORM% boost-date-time:%VCPKG_BOOST_PLATFORM% boost-filesystem:%VCPKG_BOOST_PLATFORM% boost-interprocess:%VCPKG_BOOST_PLATFORM% boost-intrusive:%VCPKG_BOOST_PLATFORM% boost-lexical-cast:%VCPKG_BOOST_PLATFORM% boost-locale:%VCPKG_BOOST_PLATFORM% boost-mpl:%VCPKG_BOOST_PLATFORM% boost-optional:%VCPKG_BOOST_PLATFORM% boost-range:%VCPKG_BOOST_PLATFORM% boost-thread:%VCPKG_BOOST_PLATFORM% boost-type-traits:%VCPKG_BOOST_PLATFORM% boost-units:%VCPKG_BOOST_PLATFORM% boost-utility:%VCPKG_BOOST_PLATFORM% boost-variant:%VCPKG_BOOST_PLATFORM% boost-program-options:%VCPKG_BOOST_PLATFORM%
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 
 
 build_script:
