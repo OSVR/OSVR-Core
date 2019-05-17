@@ -197,12 +197,12 @@ TEST_P(UnitQuatInput, QuatlibRoundTripLn) {
 INSTANTIATE_TEST_CASE_P(
     BasicQuats, UnitQuatInput,
     ::testing::Values(QuatCreator::Identity(),
-                      QuatCreator::AngleAxis(M_PI / 2, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(M_PI / 2, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(M_PI / 2, Vector3d::UnitZ()),
-                      QuatCreator::AngleAxis(-M_PI / 2, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(-M_PI / 2, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(-M_PI / 2, Vector3d::UnitZ())));
+                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())));
 
 INSTANTIATE_TEST_CASE_P(
     SmallQuats, UnitQuatInput,
@@ -223,12 +223,12 @@ INSTANTIATE_TEST_CASE_P(
 
 #endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
 #if 0
-QuatCreator::AngleAxis(M_PI, Vector3d::UnitX()),
-QuatCreator::AngleAxis(M_PI, Vector3d::UnitY()),
-QuatCreator::AngleAxis(M_PI, Vector3d::UnitZ()),
-QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitX()),
-QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitY()),
-QuatCreator::AngleAxis(3 * M_PI / 2, Vector3d::UnitZ()),
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitX()),
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitY()),
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitZ()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitX()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitY()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitZ()),
 #endif
 
 #ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
@@ -265,10 +265,10 @@ TEST_P(ExpMapVecInput, QuatlibRoundTripExp) {
 
 INSTANTIATE_TEST_CASE_P(
     BasicVecs, ExpMapVecInput,
-    ::testing::Values(Vector3d::Zero(), Vector3d(M_PI / 2, 0, 0),
-                      Vector3d(0, M_PI / 2, 0), Vector3d(0, 0, M_PI / 2),
-                      Vector3d(-M_PI / 2, 0, 0), Vector3d(0, -M_PI / 2, 0),
-                      Vector3d(0, 0, -M_PI / 2)));
+    ::testing::Values(Vector3d::Zero(), Vector3d(EIGEN_PI / 2, 0, 0),
+                      Vector3d(0, EIGEN_PI / 2, 0), Vector3d(0, 0, EIGEN_PI / 2),
+                      Vector3d(-EIGEN_PI / 2, 0, 0), Vector3d(0, -EIGEN_PI / 2, 0),
+                      Vector3d(0, 0, -EIGEN_PI / 2)));
 INSTANTIATE_TEST_CASE_P(
     SmallVecs, ExpMapVecInput,
     ::testing::Values(Vector3d(SMALL, 0, 0), Vector3d(0, SMALL, 0),
@@ -340,12 +340,12 @@ TEST_P(EquivalentInput, ExpCompareWithQuatlib) {
 
 INSTANTIATE_TEST_CASE_P(
     HalfPiMultiples, EquivalentInput,
-    ::testing::Values(makePairFromAngleAxis(M_PI / 2, Vector3d::UnitX()),
-                      makePairFromAngleAxis(M_PI / 2, Vector3d::UnitY()),
-                      makePairFromAngleAxis(M_PI / 2, Vector3d::UnitZ()),
-                      makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitX()),
-                      makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitY()),
-                      makePairFromAngleAxis(-M_PI / 2, Vector3d::UnitZ())
+    ::testing::Values(makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+                      makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+                      makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())
 
                           ));
 
