@@ -457,13 +457,13 @@ TEST_CASE("unscented with identity calibration output", "[ukf]") {
         }
     };
     GIVEN("a state rotated about y") {
-        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitY()));
+        Quaterniond stateRotation(AngleAxisd(EIGEN_PI / 4., Vector3d::UnitY()));
         data->state.setQuaternion(stateRotation);
         allSmallSingleAxisRotations(
             runIncrementalSmallRotChecksNonIdentityState);
     }
     GIVEN("a state rotated about x") {
-        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitX()));
+        Quaterniond stateRotation(AngleAxisd(EIGEN_PI / 4., Vector3d::UnitX()));
         data->state.setQuaternion(stateRotation);
         allSmallSingleAxisRotations(
             runIncrementalSmallRotChecksNonIdentityState);

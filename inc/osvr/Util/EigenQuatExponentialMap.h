@@ -161,10 +161,10 @@ namespace util {
                 VecType<Derived> myVec = derived().vec();
                 static const double eps = 1.e-2;
                 ScalarType<Derived> vecNorm = myVec.norm();
-                if (vecNorm > M_PI - eps) {
+                if (vecNorm > EIGEN_PI - eps) {
                     // Too close to the sphere of 2pi - replace with the
                     // equivalent rotation.
-                    myVec *= ((1. - 2. * M_PI) / vecNorm);
+                    myVec *= ((1. - 2. * EIGEN_PI) / vecNorm);
                 }
                 return myVec;
             }

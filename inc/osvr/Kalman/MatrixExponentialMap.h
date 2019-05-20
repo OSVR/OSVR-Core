@@ -79,9 +79,9 @@ namespace kalman {
         /// will be modified if required.
         template <typename T> inline void avoidSingularities(T &&omega) {
             // if magnitude gets too close to 2pi, in this case, pi...
-            if (omega.squaredNorm() > M_PI * M_PI) {
+            if (omega.squaredNorm() > EIGEN_PI * EIGEN_PI) {
                 // replace omega with an equivalent one.
-                omega = ((1 - (2 * M_PI) / omega.norm()) * omega).eval();
+                omega = ((1 - (2 * EIGEN_PI) / omega.norm()) * omega).eval();
             }
         }
 

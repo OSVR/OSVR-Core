@@ -99,7 +99,7 @@ CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[.][ekf]",
         }
     }
     GIVEN("a state rotated about y") {
-        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitY()));
+        Quaterniond stateRotation(AngleAxisd(EIGEN_PI / 4., Vector3d::UnitY()));
         data->state.setQuaternion(stateRotation);
         WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY =
@@ -120,7 +120,7 @@ CATCH_TYPELIST_DESCRIBED_TESTCASE("identity calibration output", "[.][ekf]",
         }
     }
     GIVEN("a state rotated about x") {
-        Quaterniond stateRotation(AngleAxisd(M_PI / 4., Vector3d::UnitX()));
+        Quaterniond stateRotation(AngleAxisd(EIGEN_PI / 4., Vector3d::UnitX()));
         data->state.setQuaternion(stateRotation);
         WHEN("filtering in a small positive rotation about y") {
             Quaterniond smallPositiveRotationAboutY =

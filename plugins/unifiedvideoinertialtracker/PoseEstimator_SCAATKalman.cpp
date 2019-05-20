@@ -343,7 +343,7 @@ namespace vbtracker {
 
             /// These are, in practice, surprisingly high...
             /// as well as dependent on the variances...
-            static const auto MaxAngVelChangeFromOneBeacon = 3 * M_PI;
+            static const auto MaxAngVelChangeFromOneBeacon = 3 * EIGEN_PI;
             static const auto MaxAnglVelChangeSquared =
                 MaxAngVelChangeFromOneBeacon * MaxAngVelChangeFromOneBeacon;
             auto angVelChangeSquared =
