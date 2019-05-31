@@ -28,9 +28,9 @@
 #include "../../../src/osvr/Connection/AsyncAccessControl.cpp"
 
 // Library/third-party includes
-#include "gtest/gtest.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/thread.hpp>
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <memory>
@@ -58,104 +58,162 @@ class ScopedThread : boost::noncopyable {
     ThreadHolder m_thread;
 };
 
-TEST(AsyncAccessControl, simple) {
+TEST_CASE("AsyncAccessControl-simple") {
     AsyncAccessControl control;
     volatile bool sent = false;
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 
     ScopedThread asyncThread(new boost::thread([&] {
         RequestToSend rts(control);
-        ASSERT_TRUE(rts.request()) << "Request should be approved";
-        ASSERT_FALSE(rts.isNested());
+        {
+            INFO("Request should be approved");
+            REQUIRE(rts.request());
+        }
+        REQUIRE_FALSE(rts.isNested());
         sent = true;
     }));
 
     pleaseSleep();
-    ASSERT_FALSE(sent) << "Shouldn't have been permitted to send yet.";
+    {
+        INFO("Shouldn't have been permitted to send yet.");
+        REQUIRE_FALSE(sent);
+    }
+
     while (!control.mainThreadCTS()) {
         pleaseYield();
     }
-    ASSERT_TRUE(sent) << "Should have sent";
 
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("Should have sent");
+        REQUIRE(sent);
+    }
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 }
 
-TEST(AsyncAccessControl, serialRequests) {
+TEST_CASE("AsyncAccessControl-serialRequests") {
     AsyncAccessControl control;
     volatile bool sent1 = false;
     volatile bool sent2 = false;
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 
     ScopedThread asyncThread(new boost::thread([&] {
         {
             RequestToSend rts(control);
-            ASSERT_TRUE(rts.request()) << "Request should be approved";
-            ASSERT_FALSE(rts.isNested());
+            {
+                INFO("Request should be approved");
+                REQUIRE(rts.request());
+            }
+            REQUIRE_FALSE(rts.isNested());
             sent1 = true;
         }
         pleaseSleep();
         {
             RequestToSend rts(control);
-            ASSERT_TRUE(rts.request()) << "Request should be approved";
-            ASSERT_FALSE(rts.isNested());
+            {
+                INFO("Request should be approved");
+                REQUIRE(rts.request());
+            }
+            REQUIRE_FALSE(rts.isNested());
             sent2 = true;
         }
-
     }));
 
     pleaseSleep();
-    ASSERT_FALSE(sent1) << "Shouldn't have been permitted to send first yet.";
-    ASSERT_FALSE(sent2) << "Shouldn't have been permitted to send second yet.";
+    {
+        INFO("Shouldn't have been permitted to send first yet.");
+        REQUIRE_FALSE(sent1);
+    }
+    {
+        INFO("Shouldn't have been permitted to send second yet.");
+        REQUIRE_FALSE(sent2);
+    }
 
     while (!control.mainThreadCTS()) {
         pleaseYield();
     }
-    ASSERT_TRUE(sent1) << "Should have sent first.";
-    ASSERT_FALSE(sent2) << "Shouldn't have been permitted to send second yet.";
+    {
+        INFO("Should have sent first.");
+        REQUIRE(sent1);
+    }
+    {
+        INFO("Shouldn't have been permitted to send second yet.");
+        REQUIRE_FALSE(sent2);
+    }
 
     while (!control.mainThreadCTS()) {
         pleaseYield();
     }
-    ASSERT_TRUE(sent1) << "Should have sent first.";
-    ASSERT_TRUE(sent2) << "Should have sent second.";
-
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("Should have sent first.");
+        REQUIRE(sent1);
+    }
+    {
+        INFO("Should have sent second.");
+        REQUIRE(sent2);
+    }
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 }
 
-TEST(AsyncAccessControl, recursive) {
+TEST_CASE("AsyncAccessControl-recursive") {
     AsyncAccessControl control;
     volatile bool outer = false;
     volatile bool inner = false;
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 
     ScopedThread asyncThread(new boost::thread([&] {
         RequestToSend rts(control);
-        ASSERT_TRUE(rts.request()) << "Request should be approved";
-        ASSERT_FALSE(rts.isNested());
+        {
+            INFO("Request should be approved");
+            REQUIRE(rts.request());
+        }
+        REQUIRE_FALSE(rts.isNested());
         outer = true;
         {
             RequestToSend rts2(control);
-            ASSERT_TRUE(rts2.request())
-                << "Request should be approved since we're already in it.";
+            {
+                INFO("Request should be approved since we're already in it");
+                REQUIRE(rts2.request());
+            }
             inner = true;
-            ASSERT_TRUE(rts2.isNested());
+            REQUIRE(rts2.isNested());
         }
     }));
 
     pleaseSleep();
-    ASSERT_FALSE(outer || inner)
-        << "Shouldn't have been permitted to send yet.";
+    {
+        INFO("Shouldn't have been permitted to send yet.");
+        REQUIRE_FALSE(outer);
+        REQUIRE_FALSE(inner);
+    }
     while (!control.mainThreadCTS()) {
         pleaseYield();
     }
-    ASSERT_TRUE(outer) << "Should have gotten outer permission";
-    ASSERT_TRUE(inner) << "Should have gotten inner permission";
+    {
+        INFO("Should have gotten outer permission");
+        REQUIRE(outer);
+    }
+    {
+        INFO("Should have gotten inner permission");
+        REQUIRE(inner);
+    }
 
-    ASSERT_FALSE(control.mainThreadCTS())
-        << "CTS should have no tasks waiting.";
+    {
+        INFO("CTS should have no tasks waiting.");
+        REQUIRE_FALSE(control.mainThreadCTS());
+    }
 }
