@@ -22,13 +22,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define HAVE_QUATLIB
+
 // Internal Includes
+#include "CatchEigen.h"
 #include <osvr/Util/EigenQuatExponentialMap.h>
 
 // Library/third-party includes
-#include "../EigenTestHelpers.h"
+#ifdef HAVE_QUATLIB
 #include "quat.h"
-#include "gtest/gtest.h"
+#endif // HAVE_QUATLIB
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <array>
@@ -38,60 +42,38 @@ using osvr::util::quat_exp_map;
 static const double SMALL = 0.1;
 static const double SMALLER = 1.0e-5;
 
-#if !defined(_WIN32) || defined(NDEBUG)
-/// @todo These cause link failures in Windows/DLL debug builds. For now,
-/// just assume they're tested enough in release mode.
-#define OSVR_CAN_USE_PARAMETERIZED_TESTS
-#endif
+// Make an equality comparison for quaternions, for the sake of Catch2.
 
-namespace quat_array {
-
-using array_type = std::array<double, 4>;
-inline void set(array_type &arr, Eigen::Quaterniond const &quat) {
-    Eigen::Vector4d::Map(arr.data()) = quat.coeffs();
+namespace Eigen {
+static inline bool operator==(Quaterniond const &lhs, Quaterniond const &rhs) {
+    return lhs.coeffs() == rhs.coeffs();
 }
+} // namespace Eigen
 
-inline array_type set(Eigen::Quaterniond const &quat) {
-    array_type ret;
-    set(ret, quat);
-    return ret;
-}
-
-inline void get(Eigen::Quaterniond &quat, array_type const &arr) {
-    quat.coeffs() = Eigen::Vector4d::Map(arr.data());
-}
-
-inline Eigen::Quaterniond get(array_type const &arr) {
-    Eigen::Quaterniond ret;
-    get(ret, arr);
-    return ret;
-}
-
-} // namespace quat_array
-
+using Eigen::AngleAxisd;
 using Eigen::Quaterniond;
 using Eigen::Vector3d;
-using Eigen::AngleAxisd;
 
 /// @name Quatlib interaction utilities
 /// @{
 /// Container for q_type that's C++-safe to pass around and such. To pass to
 /// quatlib functions, use the `.data()` member function.
-using QuatlibQuatArray = std::array<double, 4>;
+using QuatArray = std::array<double, 4>;
 
 /// Convert Eigen vector to a quatlib (pure: w = 0) quaternion, wrapped in an
 /// std::array.
-inline QuatlibQuatArray toQuatlib(Vector3d const &vec) {
-    QuatlibQuatArray ret;
+static inline QuatArray toQuatlib(Vector3d const &vec) {
+    QuatArray ret;
     ret[Q_W] = 0;
     ret[Q_X] = vec.x();
     ret[Q_Y] = vec.y();
     ret[Q_Z] = vec.z();
     return ret;
 }
+
 /// Convert Eigen quat to a quatlib quaternion, wrapped in an std::array.
-inline QuatlibQuatArray toQuatlib(Quaterniond const &q) {
-    QuatlibQuatArray ret;
+static inline QuatArray toQuatlib(Quaterniond const &q) {
+    QuatArray ret;
     ret[Q_W] = q.w();
     ret[Q_X] = q.x();
     ret[Q_Y] = q.y();
@@ -101,127 +83,96 @@ inline QuatlibQuatArray toQuatlib(Quaterniond const &q) {
 
 /// Takes a quatlib quaternion wrapped in an array and converts it to an
 /// Eigen::Quaterniond, no questions asked.
-inline Quaterniond quatFromQuatlib(QuatlibQuatArray const &arr) {
+static inline Quaterniond quatFromQuatlib(QuatArray const &arr) {
     return Quaterniond(arr[Q_W], arr[Q_X], arr[Q_Y], arr[Q_Z]);
 }
 /// Takes a quatlib quaternion wrapped in an array and converts it to an
 /// Eigen::Vector3d, no questions asked - assumes it's a pure quaternion (w=0)
 /// or that you just want the vector part.
-inline Vector3d vecFromQuatlib(QuatlibQuatArray const &arr) {
+static inline Vector3d vecFromQuatlib(QuatArray const &arr) {
     return Vector3d(arr[Q_X], arr[Q_Y], arr[Q_Z]);
 }
 /// @}
 
-inline std::string formatAngleAxis(double angle, Eigen::Vector3d const &axis) {
-    std::ostringstream os;
-    os << "Angle " << angle << ", Axis " << axis.transpose();
-    return os.str();
-}
-
+/// Creates a quaternion from angle+axis or identity,
+/// and stores it along with a human-readable description.
 class QuatCreator {
   public:
-    explicit QuatCreator(quat_array::array_type &&arr, std::string &&input)
+    explicit QuatCreator(QuatArray &&arr, std::string &&input)
         : m_coeffs(std::move(arr)), m_input(std::move(input)) {}
 
     static QuatCreator Identity() {
-        return QuatCreator(quat_array::set(Eigen::Quaterniond::Identity()),
+        return QuatCreator(toQuatlib(Eigen::Quaterniond::Identity()),
                            "Identity");
     }
     static QuatCreator AngleAxis(double angle, Eigen::Vector3d const &axis) {
         return QuatCreator(
-            quat_array::set(Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis))),
+            toQuatlib(Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis))),
             formatAngleAxis(angle, axis));
     }
 
-    Eigen::Quaterniond get() const { return quat_array::get(m_coeffs); }
+    Eigen::Quaterniond get() const { return quatFromQuatlib(m_coeffs); }
 
     std::string const &getDescription() const { return m_input; }
 
   private:
-    std::array<double, 4> m_coeffs;
+    QuatArray m_coeffs;
     std::string m_input;
+    static std::string formatAngleAxis(double angle,
+                                       Eigen::Vector3d const &axis) {
+        std::ostringstream os;
+        os << "Angle " << angle << ", Axis " << axis.transpose();
+        return os.str();
+    }
 };
 
-inline ::std::ostream &operator<<(::std::ostream &os, QuatCreator const &q) {
+static inline ::std::ostream &operator<<(::std::ostream &os,
+                                         QuatCreator const &q) {
     os << q.getDescription();
     return os;
 }
 
 using QuatVecPair = std::pair<QuatCreator, Eigen::Vector3d>;
 
-inline QuatVecPair makePairFromAngleAxis(double angle,
-                                         Eigen::Vector3d const &axis) {
+static inline QuatVecPair makePairFromAngleAxis(double angle,
+                                                Eigen::Vector3d const &axis) {
     return std::make_pair(QuatCreator::AngleAxis(angle, axis),
-                          (angle * axis).eval());
+                          (angle * axis * 0.5).eval());
 }
 
-inline ::std::ostream &operator<<(::std::ostream &os, QuatVecPair const &q) {
+static inline ::std::ostream &operator<<(::std::ostream &os,
+                                         QuatVecPair const &q) {
     os << q.first << " (quat-vec pair, vec " << q.second.transpose() << ")";
     return os;
 }
-class UnitQuatInput : public ::testing::TestWithParam<QuatCreator> {
-  public:
-    // You can implement all the usual fixture class members here.
-    // To access the test parameter, call GetParam() from class
-    // TestWithParam<T>.
 
-    // Gets the parameter and converts it to a real Eigen quat.
-    Eigen::Quaterniond getQuat() const { return GetParam().get(); }
-};
+static const Vector3d Vec3dZero = Vector3d::Zero();
 
-#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
+/* Tests that take a unit quat as input */
+static const auto BasicQuats = {
+    QuatCreator::Identity(),
+    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())};
 
-TEST_P(UnitQuatInput, BasicRunLn) {
-    ASSERT_NO_THROW(quat_exp_map(getQuat()).ln());
-    if (getQuat().vec().norm() > 0) {
-        // that is, if this isn't the identity
-        ASSERT_VEC_DOUBLE_NE(Vector3d::Zero(), quat_exp_map(getQuat()).ln());
-    }
-}
+static const auto SmallQuats = {
+    QuatCreator::AngleAxis(SMALL, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(SMALL, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(SMALL, Vector3d::UnitZ()),
+    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitZ())};
+static const auto SmallNegativeQuats = {
+    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitZ()),
+    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitX()),
+    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitY()),
+    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitZ())};
 
-TEST_P(UnitQuatInput, RoundTripLn) {
-    ASSERT_QUAT_DOUBLE_EQ(getQuat(),
-                          quat_exp_map(quat_exp_map(getQuat()).ln()).exp());
-}
-
-TEST_P(UnitQuatInput, QuatlibRoundTripLn) {
-    QuatlibQuatArray quatlib_q = toQuatlib(getQuat());
-    q_log(quatlib_q.data(), quatlib_q.data());
-    q_exp(quatlib_q.data(), quatlib_q.data());
-    ASSERT_QUAT_DOUBLE_EQ(getQuat(), quatFromQuatlib(quatlib_q))
-        << "Actual is result of applying q_log then q_exp to the input "
-           "quaternion.\nTests Quatlib as a source of truth - does not test "
-           "OSVR-custom code.";
-}
-
-INSTANTIATE_TEST_CASE_P(
-    BasicQuats, UnitQuatInput,
-    ::testing::Values(QuatCreator::Identity(),
-                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
-                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())));
-
-INSTANTIATE_TEST_CASE_P(
-    SmallQuats, UnitQuatInput,
-    ::testing::Values(QuatCreator::AngleAxis(SMALL, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(SMALL, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(SMALL, Vector3d::UnitZ()),
-                      QuatCreator::AngleAxis(SMALLER, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(SMALLER, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(SMALLER, Vector3d::UnitZ())));
-INSTANTIATE_TEST_CASE_P(
-    SmallNegativeQuats, UnitQuatInput,
-    ::testing::Values(QuatCreator::AngleAxis(-SMALL, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(-SMALL, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(-SMALL, Vector3d::UnitZ()),
-                      QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitX()),
-                      QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitY()),
-                      QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitZ())));
-
-#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
 #if 0
 QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitX()),
 QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitY()),
@@ -231,140 +182,187 @@ QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitY()),
 QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitZ()),
 #endif
 
-#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
-class ExpMapVecInput : public ::testing::TestWithParam<Eigen::Vector3d> {
-  public:
-    // You can implement all the usual fixture class members here.
-    // To access the test parameter, call GetParam() from class
-    // TestWithParam<T>.
-};
+TEST_CASE("UnitQuatInput") {
+    const auto doTests = [](QuatCreator const &qCreator) {
+        CAPTURE(qCreator);
+        Quaterniond q = qCreator.get();
+        CAPTURE(q);
+        SECTION("Basic run ln") {
+            REQUIRE_NOTHROW(quat_exp_map(q).ln());
+            const Vector3d ln_q = quat_exp_map(q).ln();
+            const bool isIdentityQuat = q.vec().norm() == 0;
+            CAPTURE(isIdentityQuat);
+            if (isIdentityQuat) {
+                REQUIRE(ln_q == Vec3dZero);
+            } else {
+                REQUIRE_FALSE(ln_q == Vec3dZero);
+            }
+            SECTION("Round trip") {
 
-TEST_P(ExpMapVecInput, BasicRunExp) {
-    ASSERT_NO_THROW(quat_exp_map(GetParam()).exp());
-    if (GetParam() != Vector3d::Zero()) {
-        // that is, if this isn't the null rotation
-        ASSERT_QUAT_DOUBLE_NE(Quaterniond::Identity(),
-                              quat_exp_map(GetParam()).exp());
+                const Quaterniond exp_ln_q = quat_exp_map(ln_q).exp();
+
+                REQUIRE(q == exp_ln_q);
+            }
+        }
+#ifdef HAVE_QUATLIB
+        SECTION("Quatlib roundtrip (exp(ln(q))) as ground truth") {
+            QuatArray quatlib_q = toQuatlib(q);
+            q_log(quatlib_q.data(), quatlib_q.data());
+            q_exp(quatlib_q.data(), quatlib_q.data());
+            REQUIRE(ApproxVec(q.coeffs()) ==
+                    quatFromQuatlib(quatlib_q).coeffs());
+        }
+#endif // HAVE_QUATLIB
+    };
+    SECTION("Basic quats") {
+        auto quatCreator = GENERATE(values(BasicQuats));
+        doTests(quatCreator);
+    }
+    SECTION("Small quats") {
+        auto quatCreator = GENERATE(values(SmallQuats));
+        doTests(quatCreator);
+    }
+    SECTION("Small negative quats") {
+        auto quatCreator = GENERATE(values(SmallNegativeQuats));
+        doTests(quatCreator);
     }
 }
-TEST_P(ExpMapVecInput, RoundTripExp) {
-    ASSERT_VEC_DOUBLE_EQ(GetParam(),
-                         quat_exp_map(quat_exp_map(GetParam()).exp()).ln());
+
+/* Tests that take a rotation vector as input */
+static const std::initializer_list<Vector3d> BasicVecs = {
+    Vector3d::Zero(),
+    Vector3d(EIGEN_PI / 2, 0, 0),
+    Vector3d(0, EIGEN_PI / 2, 0),
+    Vector3d(0, 0, EIGEN_PI / 2),
+    Vector3d(-EIGEN_PI / 2, 0, 0),
+    Vector3d(0, -EIGEN_PI / 2, 0),
+    Vector3d(0, 0, -EIGEN_PI / 2)};
+static const std::initializer_list<Vector3d> SmallVecs = {
+    Vector3d(SMALL, 0, 0),   Vector3d(0, SMALL, 0),   Vector3d(0, 0, SMALL),
+    Vector3d(SMALLER, 0, 0), Vector3d(0, SMALLER, 0), Vector3d(0, 0, SMALLER)};
+
+static const std::initializer_list<Vector3d> SmallNegativeVecs = {
+    Vector3d(-SMALL, 0, 0),   Vector3d(0, -SMALL, 0),
+    Vector3d(0, 0, -SMALL),   Vector3d(-SMALLER, 0, 0),
+    Vector3d(0, -SMALLER, 0), Vector3d(0, 0, -SMALLER)};
+
+TEST_CASE("ExpMapVecInput") {
+    const auto doTests = [](Vector3d const &v) {
+        CAPTURE(v);
+        SECTION("BasicRunExp") {
+            REQUIRE_NOTHROW(quat_exp_map(v).exp());
+            const Quaterniond exp_v = quat_exp_map(v).exp();
+
+            const bool isNullRotation = (v == Vector3d::Zero());
+            CAPTURE(isNullRotation);
+
+            if (isNullRotation) {
+                REQUIRE(exp_v == Quaterniond::Identity());
+            } else {
+                REQUIRE_FALSE(exp_v == Quaterniond::Identity());
+            }
+
+            SECTION("Round-trip") {
+                Vector3d ln_exp_v = quat_exp_map(exp_v).ln();
+                REQUIRE(ln_exp_v == ApproxVec(v));
+            }
+        }
+
+#ifdef HAVE_QUATLIB
+        SECTION("Quatlib roundtrip (ln(exp(v))) as ground truth") {
+            QuatArray quatlib_q = toQuatlib(v);
+            q_exp(quatlib_q.data(), quatlib_q.data());
+            q_log(quatlib_q.data(), quatlib_q.data());
+            REQUIRE(ApproxVec(v) == vecFromQuatlib(quatlib_q));
+        }
+#endif // HAVE_QUATLIB
+    };
+    SECTION("BasicVecs") {
+        Vector3d v = GENERATE(values(BasicVecs));
+        doTests(v);
+    }
+    SECTION("SmallVecs") {
+        Vector3d v = GENERATE(values(SmallVecs));
+        doTests(v);
+    }
+    SECTION("SmallNegativeVecs") {
+        Vector3d v = GENERATE(values(SmallNegativeVecs));
+        doTests(v);
+    }
 }
 
-TEST_P(ExpMapVecInput, QuatlibRoundTripExp) {
-    QuatlibQuatArray quatlib_q = toQuatlib(GetParam());
-    q_exp(quatlib_q.data(), quatlib_q.data());
-    q_log(quatlib_q.data(), quatlib_q.data());
-    Vector3d vec = GetParam();
-    ASSERT_VEC_DOUBLE_EQ(GetParam(), vecFromQuatlib(quatlib_q))
-        << "Actual is result of applying q_exp then q_log to the input "
-           "quaternion.\nTests Quatlib as a source of truth - does not test "
-           "OSVR-custom code.";
+TEST_CASE("SimpleEquivalencies-Ln") {
+    REQUIRE(Vec3dZero == Vector3d(quat_exp_map(Quaterniond::Identity()).ln()));
 }
 
-INSTANTIATE_TEST_CASE_P(
-    BasicVecs, ExpMapVecInput,
-    ::testing::Values(Vector3d::Zero(), Vector3d(EIGEN_PI / 2, 0, 0),
-                      Vector3d(0, EIGEN_PI / 2, 0), Vector3d(0, 0, EIGEN_PI / 2),
-                      Vector3d(-EIGEN_PI / 2, 0, 0), Vector3d(0, -EIGEN_PI / 2, 0),
-                      Vector3d(0, 0, -EIGEN_PI / 2)));
-INSTANTIATE_TEST_CASE_P(
-    SmallVecs, ExpMapVecInput,
-    ::testing::Values(Vector3d(SMALL, 0, 0), Vector3d(0, SMALL, 0),
-                      Vector3d(0, 0, SMALL), Vector3d(SMALLER, 0, 0),
-                      Vector3d(0, SMALLER, 0), Vector3d(0, 0, SMALLER)));
-INSTANTIATE_TEST_CASE_P(
-    SmallNegativeVecs, ExpMapVecInput,
-    ::testing::Values(Vector3d(-SMALL, 0, 0), Vector3d(0, -SMALL, 0),
-                      Vector3d(0, 0, -SMALL), Vector3d(-SMALLER, 0, 0),
-                      Vector3d(0, -SMALLER, 0), Vector3d(0, 0, -SMALLER)));
-
-#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
-
-inline Quaterniond makeQuat(double angle, Vector3d const &axis) {
-    return Quaterniond(AngleAxisd(angle, axis));
+TEST_CASE("SimpleEquivalencies-Exp") {
+    REQUIRE(Quaterniond::Identity() ==
+            Quaterniond(quat_exp_map(Vec3dZero).exp()));
 }
 
-TEST(SimpleEquivalencies, Ln) {
-    ASSERT_VEC_DOUBLE_EQ(Vector3d::Zero(),
-                         quat_exp_map(Quaterniond::Identity()).ln());
+/* Tests that take a pair of equivalent quaternion and vector as input */
+static const auto HalfPiMultiples = {
+    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())};
+
+static const auto SmallEquivalentValues = {
+    makePairFromAngleAxis(SMALL, Vector3d::UnitX()),
+    makePairFromAngleAxis(SMALL, Vector3d::UnitY()),
+    makePairFromAngleAxis(SMALL, Vector3d::UnitZ()),
+    makePairFromAngleAxis(SMALLER, Vector3d::UnitX()),
+    makePairFromAngleAxis(SMALLER, Vector3d::UnitY()),
+    makePairFromAngleAxis(SMALLER, Vector3d::UnitZ())};
+
+static const auto SmallNegativeEquivalentValues = {
+    makePairFromAngleAxis(-SMALL, Vector3d::UnitX()),
+    makePairFromAngleAxis(-SMALL, Vector3d::UnitY()),
+    makePairFromAngleAxis(-SMALL, Vector3d::UnitZ()),
+    makePairFromAngleAxis(-SMALLER, Vector3d::UnitX()),
+    makePairFromAngleAxis(-SMALLER, Vector3d::UnitY()),
+    makePairFromAngleAxis(-SMALLER, Vector3d::UnitZ())};
+
+TEST_CASE("EquivalentInput") {
+    const auto doTests = [](QuatCreator const &qCreator, Vector3d const &v) {
+        CAPTURE(v);
+        CAPTURE(qCreator);
+        Quaterniond q = qCreator.get();
+        CAPTURE(q);
+        Vector3d ln_q = quat_exp_map(q).ln();
+        Quaterniond exp_v = quat_exp_map(v).exp();
+
+        SECTION("Ln") { REQUIRE(ln_q == ApproxVec(v)); }
+
+        SECTION("Exp") { REQUIRE(exp_v == ApproxQuat(q)); }
+
+#ifdef HAVE_QUATLIB
+        SECTION("Compare ln with quatlib") {
+            QuatArray quatlib_q = toQuatlib(q);
+            q_log(quatlib_q.data(), quatlib_q.data());
+            REQUIRE(vecFromQuatlib(quatlib_q) == ln_q);
+        }
+        SECTION("Compare exp with quatlib") {
+            QuatArray quatlib_q = toQuatlib(v);
+            q_exp(quatlib_q.data(), quatlib_q.data());
+            q_normalize(quatlib_q.data(), quatlib_q.data());
+
+            REQUIRE(quatFromQuatlib(quatlib_q) == exp_v);
+        }
+#endif // HAVE_QUATLIB
+    };
+    SECTION("HalfPiMultiples") {
+        QuatVecPair qvp = GENERATE(values(HalfPiMultiples));
+        doTests(qvp.first, qvp.second);
+    }
+    SECTION("SmallEquivalentValues") {
+        QuatVecPair qvp = GENERATE(values(SmallEquivalentValues));
+        doTests(qvp.first, qvp.second);
+    }
+    SECTION("SmallNegativeVecs") {
+        QuatVecPair qvp = GENERATE(values(SmallNegativeEquivalentValues));
+        doTests(qvp.first, qvp.second);
+    }
 }
-
-TEST(SimpleEquivalencies, Exp) {
-    ASSERT_QUAT_DOUBLE_EQ(Quaterniond::Identity(),
-                          quat_exp_map(Vector3d::Zero().eval()).exp());
-}
-
-#ifdef OSVR_CAN_USE_PARAMETERIZED_TESTS
-class EquivalentInput : public ::testing::TestWithParam<QuatVecPair> {
-  public:
-    // Gets the first part of theparameter and converts it to a real Eigen quat.
-    Eigen::Quaterniond getQuat() const { return GetParam().first.get(); }
-    // Gets the second part of the parameter: the vec
-    Eigen::Vector3d getVec() const { return GetParam().second; }
-};
-
-/// @todo Test appears broken?
-TEST_P(EquivalentInput, DISABLED_Ln) {
-    ASSERT_VEC_DOUBLE_EQ(getVec(), quat_exp_map(getQuat()).ln());
-}
-
-TEST_P(EquivalentInput, LnCompareWithQuatlib) {
-    QuatlibQuatArray quatlib_q = toQuatlib(getQuat());
-    q_log(quatlib_q.data(), quatlib_q.data());
-
-    ASSERT_VEC_DOUBLE_EQ(vecFromQuatlib(quatlib_q),
-                         quat_exp_map(getQuat()).ln())
-        << "\n'Expected' value is the output of quatlib's q_log function on "
-           "the same input: " +
-               to_string(getQuat()) + "\n";
-}
-
-/// @todo Test appears broken?
-TEST_P(EquivalentInput, DISABLED_Exp) {
-    ASSERT_QUAT_DOUBLE_EQ(getQuat(), quat_exp_map(getVec()).exp());
-}
-
-TEST_P(EquivalentInput, ExpCompareWithQuatlib) {
-    QuatlibQuatArray quatlib_q = toQuatlib(getVec());
-    q_exp(quatlib_q.data(), quatlib_q.data());
-    q_normalize(quatlib_q.data(), quatlib_q.data());
-
-    ASSERT_QUAT_DOUBLE_EQ(quatFromQuatlib(quatlib_q),
-                          quat_exp_map(getVec()).exp())
-        << "\n'Expected' value is the normalized output of quatlib's q_exp "
-           "function on the same input: " +
-               to_string(getVec()) + "\n";
-}
-
-INSTANTIATE_TEST_CASE_P(
-    HalfPiMultiples, EquivalentInput,
-    ::testing::Values(makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
-                      makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
-                      makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
-                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
-                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
-                      makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())
-
-                          ));
-
-INSTANTIATE_TEST_CASE_P(
-    SmallValues, EquivalentInput,
-    ::testing::Values(makePairFromAngleAxis(SMALL, Vector3d::UnitX()),
-                      makePairFromAngleAxis(SMALL, Vector3d::UnitY()),
-                      makePairFromAngleAxis(SMALL, Vector3d::UnitZ()),
-                      makePairFromAngleAxis(SMALLER, Vector3d::UnitX()),
-                      makePairFromAngleAxis(SMALLER, Vector3d::UnitY()),
-                      makePairFromAngleAxis(SMALLER, Vector3d::UnitZ())));
-
-INSTANTIATE_TEST_CASE_P(
-    SmallNegativeValues, EquivalentInput,
-    ::testing::Values(makePairFromAngleAxis(-SMALL, Vector3d::UnitX()),
-                      makePairFromAngleAxis(-SMALL, Vector3d::UnitY()),
-                      makePairFromAngleAxis(-SMALL, Vector3d::UnitZ()),
-                      makePairFromAngleAxis(-SMALLER, Vector3d::UnitX()),
-                      makePairFromAngleAxis(-SMALLER, Vector3d::UnitY()),
-                      makePairFromAngleAxis(-SMALLER, Vector3d::UnitZ())));
-
-#endif // OSVR_CAN_USE_PARAMETERIZED_TESTS
