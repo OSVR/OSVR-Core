@@ -26,9 +26,9 @@
 // Internal Includes
 #include "TypePackTestShared.h"
 
-// Yes, I know these are all static (compile-time) tests, but using the gtest
+// Yes, I know these are all static (compile-time) tests, but using the Catch2
 // structure to split them into logical units.
-TEST(TypePack, contains) {
+TEST_CASE("TypePack-contains") {
     static_assert(tp::contains<mylist, myelt1>::value == true,
                   "list should contain its first element");
     static_assert(tp::contains<mylist, myelt2>::value == true,

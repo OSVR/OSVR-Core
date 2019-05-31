@@ -26,10 +26,10 @@
 // Internal Includes
 #include "TypePackTestShared.h"
 
-// Yes, I know these are all static (compile-time) tests, but using the gtest
+// Yes, I know these are all static (compile-time) tests, but using the Catch2
 // structure to split them into logical units.
 
-TEST(TypePack, booleanOr) {
+TEST_CASE("TypePack-booleanOr") {
     /// empty list - defined to be false
     static_assert(tp::or_<>::value == false, "Empty list");
 

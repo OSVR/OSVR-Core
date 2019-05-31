@@ -26,10 +26,10 @@
 // Internal Includes
 #include "TypePackTestShared.h"
 
-// Yes, I know these are all static (compile-time) tests, but using the gtest
+// Yes, I know these are all static (compile-time) tests, but using the Catch2
 // structure to split them into logical units.
 
-TEST(TypePack, push) {
+TEST_CASE("TypePack-push") {
     static_assert(is_same<tp::head<mylist>, myhead>::value, "Correct head");
     static_assert(is_same<mylist, tp::push_front<mytail, myhead>>::value,
                   "Push front");

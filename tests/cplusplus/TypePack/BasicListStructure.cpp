@@ -26,9 +26,9 @@
 // Internal Includes
 #include "TypePackTestShared.h"
 
-// Yes, I know these are all static (compile-time) tests, but using the gtest
+// Yes, I know these are all static (compile-time) tests, but using the Catch2
 // structure to split them into logical units.
-TEST(TypePack, basicListStructure) {
+TEST_CASE("TypePack-basicListStructure") {
     static_assert(is_same<tp::t_<mylist>, tp::t_<tp::list<mylist>>>::value,
                   "Unwrapping list of single list");
     static_assert(
