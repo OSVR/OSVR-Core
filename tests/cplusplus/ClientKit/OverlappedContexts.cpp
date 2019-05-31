@@ -30,14 +30,14 @@
 // - none
 
 // Standard includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
-TEST(OverlappedContexts, TwoContexts) {
+TEST_CASE("OverlappedContexts-TwoContexts") {
     OSVR_ClientContext firstContext =
         osvrClientInit("com.osvr.test.firstContext");
     OSVR_ClientContext secondContext =
         osvrClientInit("com.osvr.test.secondContext");
-    ASSERT_EQ(OSVR_RETURN_SUCCESS, osvrClientShutdown(firstContext));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientShutdown(firstContext));
     osvrClientUpdate(secondContext);
-    ASSERT_EQ(OSVR_RETURN_SUCCESS, osvrClientShutdown(secondContext));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientShutdown(secondContext));
 }

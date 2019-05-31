@@ -30,9 +30,9 @@
 // - none
 
 // Standard includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
-TEST(SimultaneousClient, TwoContexts) {
+TEST_CASE("SimultaneousClient-TwoContexts") {
     osvr::clientkit::ClientContext outerContext("com.osvr.test.outerContext");
     {
         osvr::clientkit::ClientContext innerContext("com.osvr.test.innerContext");
