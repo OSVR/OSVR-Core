@@ -32,9 +32,6 @@ if(BUILD_TESTING)
 
     # Will search for a system install first.
     add_subdirectory(catch-single-header-2.8.0)
-    # Create an interface target to consume Catch
-    add_library(vendored-catch INTERFACE)
-    target_include_directories(vendored-catch INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/catch-single-header-1.5.8")
 endif()
 set(BUILD_SHARED_LIBS OFF)
 
