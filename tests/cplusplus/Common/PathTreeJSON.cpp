@@ -30,8 +30,8 @@
 #include <test_path_tree_json.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
 #include "json/reader.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 // - none
@@ -43,44 +43,44 @@ std::string getJSON() {
     return std::string(test_path_tree_json, sizeof(test_path_tree_json));
 }
 
-TEST(PathTreeJSON, EmptyTreeToJson) {
+TEST_CASE("PathTreeJSON-EmptyTreeToJson") {
     PathTree tree;
-    ASSERT_NO_THROW(common::pathTreeToJson(tree));
+    REQUIRE_NOTHROW(common::pathTreeToJson(tree));
     auto json = common::pathTreeToJson(tree);
-    ASSERT_EQ(json.size(), 0);
+    REQUIRE(json.size() == 0);
 }
 
-TEST(PathTreeJSON, EmptyJsonArrayToTree) {
+TEST_CASE("PathTreeJSON-EmptyJsonArrayToTree") {
 
     PathTree tree;
     Json::Value val(Json::arrayValue);
 
-    ASSERT_NO_THROW(common::jsonToPathTree(tree, val));
-    ASSERT_EQ(val, common::pathTreeToJson(tree));
+    REQUIRE_NOTHROW(common::jsonToPathTree(tree, val));
+    REQUIRE(val == common::pathTreeToJson(tree));
 }
 
-TEST(PathTreeJSON, ManualTreeToJsonWithRoundtrip) {
+TEST_CASE("PathTreeJSON-ManualTreeToJsonWithRoundtrip") {
     PathTree tree;
     setupDummyTree(tree);
 
-    ASSERT_NO_THROW(common::pathTreeToJson(tree));
+    REQUIRE_NOTHROW(common::pathTreeToJson(tree));
     auto json = common::pathTreeToJson(tree);
-    std::cout << json.toStyledString() << std::endl;
-    ASSERT_NE(json.size(), 0u);
+    INFO(json.toStyledString());
+    REQUIRE_FALSE(json.size() == 0u);
 
     PathTree tree2;
-    ASSERT_NO_THROW(common::jsonToPathTree(tree2, json));
-    ASSERT_EQ(json, common::pathTreeToJson(tree2));
+    REQUIRE_NOTHROW(common::jsonToPathTree(tree2, json));
+    REQUIRE(json == common::pathTreeToJson(tree2));
 }
 
-TEST(PathTreeJSON, SerializedTreeToJsonWithRoundtrip) {
+TEST_CASE("PathTreeJSON-SerializedTreeToJsonWithRoundtrip") {
 
     Json::Value val;
     Json::Reader reader;
-    ASSERT_TRUE(reader.parse(getJSON(), val));
+    REQUIRE(reader.parse(getJSON(), val));
 
     PathTree tree;
-    ASSERT_NO_THROW(common::jsonToPathTree(tree, val));
+    REQUIRE_NOTHROW(common::jsonToPathTree(tree, val));
 
-    ASSERT_EQ(common::pathTreeToJson(tree), val);
+    REQUIRE(common::pathTreeToJson(tree) == val);
 }

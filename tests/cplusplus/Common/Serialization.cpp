@@ -24,13 +24,13 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/Serialization.h>
 #include <osvr/Common/Buffer.h>
 #include <osvr/Common/BufferTraits.h>
+#include <osvr/Common/Serialization.h>
 #include <osvr/Util/StdInt.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <string>
@@ -38,139 +38,135 @@
 
 using osvr::common::Buffer;
 
-TEST(Buffer, EmptyConstructionAndInvalidRead) {
+TEST_CASE("Buffer-EmptyConstructionAndInvalidRead") {
     osvr::common::Buffer<> buf;
-    ASSERT_EQ(buf.size(), 0);
+    REQUIRE(buf.size() == 0);
     auto reader = buf.startReading();
-    ASSERT_EQ(reader.bytesRead(), 0);
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(reader.bytesRead() == 0);
+    REQUIRE(reader.bytesRemaining() == 0);
     uint16_t val;
-    ASSERT_THROW(reader.read(val), std::runtime_error);
-    ASSERT_THROW(reader.readAligned(val, sizeof(val)), std::runtime_error);
+    REQUIRE_THROWS_AS(reader.read(val), std::runtime_error);
+    REQUIRE_THROWS_AS(reader.readAligned(val, sizeof(val)), std::runtime_error);
 }
 
-TEST(Buffer, TypeTraits) {
+TEST_CASE("Buffer-TypeTraits") {
+    using osvr::common::BufferByteVector;
+    using osvr::common::BufferReader;
     using osvr::common::is_buffer;
     using osvr::common::is_buffer_reader;
-    using osvr::common::BufferReader;
-    using osvr::common::BufferByteVector;
 
-    ASSERT_TRUE(is_buffer<Buffer<> >::value);
-    ASSERT_FALSE(is_buffer<BufferReader<BufferByteVector> >::value);
-    ASSERT_FALSE(is_buffer<BufferByteVector>::value);
+    REQUIRE(is_buffer<Buffer<> >::value);
+    REQUIRE_FALSE(is_buffer<BufferReader<BufferByteVector> >::value);
+    REQUIRE_FALSE(is_buffer<BufferByteVector>::value);
 
-    ASSERT_FALSE(is_buffer_reader<Buffer<> >::value);
-    ASSERT_TRUE(is_buffer_reader<BufferReader<BufferByteVector> >::value);
-    ASSERT_FALSE(is_buffer_reader<BufferByteVector>::value);
+    REQUIRE_FALSE(is_buffer_reader<Buffer<> >::value);
+    REQUIRE(is_buffer_reader<BufferReader<BufferByteVector> >::value);
+    REQUIRE_FALSE(is_buffer_reader<BufferByteVector>::value);
 }
 
-template <typename T> class IntRawSerialization : public ::testing::Test {};
-typedef ::testing::Types<uint64_t, int64_t, uint32_t, int32_t, uint16_t,
-                         int16_t, uint8_t, int8_t> IntTypes;
-
-TYPED_TEST_CASE(IntRawSerialization, IntTypes);
-
-TYPED_TEST(IntRawSerialization, RoundTrip1) {
+TEMPLATE_TEST_CASE("IntRawSerialization-RoundTrip1", "", uint64_t, int64_t,
+                   uint32_t, int32_t, uint16_t, int16_t, uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal(1);
+    TestType inVal(1);
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(0);
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+    TestType outVal(0);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TYPED_TEST(IntRawSerialization, RoundTrip0) {
+TEMPLATE_TEST_CASE("IntRawSerialization-RoundTrip0", "", uint64_t, int64_t,
+                   uint32_t, int32_t, uint16_t, int16_t, uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal(0);
+    TestType inVal(0);
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(1);
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+    TestType outVal(1);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TYPED_TEST(IntRawSerialization, Endianness) {
+TEMPLATE_TEST_CASE("IntRawSerialization-Endianness", "", uint64_t, int64_t,
+                   uint32_t, int32_t, uint16_t, int16_t, uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal(1);
+    TestType inVal(1);
     osvr::common::serialization::serializeRaw(buf, inVal);
     auto zeroes = buf.size() - 1;
     for (size_t i = 0; i < zeroes; ++i) {
-        ASSERT_EQ(buf.getContents()[i], uint8_t(0));
+        REQUIRE(buf.getContents()[i] == uint8_t(0));
     }
-    ASSERT_EQ(buf.getContents()[buf.size() - 1], uint8_t(1));
+    REQUIRE(buf.getContents()[buf.size() - 1] == uint8_t(1));
 }
 
-template <typename T>
-class ArithmeticRawSerialization : public ::testing::Test {};
-typedef ::testing::Types<double, uint64_t, int64_t, uint32_t, int32_t, uint16_t,
-                         int16_t, uint8_t, int8_t> ArithmeticTypes;
-
-TYPED_TEST_CASE(ArithmeticRawSerialization, ArithmeticTypes);
-
-TYPED_TEST(ArithmeticRawSerialization, RoundTrip1) {
+TEMPLATE_TEST_CASE("ArithmeticRawSerialization-RoundTrip1", "", double,
+                   uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+                   uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal(1);
+    TestType inVal(1);
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(0);
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+    TestType outVal(0);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TYPED_TEST(ArithmeticRawSerialization, RoundTrip0) {
+TEMPLATE_TEST_CASE("ArithmeticRawSerialization-RoundTrip0", "", double,
+                   uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+                   uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal(0);
+    TestType inVal(0);
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(1);
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+    TestType outVal(1);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TYPED_TEST(ArithmeticRawSerialization, VectorRoundTrip) {
+TEMPLATE_TEST_CASE("ArithmeticRawSerialization-VectorRoundTrip", "", double,
+                   uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+                   uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam in(0);
+    TestType in(0);
     static const auto count = 5;
-    std::vector<TypeParam> inVal;
+    std::vector<TestType> inVal;
     for (int i = 0; i < count; ++i) {
         in += 1.8;
         inVal.push_back(in);
     }
 
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_GE(buf.size(), sizeof(uint32_t) + count * sizeof(TypeParam));
+    REQUIRE(buf.size() >= sizeof(uint32_t) + count * sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    std::vector<TypeParam> outVal(1);
+    std::vector<TestType> outVal(1);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
 #ifdef _MSC_VER
@@ -178,89 +174,93 @@ TYPED_TEST(ArithmeticRawSerialization, VectorRoundTrip) {
 #pragma warning(push)
 #pragma warning(disable : 4309)
 #endif
-TYPED_TEST(ArithmeticRawSerialization, RoundTripBigger) {
+TEMPLATE_TEST_CASE("ArithmeticRawSerialization-RoundTripBigger", "", double,
+                   uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+                   uint8_t, int8_t) {
     Buffer<> buf;
-    TypeParam inVal = static_cast<TypeParam>(50.5); // OK that it will truncate
-                                                    // for integers, since we
-                                                    // compare inVal vs outVal,
-                                                    // not the literal.
+    TestType inVal = static_cast<TestType>(50.5); // OK that it will truncate
+                                                  // for integers, since we
+                                                  // compare inVal vs outVal,
+                                                  // not the literal.
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-    TypeParam outVal(0);
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+    TestType outVal(0);
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TYPED_TEST(ArithmeticRawSerialization, RoundTripNegative) {
+TEMPLATE_TEST_CASE("ArithmeticRawSerialization-RoundTripNegative", "", double,
+                   uint64_t, int64_t, uint32_t, int32_t, uint16_t, int16_t,
+                   uint8_t, int8_t) {
     // Only do the body of this test for signed types.
-    if (std::is_signed<TypeParam>()) {
+    if (std::is_signed<TestType>()) {
         Buffer<> buf;
-        TypeParam inVal =
-            static_cast<TypeParam>(-50.5); // OK that it will truncate
-                                           // for integers, since we
-                                           // compare inVal vs outVal,
-                                           // not the literal.
+        TestType inVal =
+            static_cast<TestType>(-50.5); // OK that it will truncate
+                                          // for integers, since we
+                                          // compare inVal vs outVal,
+                                          // not the literal.
         osvr::common::serialization::serializeRaw(buf, inVal);
-        ASSERT_EQ(buf.size(), sizeof(TypeParam));
+        REQUIRE(buf.size() == sizeof(TestType));
 
         auto reader = buf.startReading();
 
-        ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
-        TypeParam outVal(0);
+        REQUIRE(reader.bytesRemaining() == sizeof(TestType));
+        TestType outVal(0);
         osvr::common::serialization::deserializeRaw(reader, outVal);
-        ASSERT_EQ(inVal, outVal);
-        ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-        ASSERT_EQ(reader.bytesRemaining(), 0);
+        REQUIRE(inVal == outVal);
+        REQUIRE(reader.bytesRead() == sizeof(TestType));
+        REQUIRE(reader.bytesRemaining() == 0);
     }
 }
 #ifdef _MSC_VER
 /// Disable "truncation of constant value" warning here.
 #pragma warning(pop)
 #endif
-TEST(BoolSerialization, RoundTripTrue) {
+TEST_CASE("BoolSerialization-RoundTripTrue") {
     Buffer<> buf;
-    typedef OSVR_CBool TypeParam;
+    typedef OSVR_CBool TestType;
     bool inVal = true;
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
     bool outVal = false;
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TEST(BoolSerialization, RoundTripFalse) {
+TEST_CASE("BoolSerialization-RoundTripFalse") {
     Buffer<> buf;
-    typedef OSVR_CBool TypeParam;
+    typedef OSVR_CBool TestType;
     bool inVal = false;
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_EQ(buf.size(), sizeof(TypeParam));
+    REQUIRE(buf.size() == sizeof(TestType));
 
     auto reader = buf.startReading();
 
-    ASSERT_EQ(reader.bytesRemaining(), sizeof(TypeParam));
+    REQUIRE(reader.bytesRemaining() == sizeof(TestType));
     bool outVal = true;
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRead(), sizeof(TypeParam));
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRead() == sizeof(TestType));
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-TEST(StringVectorSerialization, RoundTrip) {
+TEST_CASE("StringVectorSerialization-RoundTrip") {
     auto buf = Buffer<>{};
-    using TypeParam = std::vector<std::string>;
-    auto inVal = TypeParam{};
+    using TestType = std::vector<std::string>;
+    auto inVal = TestType{};
     std::ostringstream os;
     static const auto count = 10;
     for (int i = 0; i < count; ++i) {
@@ -269,17 +269,17 @@ TEST(StringVectorSerialization, RoundTrip) {
     }
 
     osvr::common::serialization::serializeRaw(buf, inVal);
-    ASSERT_GE(buf.size(), sizeof(uint32_t) + count * sizeof(char));
+    REQUIRE(buf.size() >= sizeof(uint32_t) + count * sizeof(char));
 
     auto reader = buf.startReading();
 
-    auto outVal = TypeParam{};
+    auto outVal = TestType{};
     osvr::common::serialization::deserializeRaw(reader, outVal);
-    ASSERT_EQ(inVal, outVal);
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(inVal == outVal);
+    REQUIRE(reader.bytesRemaining() == 0);
 }
 
-class SerializationAlignment : public ::testing::Test {
+class SerializationAlignment {
   public:
     virtual void SetUp() {
         /// Give them some dummy values.
@@ -291,8 +291,8 @@ class SerializationAlignment : public ::testing::Test {
     }
 
     void checkOutput() {
-        ASSERT_EQ(in32, out32);
-        ASSERT_EQ(in8, out8);
+        REQUIRE(in32 == out32);
+        REQUIRE(in8 == out8);
     }
     int8_t in8;
     int32_t in32;
@@ -301,30 +301,37 @@ class SerializationAlignment : public ::testing::Test {
     Buffer<> buf;
 };
 
-TEST_F(SerializationAlignment, Buffer32Then8) {
+TEST_CASE_METHOD(SerializationAlignment,
+                 "SerializationAlignment-Buffer32Then8") {
     osvr::common::serialization::serializeRaw(buf, in32);
-    ASSERT_EQ(buf.size(), sizeof(in32));
+    REQUIRE(buf.size() == sizeof(in32));
     osvr::common::serialization::serializeRaw(buf, in8);
-    ASSERT_EQ(buf.size(), sizeof(in32) + sizeof(in8))
-        << "No padding should be required here";
+    {
+        INFO("No padding should be required here");
+        REQUIRE(buf.size() == sizeof(in32) + sizeof(in8));
+    }
 
     auto reader = buf.startReading();
     osvr::common::serialization::deserializeRaw(reader, out32);
     osvr::common::serialization::deserializeRaw(reader, out8);
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(reader.bytesRemaining() == 0);
     checkOutput();
 }
 
-TEST_F(SerializationAlignment, Buffer8Then32) {
+TEST_CASE_METHOD(SerializationAlignment,
+                 "SerializationAlignment-Buffer8Then32") {
     osvr::common::serialization::serializeRaw(buf, in8);
-    ASSERT_EQ(buf.size(), sizeof(in8));
+    REQUIRE(buf.size() == sizeof(in8));
     osvr::common::serialization::serializeRaw(buf, in32);
-    ASSERT_EQ(buf.size(), 2 * sizeof(in32)) << "Should be padded out to 32bits";
+    {
+        INFO("Should be padded out to 32bits");
+        REQUIRE(buf.size() == 2 * sizeof(in32));
+    }
 
     auto reader = buf.startReading();
     osvr::common::serialization::deserializeRaw(reader, out8);
     osvr::common::serialization::deserializeRaw(reader, out32);
-    ASSERT_EQ(reader.bytesRemaining(), 0);
+    REQUIRE(reader.bytesRemaining() == 0);
     checkOutput();
 }
 
@@ -342,7 +349,7 @@ class MyClass {
     int8_t c;
 };
 
-TEST(Serialization, SelfDescriptive) {
+TEST_CASE("Serialization-SelfDescriptive") {
     Buffer<> buf;
     {
         MyClass data;
@@ -351,16 +358,18 @@ TEST(Serialization, SelfDescriptive) {
         data.c = 3;
         osvr::common::serialize(buf, data);
     }
-
-    ASSERT_EQ(buf.size(), sizeof(int32_t) + sizeof(uint32_t) + sizeof(int8_t))
-        << "No padding should be needed here.";
+    {
+        INFO("No padding should be needed here.");
+        REQUIRE(buf.size() ==
+                sizeof(int32_t) + sizeof(uint32_t) + sizeof(int8_t));
+    }
 
     {
         MyClass data;
         auto reader = buf.startReading();
         osvr::common::deserialize(reader, data);
-        ASSERT_EQ(data.a, 1);
-        ASSERT_EQ(data.b, 2);
-        ASSERT_EQ(data.c, 3);
+        REQUIRE(data.a == 1);
+        REQUIRE(data.b == 2);
+        REQUIRE(data.c == 3);
     }
 }
