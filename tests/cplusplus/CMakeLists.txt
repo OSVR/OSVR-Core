@@ -1,3 +1,7 @@
+
+add_library(osvr-catch-main OBJECT CatchMain.cpp)
+target_link_libraries(osvr-catch-main PUBLIC osvr-catch2-interface)
+
 if(TARGET osvrTypePack)
     add_subdirectory(TypePack)
 endif()
