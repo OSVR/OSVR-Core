@@ -27,16 +27,17 @@
 #include <osvr/Util/ContainerWrapper.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
-#include <type_traits>
 #include <string>
+#include <type_traits>
 #include <vector>
-using std::vector;
-using std::string;
-using std::is_same;
+
 using osvr::util::ContainerWrapper;
+using std::is_same;
+using std::string;
+using std::vector;
 namespace policies = osvr::util::container_policies;
 
 typedef vector<string> svec;
@@ -66,15 +67,15 @@ static_assert(is_same<ContainerWrapper<svec, policies::iterators,
                       ContainerWrapper<svec, policies::iterators>>::value,
               "iterators implies const_iterators");
 
-TEST(ContainerWrapper, constructWithVariedArguments) {
-    ASSERT_NO_THROW((MyTestContainerWrapper<svec>{}));
-    ASSERT_NO_THROW(
+TEST_CASE("ContainerWrapper-constructWithVariedArguments") {
+    REQUIRE_NOTHROW((MyTestContainerWrapper<svec>{}));
+    REQUIRE_NOTHROW(
         (MyTestContainerWrapper<svec, policies::const_iterators>{}));
-    ASSERT_NO_THROW((MyTestContainerWrapper<svec, policies::iterators>{}));
+    REQUIRE_NOTHROW((MyTestContainerWrapper<svec, policies::iterators>{}));
 
-    ASSERT_NO_THROW((MyTestContainerWrapper<svec, policies::size>{}));
-    ASSERT_NO_THROW((MyTestContainerWrapper<svec, policies::size,
+    REQUIRE_NOTHROW((MyTestContainerWrapper<svec, policies::size>{}));
+    REQUIRE_NOTHROW((MyTestContainerWrapper<svec, policies::size,
                                             policies::const_iterators>{}));
-    ASSERT_NO_THROW(
+    REQUIRE_NOTHROW(
         (MyTestContainerWrapper<svec, policies::size, policies::iterators>{}));
 }

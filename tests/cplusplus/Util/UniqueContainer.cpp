@@ -27,100 +27,101 @@
 #include <osvr/Util/UniqueContainer.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
-#include <type_traits>
 #include <string>
+#include <type_traits>
 #include <vector>
-using std::vector;
-using std::string;
-using std::is_same;
+
 using osvr::util::UniqueContainer;
+using std::is_same;
+using std::string;
+using std::vector;
 namespace wrap_policies = osvr::util::container_policies;
 namespace policies = osvr::util::unique_container_policies;
 
 using container = UniqueContainer<vector<int>, policies::PushBack,
                                   wrap_policies::size, wrap_policies::empty>;
 
-TEST(UniqueContainer, construct) {
-    ASSERT_NO_THROW((container{}));
-    ASSERT_TRUE((container{}).empty());
+TEST_CASE("UniqueContainer-construct") {
+    REQUIRE_NOTHROW((container{}));
+    REQUIRE((container{}).empty());
 }
 
-TEST(UniqueContainer, addUnique) {
+TEST_CASE("UniqueContainer-addUnique") {
     container c;
-    ASSERT_TRUE(c.insert(1));
-    ASSERT_TRUE(c.insert(2));
-    ASSERT_EQ(c.size(), 2);
-    ASSERT_TRUE(c.contains(1));
-    ASSERT_TRUE(c.contains(2));
-    ASSERT_FALSE(c.contains(3));
+    REQUIRE(c.insert(1));
+    REQUIRE(c.insert(2));
+    REQUIRE(c.size() == 2);
+    REQUIRE(c.contains(1));
+    REQUIRE(c.contains(2));
+    REQUIRE_FALSE(c.contains(3));
 }
-TEST(UniqueContainer, addNonUnique) {
+TEST_CASE("UniqueContainer-addNonUnique") {
     container c;
-    ASSERT_TRUE(c.insert(1));
-    ASSERT_FALSE(c.insert(1));
-    ASSERT_TRUE(c.insert(2));
-    ASSERT_FALSE(c.insert(2));
-    ASSERT_EQ(c.size(), 2);
-    ASSERT_TRUE(c.contains(1));
-    ASSERT_TRUE(c.contains(2));
-    ASSERT_FALSE(c.contains(3));
+    REQUIRE(c.insert(1));
+    REQUIRE_FALSE(c.insert(1));
+    REQUIRE(c.insert(2));
+    REQUIRE_FALSE(c.insert(2));
+    REQUIRE(c.size() == 2);
+    REQUIRE(c.contains(1));
+    REQUIRE(c.contains(2));
+    REQUIRE_FALSE(c.contains(3));
 
-    ASSERT_TRUE(c.insert(3));
-    ASSERT_TRUE(c.contains(3));
-    ASSERT_FALSE(c.insert(3));
-    ASSERT_TRUE(c.contains(3));
-    ASSERT_EQ(c.size(), 3);
+    REQUIRE(c.insert(3));
+    REQUIRE(c.contains(3));
+    REQUIRE_FALSE(c.insert(3));
+    REQUIRE(c.contains(3));
+    REQUIRE(c.size() == 3);
 }
 
-TEST(UniqueContainer, removeUniqueFront) {
-    container c;
-    c.insert(1);
-    c.insert(2);
-    ASSERT_EQ(c.size(), 2);
-
-    ASSERT_TRUE(c.remove(1));
-    ASSERT_EQ(c.size(), 1);
-    ASSERT_FALSE(c.contains(1));
-    ASSERT_TRUE(c.contains(2));
-
-    ASSERT_TRUE(c.remove(2));
-    ASSERT_EQ(c.size(), 0);
-    ASSERT_TRUE(c.empty());
-    ASSERT_FALSE(c.contains(1));
-    ASSERT_FALSE(c.contains(2));
-}
-
-TEST(UniqueContainer, removeUniqueBack) {
+TEST_CASE("UniqueContainer-removeUniqueFront") {
     container c;
     c.insert(1);
     c.insert(2);
-    ASSERT_EQ(c.size(), 2);
+    REQUIRE(c.size() == 2);
 
-    ASSERT_TRUE(c.remove(2));
-    ASSERT_EQ(c.size(), 1);
-    ASSERT_TRUE(c.contains(1));
-    ASSERT_FALSE(c.contains(2));
+    REQUIRE(c.remove(1));
+    REQUIRE(c.size() == 1);
+    REQUIRE_FALSE(c.contains(1));
+    REQUIRE(c.contains(2));
 
-    ASSERT_TRUE(c.remove(1));
-    ASSERT_EQ(c.size(), 0);
-    ASSERT_TRUE(c.empty());
-    ASSERT_FALSE(c.contains(1));
-    ASSERT_FALSE(c.contains(2));
+    REQUIRE(c.remove(2));
+    REQUIRE(c.size() == 0);
+    REQUIRE(c.empty());
+    REQUIRE_FALSE(c.contains(1));
+    REQUIRE_FALSE(c.contains(2));
 }
 
-TEST(UniqueContainer, removeNonUnique) {
+TEST_CASE("UniqueContainer-removeUniqueBack") {
     container c;
     c.insert(1);
     c.insert(2);
-    ASSERT_EQ(c.size(), 2);
+    REQUIRE(c.size() == 2);
 
-    ASSERT_TRUE(c.remove(1));
+    REQUIRE(c.remove(2));
+    REQUIRE(c.size() == 1);
+    REQUIRE(c.contains(1));
+    REQUIRE_FALSE(c.contains(2));
 
-    ASSERT_FALSE(c.remove(1));
-    ASSERT_EQ(c.size(), 1);
-    ASSERT_FALSE(c.contains(1));
-    ASSERT_TRUE(c.contains(2));
+    REQUIRE(c.remove(1));
+    REQUIRE(c.size() == 0);
+    REQUIRE(c.empty());
+    REQUIRE_FALSE(c.contains(1));
+    REQUIRE_FALSE(c.contains(2));
+}
+
+TEST_CASE("UniqueContainer-removeNonUnique") {
+    container c;
+    c.insert(1);
+    c.insert(2);
+    REQUIRE(c.size() == 2);
+
+    REQUIRE(c.remove(1));
+
+    REQUIRE_FALSE(c.remove(1));
+    REQUIRE(c.size() == 1);
+    REQUIRE_FALSE(c.contains(1));
+    REQUIRE(c.contains(2));
 }
