@@ -9,6 +9,7 @@
 */
 
 // Copyright 2015 Sensics, Inc.
+// Copyright 2019 Collabora, Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +23,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define CATCH_CONFIG_MAIN
+
 // Internal Includes
 #include <osvr/Kalman/FlexibleKalmanFilter.h>
 #include <osvr/Kalman/PoseConstantVelocity.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <iostream>
@@ -36,12 +39,11 @@ using ProcessModel = osvr::kalman::PoseConstantVelocityProcessModel;
 using State = ProcessModel::State;
 using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
-TEST(KalmanFilter, DefaultConstruction) {
-    ASSERT_NO_THROW(auto filter = Filter{});
-}
-TEST(KalmanFilter, MoveStateConstructions) {
-    ASSERT_NO_THROW(auto filter = Filter{State{}});
-}
-TEST(KalmanFilter, MoveStateProcessConstructions) {
-    ASSERT_NO_THROW(auto filter = Filter(ProcessModel{}, State{}));
+TEST_CASE("KalmanFilterConstruction") {
+    SECTION("default construction") { REQUIRE_NOTHROW(Filter{}); }
+    SECTION("move state construction") { REQUIRE_NOTHROW(Filter{State{}}); }
+
+    SECTION("move state+process construction") {
+        REQUIRE_NOTHROW(Filter(ProcessModel{}, State{}));
+    }
 }
