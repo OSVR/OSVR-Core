@@ -1,9 +1,7 @@
 foreach(testname TreeNode ContainerWrapper UniqueContainer Projection)
     add_executable(${testname}
-        $<TARGET_OBJECTS:osvr-catch-main>
-
         ${testname}.cpp)
-    target_link_libraries(${testname} osvr-catch2-interface osvr_cxx11_flags)
+    target_link_libraries(${testname} osvr-catch-main)
     target_link_libraries(${testname} osvrUtilCpp)
     add_test(NAME ${testname} COMMAND ${testname})
 endforeach()

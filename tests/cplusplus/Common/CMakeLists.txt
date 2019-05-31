@@ -14,8 +14,6 @@ endif()
 get_filename_component(LIB_TO_TEST ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 set(TEST_EXE Test${LIB_TO_TEST})
 add_executable(${TEST_EXE}
-    $<TARGET_OBJECTS:osvr-catch-main>
-
     DummyTree.h
     CommonComponent.cpp
     PathTreeResolution.cpp
@@ -25,7 +23,7 @@ add_executable(${TEST_EXE}
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Simple.h"
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Complicated.h"
     ${PATHTREEJSON_SOURCES})
-target_link_libraries(${TEST_EXE} osvr-catch2-interface osvr_cxx11_flags osvr${LIB_TO_TEST})
+target_link_libraries(${TEST_EXE} osvr-catch-main osvr${LIB_TO_TEST})
 target_link_libraries(${TEST_EXE} osvrCommon JsonCpp::JsonCpp vendored-vrpn)
 
 add_test(NAME ${LIB_TO_TEST}
