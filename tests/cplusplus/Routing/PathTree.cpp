@@ -24,82 +24,109 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathTreeFull.h>
+#include "IsType.h"
 #include <osvr/Common/PathElementTypes.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/RoutingExceptions.h>
-#include "IsType.h"
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 // - none
 
 using std::string;
 using namespace osvr::common;
-TEST(PathTree, create) { ASSERT_NO_THROW(PathTree()); }
+TEST_CASE("PathTree-create") { REQUIRE_NOTHROW(PathTree()); }
 
-TEST(PathTree, getPathRoot) {
+TEST_CASE("PathTree-getPathRoot") {
     PathTree tree;
     PathNode *result = nullptr;
-    ASSERT_NO_THROW(result = &tree.getNodeByPath("/")) << "Get the root.";
-    ASSERT_TRUE(result->isRoot());
-    ASSERT_EQ(result->getParent(), nullptr);
+    REQUIRE_NOTHROW(result = &tree.getNodeByPath("/"));
+    REQUIRE(result->isRoot());
+    REQUIRE(result->getParent() == nullptr);
 }
 
-TEST(PathTree, getPathBadInput) {
+TEST_CASE("PathTree-getPathBadInput") {
     PathTree tree;
-    ASSERT_THROW(tree.getNodeByPath(""), exceptions::EmptyPath)
-        << "Empty string not acceptable as path";
-    ASSERT_THROW(tree.getNodeByPath("test"), exceptions::PathNotAbsolute)
-        << "Missing leading slash not acceptable";
-    ASSERT_THROW(tree.getNodeByPath("//test"), exceptions::EmptyPathComponent)
-        << "Empty component not OK!";
-    ASSERT_THROW(tree.getNodeByPath("/asdf//test"),
-                 exceptions::EmptyPathComponent)
-        << "Empty component not OK!";
-    ASSERT_THROW(tree.getNodeByPath("/asdf//"), exceptions::EmptyPathComponent)
-        << "Empty component not OK!";
+    REQUIRE_THROWS_AS(tree.getNodeByPath(""), exceptions::EmptyPath);
+    {
+        INFO("Missing leading slash not acceptable");
+        REQUIRE_THROWS_AS(tree.getNodeByPath("test"),
+                          exceptions::PathNotAbsolute);
+    }
+    REQUIRE_THROWS_AS(tree.getNodeByPath("//test"),
+                      exceptions::EmptyPathComponent);
+    SECTION("Empty component not OK!") {
+        REQUIRE_THROWS_AS(tree.getNodeByPath("/asdf//test"),
+                          exceptions::EmptyPathComponent);
+        REQUIRE_THROWS_AS(tree.getNodeByPath("/asdf//"),
+                          exceptions::EmptyPathComponent);
+    }
 }
 
-TEST(PathTree, getPathSingleLevel) {
+TEST_CASE("PathTree-getPathSingleLevel") {
     PathTree tree;
     PathNode *result = nullptr;
-    ASSERT_NO_THROW(result = &tree.getNodeByPath("/test"))
-        << "Get a new node just a single level in";
-    ASSERT_TRUE(isNodeType<elements::NullElement>(*result))
-        << "Check the type of the new node.";
-    ASSERT_EQ(result->getName(), "test") << "Check the name of the new node";
+    {
+        INFO("Get a new node just a single level in");
+        REQUIRE_NOTHROW(result = &tree.getNodeByPath("/test"));
+    }
+    {
+        INFO("Check the type of the new node.");
+        REQUIRE(isNodeType<elements::NullElement>(*result));
+    }
+    {
+        INFO("Check the name of the new node");
+        REQUIRE(result->getName() == "test");
+    }
 
-    ASSERT_NO_THROW(tree.getNodeByPath("/test")) << "Get the same node again.";
-    ASSERT_EQ(tree.getNodeByPath("/test"), *result)
-        << "Ensure we're actually getting the same identity.";
-    ASSERT_EQ(tree.getNodeByPath("/test/"), *result)
-        << "Ensure trailing slashes don't matter.";
+    {
+        INFO("Get the same node again.");
+        REQUIRE_NOTHROW(tree.getNodeByPath("/test"));
+    }
+    {
+        INFO("Ensure we're actually getting the same identity.");
+        REQUIRE(tree.getNodeByPath("/test") == *result);
+    }
+    {
+        INFO("Ensure trailing slashes don't matter.");
+        REQUIRE(tree.getNodeByPath("/test/") == *result);
+    }
 }
 
-TEST(PathTree, getPathTwoLevel) {
+TEST_CASE("PathTree-getPathTwoLevel") {
     PathTree tree;
     PathNode *test2 = nullptr;
-    ASSERT_NO_THROW(test2 = &tree.getNodeByPath("/test1/test2"))
-        << "Get a node two new levels in";
+    {
+        INFO("Get a node two new levels in");
+        REQUIRE_NOTHROW(test2 = &tree.getNodeByPath("/test1/test2"));
+    }
     // Check test2
-    ASSERT_EQ(test2->getName(), "test2");
-    ASSERT_FALSE(test2->hasChildren()) << "Make sure it has no children.";
-    ASSERT_TRUE(isNodeType<elements::NullElement>(*test2)) << "Check type";
-    ASSERT_NE(test2->getParent(), nullptr) << "Make sure it has a parent.";
+    SECTION("Check test2 - node two new levels in") {
+        REQUIRE(test2->getName() == "test2");
+        REQUIRE_FALSE(test2->hasChildren());
+        REQUIRE(isNodeType<elements::NullElement>(*test2));
+        REQUIRE_FALSE(test2->getParent() == nullptr);
+    }
 
     // Check test1
+
     auto test1 = test2->getParent();
-    ASSERT_EQ(test1->getName(), "test1");
-    ASSERT_TRUE(isNodeType<elements::NullElement>(*test1));
-    ASSERT_NE(test1->getParent(), nullptr) << "Make sure it has a parent.";
+    SECTION("Check test1, parent of test2") {
+        REQUIRE(test1->getName() == "test1");
+        REQUIRE(isNodeType<elements::NullElement>(*test1));
+        REQUIRE_FALSE(test1->getParent() == nullptr);
+    }
     auto root = test1->getParent();
 
-    ASSERT_TRUE(root->isRoot());
-    ASSERT_EQ(tree.getNodeByPath("/"), *root)
-        << "Root identity should be preserved";
-    ASSERT_EQ(tree.getNodeByPath("/test1/test2"), *test2)
-        << "Identity should be preserved";
+    SECTION("Verify root preservation") {
+        REQUIRE(root->isRoot());
+        REQUIRE(tree.getNodeByPath("/") == *root);
+    }
+    {
+        INFO("Identity should be preserved");
+        REQUIRE(tree.getNodeByPath("/test1/test2") == *test2);
+    }
 }

@@ -29,19 +29,19 @@
 #include "IsType.h"
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 // - none
 
 using namespace osvr::common;
 
-TEST(PathElement, getTypeName) {
-    ASSERT_STREQ(elements::getTypeName<elements::NullElement>(), "NullElement");
+TEST_CASE("PathElement-getTypeName") {
+    REQUIRE(std::string(elements::getTypeName<elements::NullElement>()) == "NullElement");
 }
 
-TEST(PathElement, isElementType) {
-    ASSERT_TRUE(isElementType<elements::NullElement>(elements::NullElement()));
-    ASSERT_FALSE(
+TEST_CASE("PathElement-isElementType") {
+    REQUIRE(isElementType<elements::NullElement>(elements::NullElement()));
+    REQUIRE_FALSE(
         isElementType<elements::DeviceElement>(elements::NullElement()));
 }
