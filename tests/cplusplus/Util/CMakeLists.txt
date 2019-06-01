@@ -8,3 +8,4 @@ endforeach()
 
 target_link_libraries(Projection eigen-headers)
 target_link_libraries(QuatExpMap eigen-headers vendored-vrpn)
+target_compile_definitions(QuatExpMap PRIVATE HAVE_QUATLIB)

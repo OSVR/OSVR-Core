@@ -9,6 +9,7 @@
 */
 
 // Copyright 2016 Sensics, Inc.
+// Copyright 2019 Collabora, Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,8 +23,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define HAVE_QUATLIB
-
 // Internal Includes
 #include "CatchEigen.h"
 #include <osvr/Util/EigenQuatExponentialMap.h>
@@ -36,6 +35,13 @@
 
 // Standard includes
 #include <array>
+
+#ifndef HAVE_QUATLIB
+#define Q_X 0
+#define Q_Y 1
+#define Q_Z 2
+#define Q_W 3
+#endif // !HAVE_QUATLIB
 
 using osvr::util::quat_exp_map;
 
