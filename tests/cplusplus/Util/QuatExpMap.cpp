@@ -155,39 +155,6 @@ static inline ::std::ostream &operator<<(::std::ostream &os,
 static const Vector3d Vec3dZero = Vector3d::Zero();
 
 /* Tests that take a unit quat as input */
-static const auto BasicQuats = {
-    QuatCreator::Identity(),
-    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
-    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())};
-
-static const auto SmallQuats = {
-    QuatCreator::AngleAxis(SMALL, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(SMALL, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(SMALL, Vector3d::UnitZ()),
-    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitZ())};
-static const auto SmallNegativeQuats = {
-    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitZ()),
-    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitX()),
-    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitY()),
-    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitZ())};
-
-#if 0
-QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitX()),
-QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitY()),
-QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitZ()),
-QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitX()),
-QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitY()),
-QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitZ()),
-#endif
-
 TEST_CASE("UnitQuatInput") {
     const auto doTests = [](QuatCreator const &qCreator) {
         CAPTURE(qCreator);
@@ -221,37 +188,48 @@ TEST_CASE("UnitQuatInput") {
 #endif // HAVE_QUATLIB
     };
     SECTION("Basic quats") {
-        auto quatCreator = GENERATE(values(BasicQuats));
+        auto quatCreator = GENERATE(
+            values({QuatCreator::Identity(),
+                    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+                    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())}));
         doTests(quatCreator);
     }
     SECTION("Small quats") {
-        auto quatCreator = GENERATE(values(SmallQuats));
+        auto quatCreator = GENERATE(
+            values({QuatCreator::AngleAxis(SMALL, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(SMALL, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(SMALL, Vector3d::UnitZ()),
+                    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(SMALLER, Vector3d::UnitZ())}));
         doTests(quatCreator);
     }
     SECTION("Small negative quats") {
-        auto quatCreator = GENERATE(values(SmallNegativeQuats));
+        auto quatCreator = GENERATE(
+            values({QuatCreator::AngleAxis(-SMALL, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(-SMALL, Vector3d::UnitZ()),
+                    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitX()),
+                    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitY()),
+                    QuatCreator::AngleAxis(-SMALLER, Vector3d::UnitZ())}));
         doTests(quatCreator);
     }
+
+#if 0
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitX()),
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitY()),
+QuatCreator::AngleAxis(EIGEN_PI, Vector3d::UnitZ()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitX()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitY()),
+QuatCreator::AngleAxis(3 * EIGEN_PI / 2, Vector3d::UnitZ()),
+#endif
 }
 
 /* Tests that take a rotation vector as input */
-static const std::initializer_list<Vector3d> BasicVecs = {
-    Vector3d::Zero(),
-    Vector3d(EIGEN_PI / 2, 0, 0),
-    Vector3d(0, EIGEN_PI / 2, 0),
-    Vector3d(0, 0, EIGEN_PI / 2),
-    Vector3d(-EIGEN_PI / 2, 0, 0),
-    Vector3d(0, -EIGEN_PI / 2, 0),
-    Vector3d(0, 0, -EIGEN_PI / 2)};
-static const std::initializer_list<Vector3d> SmallVecs = {
-    Vector3d(SMALL, 0, 0),   Vector3d(0, SMALL, 0),   Vector3d(0, 0, SMALL),
-    Vector3d(SMALLER, 0, 0), Vector3d(0, SMALLER, 0), Vector3d(0, 0, SMALLER)};
-
-static const std::initializer_list<Vector3d> SmallNegativeVecs = {
-    Vector3d(-SMALL, 0, 0),   Vector3d(0, -SMALL, 0),
-    Vector3d(0, 0, -SMALL),   Vector3d(-SMALLER, 0, 0),
-    Vector3d(0, -SMALLER, 0), Vector3d(0, 0, -SMALLER)};
-
 TEST_CASE("ExpMapVecInput") {
     const auto doTests = [](Vector3d const &v) {
         CAPTURE(v);
@@ -284,15 +262,25 @@ TEST_CASE("ExpMapVecInput") {
 #endif // HAVE_QUATLIB
     };
     SECTION("BasicVecs") {
-        Vector3d v = GENERATE(values(BasicVecs));
+        Vector3d v = GENERATE(values(
+            {Vector3d(Vector3d::Zero()), Vector3d(EIGEN_PI / 2, 0, 0),
+             Vector3d(0, EIGEN_PI / 2, 0), Vector3d(0, 0, EIGEN_PI / 2),
+             Vector3d(-EIGEN_PI / 2, 0, 0), Vector3d(0, -EIGEN_PI / 2, 0),
+             Vector3d(0, 0, -EIGEN_PI / 2)}));
         doTests(v);
     }
     SECTION("SmallVecs") {
-        Vector3d v = GENERATE(values(SmallVecs));
+        Vector3d v = GENERATE(
+            values({Vector3d(SMALL, 0, 0), Vector3d(0, SMALL, 0),
+                    Vector3d(0, 0, SMALL), Vector3d(SMALLER, 0, 0),
+                    Vector3d(0, SMALLER, 0), Vector3d(0, 0, SMALLER)}));
         doTests(v);
     }
     SECTION("SmallNegativeVecs") {
-        Vector3d v = GENERATE(values(SmallNegativeVecs));
+        Vector3d v = GENERATE(
+            values({Vector3d(-SMALL, 0, 0), Vector3d(0, -SMALL, 0),
+                    Vector3d(0, 0, -SMALL), Vector3d(-SMALLER, 0, 0),
+                    Vector3d(0, -SMALLER, 0), Vector3d(0, 0, -SMALLER)}));
         doTests(v);
     }
 }
@@ -307,30 +295,6 @@ TEST_CASE("SimpleEquivalencies-Exp") {
 }
 
 /* Tests that take a pair of equivalent quaternion and vector as input */
-static const auto HalfPiMultiples = {
-    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
-    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
-    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
-    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
-    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
-    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())};
-
-static const auto SmallEquivalentValues = {
-    makePairFromAngleAxis(SMALL, Vector3d::UnitX()),
-    makePairFromAngleAxis(SMALL, Vector3d::UnitY()),
-    makePairFromAngleAxis(SMALL, Vector3d::UnitZ()),
-    makePairFromAngleAxis(SMALLER, Vector3d::UnitX()),
-    makePairFromAngleAxis(SMALLER, Vector3d::UnitY()),
-    makePairFromAngleAxis(SMALLER, Vector3d::UnitZ())};
-
-static const auto SmallNegativeEquivalentValues = {
-    makePairFromAngleAxis(-SMALL, Vector3d::UnitX()),
-    makePairFromAngleAxis(-SMALL, Vector3d::UnitY()),
-    makePairFromAngleAxis(-SMALL, Vector3d::UnitZ()),
-    makePairFromAngleAxis(-SMALLER, Vector3d::UnitX()),
-    makePairFromAngleAxis(-SMALLER, Vector3d::UnitY()),
-    makePairFromAngleAxis(-SMALLER, Vector3d::UnitZ())};
-
 TEST_CASE("EquivalentInput") {
     const auto doTests = [](QuatCreator const &qCreator, Vector3d const &v) {
         CAPTURE(v);
@@ -360,15 +324,33 @@ TEST_CASE("EquivalentInput") {
 #endif // HAVE_QUATLIB
     };
     SECTION("HalfPiMultiples") {
-        QuatVecPair qvp = GENERATE(values(HalfPiMultiples));
+        QuatVecPair qvp = GENERATE(
+            values({makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitX()),
+                    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitY()),
+                    makePairFromAngleAxis(EIGEN_PI / 2, Vector3d::UnitZ()),
+                    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitX()),
+                    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitY()),
+                    makePairFromAngleAxis(-EIGEN_PI / 2, Vector3d::UnitZ())}));
         doTests(qvp.first, qvp.second);
     }
     SECTION("SmallEquivalentValues") {
-        QuatVecPair qvp = GENERATE(values(SmallEquivalentValues));
+        QuatVecPair qvp = GENERATE(
+            values({makePairFromAngleAxis(SMALL, Vector3d::UnitX()),
+                    makePairFromAngleAxis(SMALL, Vector3d::UnitY()),
+                    makePairFromAngleAxis(SMALL, Vector3d::UnitZ()),
+                    makePairFromAngleAxis(SMALLER, Vector3d::UnitX()),
+                    makePairFromAngleAxis(SMALLER, Vector3d::UnitY()),
+                    makePairFromAngleAxis(SMALLER, Vector3d::UnitZ())}));
         doTests(qvp.first, qvp.second);
     }
     SECTION("SmallNegativeVecs") {
-        QuatVecPair qvp = GENERATE(values(SmallNegativeEquivalentValues));
+        QuatVecPair qvp = GENERATE(
+            values({makePairFromAngleAxis(-SMALL, Vector3d::UnitX()),
+                    makePairFromAngleAxis(-SMALL, Vector3d::UnitY()),
+                    makePairFromAngleAxis(-SMALL, Vector3d::UnitZ()),
+                    makePairFromAngleAxis(-SMALLER, Vector3d::UnitX()),
+                    makePairFromAngleAxis(-SMALLER, Vector3d::UnitY()),
+                    makePairFromAngleAxis(-SMALLER, Vector3d::UnitZ())}));
         doTests(qvp.first, qvp.second);
     }
 }
