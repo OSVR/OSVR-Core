@@ -34,6 +34,8 @@ set_target_properties(uvbi-image-sources PROPERTIES
 target_link_libraries(uvbi-image-sources PUBLIC
     opencv_core
     opencv_highgui
+    opencv_videoio
+    opencv_imgproc
     ${VIDEOTRACKER_EXTRA_LIBS}
     osvrUtil
     PRIVATE
