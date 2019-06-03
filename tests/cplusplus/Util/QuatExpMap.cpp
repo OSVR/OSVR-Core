@@ -174,7 +174,7 @@ TEST_CASE("UnitQuatInput") {
 
                 const Quaterniond exp_ln_q = quat_exp_map(ln_q).exp();
 
-                REQUIRE(q == exp_ln_q);
+                REQUIRE(q == ApproxQuat(exp_ln_q));
             }
         }
 #ifdef HAVE_QUATLIB
@@ -182,8 +182,7 @@ TEST_CASE("UnitQuatInput") {
             QuatArray quatlib_q = toQuatlib(q);
             q_log(quatlib_q.data(), quatlib_q.data());
             q_exp(quatlib_q.data(), quatlib_q.data());
-            REQUIRE(ApproxVec(q.coeffs()) ==
-                    quatFromQuatlib(quatlib_q).coeffs());
+            REQUIRE(ApproxQuat(q) == quatFromQuatlib(quatlib_q));
         }
 #endif // HAVE_QUATLIB
     };
