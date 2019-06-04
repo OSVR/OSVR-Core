@@ -85,6 +85,8 @@ target_link_libraries(uvbi-core
     PUBLIC
     ${VIDEOTRACKER_EXTRA_LIBS}
     opencv_core
+    opencv_imgproc
+    opencv_videoio
     osvrUtilCpp # for typedefs and boost headers
     osvrKalman
     eigen-headers
@@ -99,7 +101,7 @@ target_compile_definitions(uvbi-core PRIVATE OSVR_UVBI_CORE)
 # Convenience tool to view the tracker camera using the same pipeline as the tracker plugin.
 ###
 add_executable(uvbi-view-camera ViewTrackingCamera.cpp)
-target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources)
+target_link_libraries(uvbi-view-camera PRIVATE uvbi-image-sources opencv_imgcodecs)
 set_target_properties(uvbi-view-camera PROPERTIES
     FOLDER "${PROJ_FOLDER}")
 
