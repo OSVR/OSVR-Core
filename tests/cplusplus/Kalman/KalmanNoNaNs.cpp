@@ -9,6 +9,7 @@
 */
 
 // Copyright 2015 Sensics, Inc.
+// Copyright 2019 Collabora, Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +44,7 @@ inline void dumpKalmanDebugOuput(const char name[], const char expr[],
 #include <osvr/Kalman/AbsolutePositionMeasurement.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <iostream>
@@ -56,52 +57,31 @@ using AbsolutePositionMeasurement =
     osvr::kalman::AbsolutePositionMeasurement<State>;
 using Filter = osvr::kalman::FlexibleKalmanFilter<ProcessModel>;
 
-class Stability : public ::testing::Test {
+class Stability {
   public:
-    template <typename Filter> void dumpInitialState(Filter const &filter) {
-        ASSERT_EQ(iteration, 0)
-            << "Internal test logic error: should only call "
-               "dumpInitialState before iterations begin.";
-        dumpState(filter.state(), "Initial state");
-    }
-
     template <typename State>
     void dumpState(State const &state, const char msg[]) {
-        std::cout << "\n" << msg << " (iteration " << iteration << "):\n"
+        std::cout << "\n"
+                  << msg << " (iteration " << iteration << "):\n"
                   << state << std::endl;
     }
     template <typename Filter, typename Measurement>
     void filterAndCheck(Filter &filter, Measurement &meas, double dt = 0.1) {
+        INFO("Iteration " << iteration);
+        INFO("prediction step");
         filter.predict(dt);
         dumpState(filter.state(), "After prediction");
-        ASSERT_FALSE(stateContentsInvalid(filter.state()))
-            << "ERROR: Detected an invalid floating-point value in the state "
-               "after prediction step of iteration "
-            << iteration;
-        ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
-            << "ERROR: Detected an invalid state covariance matrix (invalid "
-               "floating-point, or invariants violated) after prediction step "
-               "of iteration "
-            << iteration;
+        REQUIRE_FALSE(stateContentsInvalid(filter.state()));
+        REQUIRE_FALSE(covarianceContentsInvalid(filter.state()));
 
-        ASSERT_FALSE(
-            covarianceContentsInvalid(meas.getCovariance(filter.state())))
-            << "ERROR: Detected invalid contents (invalid floating-point, or "
-               "invariants violated) in measurement covariance "
-               "matrix, iteration "
-            << iteration << "\n" << meas.getCovariance(filter.state());
+        REQUIRE_FALSE(
+            covarianceContentsInvalid(meas.getCovariance(filter.state())));
 
+        INFO("correction step");
         filter.correct(meas);
         dumpState(filter.state(), "After correction");
-        ASSERT_FALSE(stateContentsInvalid(filter.state()))
-            << "ERROR: Detected an invalid floating-point value in the state "
-               "after correction step of iteration "
-            << iteration;
-        ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
-            << "ERROR: Detected an invalid state covariance matrix (invalid "
-               "floating-point, or invariants violated) after correction step "
-               "of iteration "
-            << iteration;
+        REQUIRE_FALSE(stateContentsInvalid(filter.state()));
+        REQUIRE_FALSE(covarianceContentsInvalid(filter.state()));
         iteration++;
     }
 
@@ -109,44 +89,9 @@ class Stability : public ::testing::Test {
     void filterAndCheckRepeatedly(Filter &filter, Measurement &meas,
                                   double dt = 0.1,
                                   std::size_t iterations = 100) {
-        for (iteration = 0; iteration < iterations; iteration++) {
-            filter.predict(dt);
-            dumpState(filter.state(), "After prediction");
-            ASSERT_FALSE(stateContentsInvalid(filter.state()))
-                << "ERROR: Detected an invalid floating-point value in the "
-                   "state "
-                   "after prediction step of iteration "
-                << iteration;
-            ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
-                << "ERROR: Detected an invalid state covariance matrix "
-                   "(invalid "
-                   "floating-point, or invariants violated) after prediction "
-                   "step "
-                   "of iteration "
-                << iteration;
-
-            ASSERT_FALSE(
-                covarianceContentsInvalid(meas.getCovariance(filter.state())))
-                << "ERROR: Detected invalid contents (invalid floating-point, "
-                   "or "
-                   "invariants violated) in measurement covariance "
-                   "matrix, iteration "
-                << iteration << "\n" << meas.getCovariance(filter.state());
-
-            filter.correct(meas);
-            dumpState(filter.state(), "After correction");
-            ASSERT_FALSE(stateContentsInvalid(filter.state()))
-                << "ERROR: Detected an invalid floating-point value in the "
-                   "state "
-                   "after correction step of iteration "
-                << iteration;
-            ASSERT_FALSE(covarianceContentsInvalid(filter.state()))
-                << "ERROR: Detected an invalid state covariance matrix "
-                   "(invalid "
-                   "floating-point, or invariants violated) after correction "
-                   "step "
-                   "of iteration "
-                << iteration;
+        iteration = 0;
+        while (iteration < iterations) {
+            filterAndCheck(filter, meas, dt);
         }
     }
 
@@ -154,44 +99,33 @@ class Stability : public ::testing::Test {
     std::size_t iteration = 0;
 };
 
-template <typename T> class VariedProcessModelStability : public Stability {};
-
-typedef ::testing::Types<osvr::kalman::PoseConstantVelocityProcessModel,
-                         osvr::kalman::PoseDampedConstantVelocityProcessModel>
-    ProcessModelTypes;
-
-TYPED_TEST_CASE(VariedProcessModelStability, ProcessModelTypes);
-TYPED_TEST(VariedProcessModelStability,
-           IdentityAbsoluteOrientationMeasurement) {
-    using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
+TEMPLATE_TEST_CASE("ProcessModelStability", "",
+                   osvr::kalman::PoseConstantVelocityProcessModel,
+                   osvr::kalman::PoseDampedConstantVelocityProcessModel) {
+    Stability fixture;
+    using Filter = osvr::kalman::FlexibleKalmanFilter<TestType>;
 
     auto filter = Filter{};
-    auto meas = AbsoluteOrientationMeasurement{
-        Eigen::Quaterniond::Identity(),
-        Eigen::Vector3d(0.00001, 0.00001, 0.00001)};
-    this->dumpInitialState(filter);
-    this->filterAndCheckRepeatedly(filter, meas);
-    /// @todo check that it's roughly identity
-}
+    fixture.dumpState(filter.state(), "Initial state");
 
-TYPED_TEST(VariedProcessModelStability, IdentityAbsolutePositionMeasurement) {
-    using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
-
-    auto filter = Filter{};
-    auto meas = AbsolutePositionMeasurement{
-        Eigen::Vector3d::Zero(), Eigen::Vector3d::Constant(0.000007)};
-    this->dumpInitialState(filter);
-    this->filterAndCheckRepeatedly(filter, meas);
-    /// @todo check that it's roughly identity
-}
-
-TYPED_TEST(VariedProcessModelStability, AbsolutePositionMeasurementXlate111) {
-    using Filter = osvr::kalman::FlexibleKalmanFilter<TypeParam>;
-
-    auto filter = Filter{};
-    auto meas = AbsolutePositionMeasurement{
-        Eigen::Vector3d::Constant(1), Eigen::Vector3d::Constant(0.000007)};
-    this->dumpInitialState(filter);
-    this->filterAndCheckRepeatedly(filter, meas);
-    /// @todo check that it's roughly identity orientation, position of 1, 1, 1
+    SECTION("IdentityAbsoluteOrientationMeasurement") {
+        auto meas = AbsoluteOrientationMeasurement{
+            Eigen::Quaterniond::Identity(),
+            Eigen::Vector3d(0.00001, 0.00001, 0.00001)};
+        fixture.filterAndCheckRepeatedly(filter, meas);
+        /// @todo check that it's roughly identity
+    }
+    SECTION("IdentityAbsolutePositionMeasurement") {
+        auto meas = AbsolutePositionMeasurement{
+            Eigen::Vector3d::Zero(), Eigen::Vector3d::Constant(0.000007)};
+        fixture.filterAndCheckRepeatedly(filter, meas);
+        /// @todo check that it's roughly identity
+    }
+    SECTION("AbsolutePositionMeasurementXlate111") {
+        auto meas = AbsolutePositionMeasurement{
+            Eigen::Vector3d::Constant(1), Eigen::Vector3d::Constant(0.000007)};
+        fixture.filterAndCheckRepeatedly(filter, meas);
+        /// @todo check that it's roughly identity orientation, position of 1,
+        /// 1, 1
+    }
 }

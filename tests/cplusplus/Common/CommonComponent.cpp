@@ -28,29 +28,29 @@
 #include <vrpn_Connection.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
-// - none
+#include <string>
 
 namespace messages = osvr::common::messages;
 
-TEST(CommonComponentMessages, GotFirstConnection) {
-    ASSERT_STREQ(messages::VRPNGotFirstConnection::identifier(),
-                 vrpn_got_first_connection);
+TEST_CASE("CommonComponentMessages-GotFirstConnection") {
+    REQUIRE(std::string(messages::VRPNGotFirstConnection::identifier()) ==
+            vrpn_got_first_connection);
 }
 
-TEST(CommonComponentMessages, GotConnection) {
-    ASSERT_STREQ(messages::VRPNGotConnection::identifier(),
-                 vrpn_got_connection);
+TEST_CASE("CommonComponentMessages-GotConnection") {
+    REQUIRE(std::string(messages::VRPNGotConnection::identifier()) ==
+            vrpn_got_connection);
 }
 
-TEST(CommonComponentMessages, DroppedConnection) {
-    ASSERT_STREQ(messages::VRPNDroppedConnection::identifier(),
-                 vrpn_dropped_connection);
+TEST_CASE("CommonComponentMessages-DroppedConnection") {
+    REQUIRE(std::string(messages::VRPNDroppedConnection::identifier()) ==
+            vrpn_dropped_connection);
 }
 
-TEST(CommonComponentMessages, DroppedLastConnection) {
-    ASSERT_STREQ(messages::VRPNDroppedLastConnection::identifier(),
-                 vrpn_dropped_last_connection);
+TEST_CASE("CommonComponentMessages-DroppedLastConnection") {
+    REQUIRE(std::string(messages::VRPNDroppedLastConnection::identifier()) ==
+            vrpn_dropped_last_connection);
 }

@@ -23,114 +23,89 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Util/ProjectionMatrix.h>
-#include <osvr/Util/ProjectionMatrixFromFOV.h>
 #include <osvr/Util/Angles.h>
 #include <osvr/Util/EigenExtras.h>
+#include <osvr/Util/ProjectionMatrix.h>
+#include <osvr/Util/ProjectionMatrixFromFOV.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
-// - none
+#include <iostream>
 
-using osvr::util::degrees;
 using osvr::util::computeSymmetricFOVRect;
+using osvr::util::degrees;
 
 typedef std::vector<double> BoundsList;
 namespace opts = osvr::util::projection_options;
 
-template <typename OptionType>
-class ParameterizedProjectionTest : public ::testing::Test {
-  public:
-    static const opts::OptionType Options = OptionType::value;
+template <opts::OptionType options = 0>
+using Options = std::integral_constant<opts::OptionType, options>;
+template <opts::OptionType Options> inline double getMinZ() {
+    return opts::IsZOutputUnsigned<Options>::value ? 0 : -1;
+}
+
+TEMPLATE_TEST_CASE("ParameterizedProjectionTest-BasicSmoketest", "", Options<>,
+                   Options<opts::ZOutputUnsigned>,
+                   Options<opts::LeftHandedInput>,
+                   Options<opts::LeftHandedInput | opts::ZOutputUnsigned>) {
+
+    static const opts::OptionType Options = TestType::value;
+
     using Vec3 = Eigen::Vector3d;
     using Vec4 = Eigen::Vector4d;
-    static double getMinZ() {
-        return opts::IsZOutputUnsigned<Options>::value ? 0 : -1;
-    }
-    ParameterizedProjectionTest()
-        : xBounds({-1, 1}), yBounds({-1, 1}), zBounds({getMinZ(), 1}) {
-        std::cout
-            << "\n Left handed input: " << std::boolalpha
-            << osvr::util::projection_options::IsLeftHandedInput<Options>::value
-            << "\n";
-        std::cout
-            << "Unsigned Z output: " << std::boolalpha
-            << osvr::util::projection_options::IsZOutputUnsigned<Options>::value
-            << "\n";
-    }
+    const auto minZ = getMinZ<Options>();
 
-    void setParams(double zNear, double zFar) {
-        near = zNear;
-        far = zFar;
-        std::cout << "Near: " << near << "\tFar: " << far << "\n";
-    }
-    osvr::util::Rectd computeSymmetricRect() const {
-        return computeSymmetricFOVRect(50. * degrees, 40. * degrees, near);
-    }
+    INFO("Left handed input: "
+         << std::boolalpha
+         << osvr::util::projection_options::IsLeftHandedInput<Options>::value);
+    INFO("Unsigned Z output: "
+         << std::boolalpha
+         << osvr::util::projection_options::IsZOutputUnsigned<Options>::value);
+    BoundsList xBounds{{-1, 1}};
+    BoundsList yBounds{{-1, 1}};
+    BoundsList zBounds{{minZ, 1}};
+    double near = 0.1;
+    double far = 1000.;
+    CAPTURE(near);
+    CAPTURE(far);
+    auto rect = computeSymmetricFOVRect(50. * degrees, 40. * degrees, near);
 
-    inline void tryProjection(osvr::util::Rectd const &rect) {
+    std::ostringstream os;
+    os << rect;
+    INFO(os.str());
 
-        std::cout << rect << std::endl;
-        double handednessCorrection =
-            osvr::util::projection_options::IsLeftHandedInput<Options>::value
-                ? 1.
-                : -1.;
-        auto projection =
-            osvr::util::parameterizedCreateProjectionMatrix<Options>(rect, near,
-                                                                     far);
-        std::cout << "Projection matrix:\n";
-        std::cout << projection << std::endl;
+    double handednessCorrection =
+        osvr::util::projection_options::IsLeftHandedInput<Options>::value ? 1.
+                                                                          : -1.;
+    auto projection = osvr::util::parameterizedCreateProjectionMatrix<Options>(
+        rect, near, far);
 
-        std::cout << "Frustum corners:\n";
-        Eigen::Matrix4d inv = projection.inverse();
-        for (auto z : zBounds) {
-            for (auto y : yBounds) {
-                for (auto x : xBounds) {
-                    Vec4 bound(x, y, z, 1);
-                    auto result =
-                        osvr::util::extractPoint((inv * bound).eval());
-                    std::cout << bound.transpose() << "\t<-\t" << result
-                              << "\n";
-                    if (z == getMinZ()) {
-                        // near plane
-                        ASSERT_NEAR(near * handednessCorrection, result.z(),
-                                    0.0000001);
-                    } else {
-                        // far plane
-                        ASSERT_NEAR(far * handednessCorrection, result.z(),
-                                    0.0000001);
-                    }
-                    // F(osvr::util::extractPoint(bound), result);
+    CAPTURE(projection);
+
+    INFO("Frustum corners:");
+    Eigen::Matrix4d inv = projection.inverse();
+    for (auto z : zBounds) {
+        for (auto y : yBounds) {
+            for (auto x : xBounds) {
+                Vec4 bound(x, y, z, 1);
+                auto result = osvr::util::extractPoint((inv * bound).eval());
+                INFO(bound.transpose() << "\t<-\t" << result);
+                if (z == minZ) {
+                    // near plane
+                    REQUIRE(near * handednessCorrection == Approx(result.z()));
+                } else {
+                    // far plane
+                    REQUIRE(far * handednessCorrection == Approx(result.z()));
                 }
+                // F(osvr::util::extractPoint(bound), result);
             }
         }
     }
-
-    double near = 0.1;
-    double far = 1000.;
-
-  private:
-    BoundsList xBounds;
-    BoundsList yBounds;
-    BoundsList zBounds;
-};
-
-template <opts::OptionType options = 0>
-using Options = std::integral_constant<opts::OptionType, options>;
-
-typedef ::testing::Types<
-    Options<>, Options<opts::ZOutputUnsigned>, Options<opts::LeftHandedInput>,
-    Options<opts::LeftHandedInput | opts::ZOutputUnsigned>> OptionCombinations;
-TYPED_TEST_CASE(ParameterizedProjectionTest, OptionCombinations);
-TYPED_TEST(ParameterizedProjectionTest, BasicSmoketest) {
-    this->setParams(0.1, 1000);
-    auto rect = this->computeSymmetricRect();
-    this->tryProjection(rect);
 }
 
-TEST(ParameterizedProjectionTest, MatchesUnparameterized) {
+TEST_CASE("ParameterizedProjectionTest-MatchesUnparameterized") {
     using namespace osvr::util;
     namespace opts = osvr::util::projection_options;
     double near = 0.1;
@@ -143,7 +118,7 @@ TEST(ParameterizedProjectionTest, MatchesUnparameterized) {
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            ASSERT_EQ(paramMat(i, j), unparamMat(i, j));
+            REQUIRE(paramMat(i, j) == unparamMat(i, j));
         }
     }
 }

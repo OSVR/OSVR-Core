@@ -24,51 +24,50 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/JointClientKit/JointClientKitC.h>
 #include <osvr/ClientKit/ContextC.h>
 #include <osvr/ClientKit/InterfaceC.h>
 #include <osvr/ClientKit/InterfaceCallbackC.h>
+#include <osvr/JointClientKit/JointClientKitC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 static bool reportReceived = false;
 
 static void myAnalogCallback(void *userdata, const OSVR_TimeValue *timestamp,
-                           const struct OSVR_AnalogReport *report) {
+                             const struct OSVR_AnalogReport *report) {
     reportReceived = true;
 }
 
-TEST(BasicJointClientKitWithInterface, ConstructDestruct) {
+TEST_CASE("BasicJointClientKitWithInterface-ConstructDestruct") {
     auto options = osvrJointClientCreateOptions();
-    ASSERT_NE(nullptr, options);
+    REQUIRE_FALSE(nullptr == options);
 
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrJointClientOptionsLoadPlugin(options, "com_osvr_example_AnalogSync"));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrJointClientOptionsLoadPlugin(
+                                       options, "com_osvr_example_AnalogSync"));
 
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrJointClientOptionsTriggerHardwareDetect(options));
+    REQUIRE(OSVR_RETURN_SUCCESS ==
+            osvrJointClientOptionsTriggerHardwareDetect(options));
 
     auto ctx = osvrJointClientInit("org.osvr.test.jointclientkit", options);
-    ASSERT_NE(nullptr, ctx);
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrClientUpdate(ctx));
+    REQUIRE_FALSE(nullptr == ctx);
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientUpdate(ctx));
 
     OSVR_ClientInterface eye = nullptr;
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrClientGetInterface(ctx, "/com_osvr_example_AnalogSync/MySyncDevice/analog/0", &eye));
+    REQUIRE(
+        OSVR_RETURN_SUCCESS ==
+        osvrClientGetInterface(
+            ctx, "/com_osvr_example_AnalogSync/MySyncDevice/analog/0", &eye));
 
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrRegisterAnalogCallback(eye, &myAnalogCallback, nullptr));
+    REQUIRE(OSVR_RETURN_SUCCESS ==
+            osvrRegisterAnalogCallback(eye, &myAnalogCallback, nullptr));
 
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrClientUpdate(ctx));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientUpdate(ctx));
 
-    ASSERT_EQ(true, reportReceived);
+    REQUIRE(reportReceived);
 
-    ASSERT_EQ(OSVR_RETURN_SUCCESS,
-      osvrClientShutdown(ctx));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientShutdown(ctx));
 }

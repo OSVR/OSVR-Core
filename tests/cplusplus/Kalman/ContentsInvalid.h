@@ -43,8 +43,9 @@ inline bool contentsInvalid(double n) { return !(n == 0. || std::isnormal(n)); }
 /// Applies contentsInvalid() to a matrix or vector.
 template <typename Derived>
 inline bool contentsInvalid(Eigen::MatrixBase<Derived> const &v) {
-    return v.unaryExpr(
-                [](typename Derived::Scalar s) { return contentsInvalid(s); })
+    return v
+        .unaryExpr(
+            [](typename Derived::Scalar s) { return contentsInvalid(s); })
         .any();
 }
 

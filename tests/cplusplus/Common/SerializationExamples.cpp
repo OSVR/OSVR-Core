@@ -24,48 +24,45 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/Serialization.h>
-#include <osvr/Common/Buffer.h>
-#include "SerializationTraitExample_Simple.h"
 #include "SerializationTraitExample_Complicated.h"
+#include "SerializationTraitExample_Simple.h"
+#include <osvr/Common/Buffer.h>
+#include <osvr/Common/Serialization.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <string>
 
 using namespace osvr::common;
 
-template <typename T>
-class SerializationTraitsExamples : public ::testing::Test {};
-typedef ::testing::Types<YourSimpleType, YourComplicatedType> ExampleTypes;
-
-TYPED_TEST_CASE(SerializationTraitsExamples, ExampleTypes);
-
-TYPED_TEST(SerializationTraitsExamples, CanSerialize) {
+TEMPLATE_TEST_CASE("SerializationTraitsExamples-CanSerialize", "",
+                   YourSimpleType, YourComplicatedType) {
     Buffer<> buf;
-    TypeParam input = {1.5, 300, -5};
-    ASSERT_NO_THROW(osvr::common::serialization::serializeRaw(buf, input));
+    TestType input = {1.5, 300, -5};
+    REQUIRE_NOTHROW(osvr::common::serialization::serializeRaw(buf, input));
 }
 
-TYPED_TEST(SerializationTraitsExamples, SerializeMatchesSize) {
+TEMPLATE_TEST_CASE("SerializationTraitsExamples-SerializeMatchesSize", "",
+                   YourSimpleType, YourComplicatedType) {
     Buffer<> buf;
-    TypeParam input = {1.5, 300, -5};
+    TestType input = {1.5, 300, -5};
     osvr::common::serialization::serializeRaw(buf, input);
-    ASSERT_NO_THROW(serialization::getBufferSpaceRequiredRaw(0, input));
-    ASSERT_EQ(buf.size(), serialization::getBufferSpaceRequiredRaw(0, input));
+    REQUIRE_NOTHROW(serialization::getBufferSpaceRequiredRaw(0, input));
+    REQUIRE(buf.size() == serialization::getBufferSpaceRequiredRaw(0, input));
 }
 
-TYPED_TEST(SerializationTraitsExamples, RoundTrip) {
+TEMPLATE_TEST_CASE("SerializationTraitsExamples-RoundTrip", "", YourSimpleType,
+                   YourComplicatedType) {
     Buffer<> buf;
-    TypeParam input = {1.5, 300, -5};
+    TestType input = {1.5, 300, -5};
     osvr::common::serialization::serializeRaw(buf, input);
 
     auto reader = buf.startReading();
-    TypeParam output;
-    ASSERT_NO_THROW(serialization::deserializeRaw(reader, output));
-    ASSERT_EQ(input.A, output.A);
-    ASSERT_EQ(input.B, output.B);
-    ASSERT_EQ(input.C, output.C);
+    TestType output;
+    REQUIRE_NOTHROW(serialization::deserializeRaw(reader, output));
+    REQUIRE(input.A == output.A);
+    REQUIRE(input.B == output.B);
+    REQUIRE(input.C == output.C);
 }

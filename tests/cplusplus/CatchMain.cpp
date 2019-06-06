@@ -1,15 +1,13 @@
 /** @file
-    @brief Test Implementation
+    @brief Main file for Catch2-based tests
 
-    @date 2015
+    @date 2019
 
-    @author
-    Sensics, Inc.
-    <http://sensics.com/osvr>
+    @author Ryan Pavlik <ryan.pavlik@collabora.com>
 
 */
 
-// Copyright 2015 Sensics, Inc.
+// Copyright 2019 Collabora, Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,18 +21,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Internal Includes
-#include <osvr/ClientKit/Context.h>
+#define CATCH_CONFIG_MAIN
 
-// Library/third-party includes
-// - none
-
-// Standard includes
 #include <catch2/catch.hpp>
-
-TEST_CASE("SimultaneousClient-TwoContexts") {
-    osvr::clientkit::ClientContext outerContext("com.osvr.test.outerContext");
-    {
-        osvr::clientkit::ClientContext innerContext("com.osvr.test.innerContext");
-    }
-}

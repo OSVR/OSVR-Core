@@ -123,9 +123,10 @@ if(BUILD_TESTING)
         TestIMU_Common.h
         TestIMU_EKF.cpp
         TestIMU_UKF.cpp)
-    target_link_libraries(uvbi-test-imu PRIVATE uvbi-core vendored-catch)
+    target_link_libraries(uvbi-test-imu PRIVATE uvbi-core osvr-catch2-interface)
     set_target_properties(uvbi-test-imu PROPERTIES
         FOLDER "${PROJ_FOLDER}")
+    add_test(NAME TestIMU COMMAND uvbi-test-imu)
 endif()
 
 # "object library" for the HDK data files.

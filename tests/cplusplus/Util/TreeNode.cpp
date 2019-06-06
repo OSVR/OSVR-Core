@@ -27,14 +27,14 @@
 #include <osvr/Util/TreeNode.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <string>
 
-using std::string;
 using osvr::util::TreeNode;
 using osvr::util::TreeNodePointer;
+using std::string;
 
 typedef TreeNode<int> IntTree;
 typedef TreeNodePointer<int>::type IntTreePtr;
@@ -42,192 +42,248 @@ typedef TreeNodePointer<int>::type IntTreePtr;
 typedef TreeNode<string> StringTree;
 typedef TreeNodePointer<string>::type StringTreePtr;
 
-TEST(TreeNode, createRoot) {
-    ASSERT_NO_THROW((IntTree::createRoot()));
-    ASSERT_NO_THROW((IntTree::createRoot(5)));
-    ASSERT_NO_THROW((StringTree::createRoot()));
-    ASSERT_NO_THROW((StringTree::createRoot("Value")));
+TEST_CASE("TreeNode-createRoot") {
+    REQUIRE_NOTHROW((IntTree::createRoot()));
+    REQUIRE_NOTHROW((IntTree::createRoot(5)));
+    REQUIRE_NOTHROW((StringTree::createRoot()));
+    REQUIRE_NOTHROW((StringTree::createRoot("Value")));
 }
 
-TEST(TreeNode, RootInvariants) {
+TEST_CASE("TreeNode-RootInvariants") {
     {
         IntTreePtr tree;
-        ASSERT_NO_THROW(tree = IntTree::createRoot());
-        ASSERT_TRUE(tree->getName().empty());
-        ASSERT_FALSE(tree->hasChildren());
-        ASSERT_EQ(tree->numChildren(), 0);
-        ASSERT_EQ(tree->value(), 0) << "Default constructed int is 0";
-        ASSERT_NO_THROW(tree->value() = 6) << "Can set the value";
-        ASSERT_EQ(tree->value(), 6) << "Retains set value";
+        REQUIRE_NOTHROW(tree = IntTree::createRoot());
+        REQUIRE(tree->getName().empty());
+        REQUIRE_FALSE(tree->hasChildren());
+        REQUIRE(tree->numChildren() == 0);
+        {
+            INFO("Default constructed int is 0");
+            REQUIRE(tree->value() == 0);
+        }
+        {
+            INFO("Can set the value");
+            REQUIRE_NOTHROW(tree->value() = 6);
+        }
+        {
+            INFO("Retains set value");
+            REQUIRE(tree->value() == 6);
+        }
     }
     {
         IntTreePtr tree;
-        ASSERT_NO_THROW(tree = IntTree::createRoot(5));
-        ASSERT_TRUE(tree->getName().empty());
-        ASSERT_FALSE(tree->hasChildren());
-        ASSERT_EQ(tree->numChildren(), 0);
-        ASSERT_EQ(tree->value(), 5) << "We created with value 5";
-        ASSERT_NO_THROW(tree->value() = 6) << "Can set the value";
-        ASSERT_EQ(tree->value(), 6) << "Retains set value";
+        REQUIRE_NOTHROW(tree = IntTree::createRoot(5));
+        REQUIRE(tree->getName().empty());
+        REQUIRE_FALSE(tree->hasChildren());
+        REQUIRE(tree->numChildren() == 0);
+        {
+            INFO("We created with value 5");
+            REQUIRE(tree->value() == 5);
+        }
+        {
+            INFO("Can set the value");
+            REQUIRE_NOTHROW(tree->value() = 6);
+        }
+        {
+            INFO("Retains set value");
+            REQUIRE(tree->value() == 6);
+        }
     }
     {
         StringTreePtr tree;
-        ASSERT_NO_THROW(tree = StringTree::createRoot());
-        ASSERT_TRUE(tree->getName().empty());
-        ASSERT_FALSE(tree->hasChildren());
-        ASSERT_EQ(tree->numChildren(), 0);
-        ASSERT_TRUE(tree->value().empty())
-            << "Default constructed string is empty";
-        ASSERT_NO_THROW(tree->value() = "myVal") << "Can set the value";
-        ASSERT_EQ(tree->value(), "myVal") << "Retains set value";
+        REQUIRE_NOTHROW(tree = StringTree::createRoot());
+        REQUIRE(tree->getName().empty());
+        REQUIRE_FALSE(tree->hasChildren());
+        REQUIRE(tree->numChildren() == 0);
+        {
+            INFO("Default constructed string is empty");
+            REQUIRE(tree->value().empty());
+        }
+        {
+            INFO("Can set the value");
+            REQUIRE_NOTHROW(tree->value() = "myVal");
+        }
+        {
+            INFO("Retains set value");
+            REQUIRE(tree->value() == "myVal");
+        }
     }
     {
         StringTreePtr tree;
-        ASSERT_NO_THROW(tree = StringTree::createRoot("test"));
-        ASSERT_TRUE(tree->getName().empty());
-        ASSERT_FALSE(tree->hasChildren());
-        ASSERT_EQ(tree->numChildren(), 0);
-        ASSERT_EQ(tree->value(), "test") << "Retains original value";
-        ASSERT_NO_THROW(tree->value() = "myVal") << "Can set the value";
-        ASSERT_EQ(tree->value(), "myVal") << "Retains set value";
+        REQUIRE_NOTHROW(tree = StringTree::createRoot("test"));
+        REQUIRE(tree->getName().empty());
+        REQUIRE_FALSE(tree->hasChildren());
+        REQUIRE(tree->numChildren() == 0);
+        {
+            INFO("Retains original value");
+            REQUIRE(tree->value() == "test");
+        }
+        {
+            INFO("Can set the value");
+            REQUIRE_NOTHROW(tree->value() = "myVal");
+        }
+        {
+            INFO("Retains set value");
+            REQUIRE(tree->value() == "myVal");
+        }
     }
 }
 
-TEST(TreeNode, create) {
+TEST_CASE("TreeNode-create") {
     IntTreePtr tree(IntTree::createRoot());
-    ASSERT_NO_THROW((IntTree::create(*tree, "A")));
-    ASSERT_TRUE(tree->hasChildren());
-    ASSERT_EQ(tree->numChildren(), 1);
+    REQUIRE_NOTHROW((IntTree::create(*tree, "A")));
+    REQUIRE(tree->hasChildren());
+    REQUIRE(tree->numChildren() == 1);
+    {
+        INFO("Can't create a duplicate-named child");
+        REQUIRE_THROWS_AS((IntTree::create(*tree, "A")), std::logic_error);
+        REQUIRE(tree->numChildren() == 1);
+    }
 
-    ASSERT_THROW((IntTree::create(*tree, "A")), std::logic_error)
-        << "Can't create a duplicate-named child";
-    ASSERT_EQ(tree->numChildren(), 1);
-
-    ASSERT_THROW((IntTree::create(*tree, "")), std::logic_error)
-        << "Can't create a non-root node without a name";
-    ASSERT_EQ(tree->numChildren(), 1);
+    {
+        INFO("Can't create a non-root node without a name");
+        REQUIRE_THROWS_AS((IntTree::create(*tree, "")), std::logic_error);
+        REQUIRE(tree->numChildren() == 1);
+    }
 }
 
-TEST(TreeNode, getOrCreateChildByName) {
+TEST_CASE("TreeNode-getOrCreateChildByName") {
     IntTreePtr tree(IntTree::createRoot());
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("A"))
-        << "Should create the child";
-    ASSERT_TRUE(tree->hasChildren());
-    ASSERT_EQ(tree->numChildren(), 1);
+    REQUIRE_NOTHROW(tree->getOrCreateChildByName("A"));
+    REQUIRE(tree->hasChildren());
+    REQUIRE(tree->numChildren() == 1);
 
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("A"))
-        << "Should just retrieve the child";
-    ASSERT_EQ(tree->numChildren(), 1) << "Should just retrieve the child";
+    REQUIRE_NOTHROW(tree->getOrCreateChildByName("A"));
+    REQUIRE(tree->numChildren() == 1);
 
-    ASSERT_THROW(tree->getOrCreateChildByName(""), std::logic_error)
-        << "Can't create a non-root node without a name";
-    ASSERT_EQ(tree->numChildren(), 1);
+    {
+        INFO("Can't create a non-root node without a name");
+        REQUIRE_THROWS_AS(tree->getOrCreateChildByName(""), std::logic_error);
+        REQUIRE(tree->numChildren() == 1);
+    }
 }
 
-TEST(TreeNode, ChildValues) {
+TEST_CASE("TreeNode-ChildValues") {
     StringTreePtr tree(StringTree::createRoot());
-    ASSERT_TRUE(tree->value().empty()) << "Default constructed string is empty";
-    ASSERT_TRUE(tree->getOrCreateChildByName("A").value().empty())
-        << "Default constructed string is empty";
-    ASSERT_EQ(tree->numChildren(), 1);
+    {
+        INFO("Default constructed string is empty");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value().empty());
+    }
+    REQUIRE(tree->numChildren() == 1);
 
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("A").value() = "myVal")
-        << "Setting child value";
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "Child value retained";
+    {
+        INFO("Setting child value");
+        REQUIRE_NOTHROW(tree->getOrCreateChildByName("A").value() = "myVal");
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+    }
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+    }
 
-    ASSERT_NO_THROW((StringTree::create(*tree, "B")));
-    ASSERT_EQ(tree->numChildren(), 2);
-    ASSERT_TRUE(tree->getOrCreateChildByName("B").value().empty())
-        << "Second child's value is empty";
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "First child value retained";
+    REQUIRE_NOTHROW((StringTree::create(*tree, "B")));
+    REQUIRE(tree->numChildren() == 2);
+    {
+        INFO("New child's value is empty");
+        REQUIRE(tree->getOrCreateChildByName("B").value().empty());
+    }
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+    }
+    INFO("Setting second child value");
+    REQUIRE_NOTHROW(tree->getOrCreateChildByName("B").value() = "mySecondVal");
 
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("B").value() = "mySecondVal")
-        << "Setting second child value";
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "First child value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("B").value(), "mySecondVal")
-        << "Second child's value retained";
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+    }
+    REQUIRE(tree->getOrCreateChildByName("B").value() == "mySecondVal");
 
-    ASSERT_NO_THROW(tree->getOrCreateChildByName("C").value() = "myThirdVal")
-        << "Creating child and setting value in single getOrCreate expression.";
-    ASSERT_EQ(tree->numChildren(), 3);
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "First child value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("B").value(), "mySecondVal")
-        << "Second child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("C").value(), "myThirdVal")
-        << "Third child's value retained";
+    INFO("Creating child and setting value in single getOrCreate "
+         "expression.");
+    REQUIRE_NOTHROW(tree->getOrCreateChildByName("C").value() = "myThirdVal");
 
-    ASSERT_NO_THROW((StringTree::create(*tree, "D").value() = "myFourthVal"))
-        << "Creating child and setting value in single create() expression.";
-    ASSERT_EQ(tree->numChildren(), 4);
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "First child value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("B").value(), "mySecondVal")
-        << "Second child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("C").value(), "myThirdVal")
-        << "Third child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("D").value(), "myFourthVal")
-        << "Fourth child's value retained";
+    REQUIRE(tree->numChildren() == 3);
 
-    ASSERT_NO_THROW((StringTree::create(*tree, "E", "myFifthVal")))
-        << "Creating child and setting value in single create() call.";
-    ASSERT_EQ(tree->numChildren(), 5);
-    ASSERT_TRUE(tree->value().empty())
-        << "Parent value should still be default";
-    ASSERT_EQ(tree->getOrCreateChildByName("A").value(), "myVal")
-        << "First child value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("B").value(), "mySecondVal")
-        << "Second child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("C").value(), "myThirdVal")
-        << "Third child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("D").value(), "myFourthVal")
-        << "Fourth child's value retained";
-    ASSERT_EQ(tree->getOrCreateChildByName("E").value(), "myFifthVal")
-        << "Fifth child's value retained";
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+        REQUIRE(tree->getOrCreateChildByName("B").value() == "mySecondVal");
+    }
+    REQUIRE(tree->getOrCreateChildByName("C").value() == "myThirdVal");
+
+    INFO("Creating child and setting value in single create() expression.");
+    REQUIRE_NOTHROW((StringTree::create(*tree, "D").value() = "myFourthVal"));
+
+    REQUIRE(tree->numChildren() == 4);
+
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+        REQUIRE(tree->getOrCreateChildByName("B").value() == "mySecondVal");
+        REQUIRE(tree->getOrCreateChildByName("C").value() == "myThirdVal");
+    }
+    REQUIRE(tree->getOrCreateChildByName("D").value() == "myFourthVal");
+
+    INFO("Creating child and setting value in single create() call.");
+    REQUIRE_NOTHROW((StringTree::create(*tree, "E", "myFifthVal")));
+    REQUIRE(tree->numChildren() == 5);
+    {
+        INFO("Other values should still be the same");
+        REQUIRE(tree->value().empty());
+        REQUIRE(tree->getOrCreateChildByName("A").value() == "myVal");
+        REQUIRE(tree->getOrCreateChildByName("B").value() == "mySecondVal");
+        REQUIRE(tree->getOrCreateChildByName("C").value() == "myThirdVal");
+        REQUIRE(tree->getOrCreateChildByName("D").value() == "myFourthVal");
+    }
+    REQUIRE(tree->getOrCreateChildByName("E").value() == "myFifthVal");
 }
 
 class ValueChecker {
   public:
     ValueChecker() : nodes(0) {}
     void operator()(StringTree const &node) {
-        ASSERT_EQ(nodes == 0, node.isRoot()) << "Root is visited first";
+        {
+            INFO("Root is visited first");
+            if (nodes == 0) {
+                REQUIRE(node.isRoot());
+            } else {
+                REQUIRE_FALSE(node.isRoot());
+            }
+        }
         if (node.getName().empty()) {
-            ASSERT_TRUE(node.isRoot()) << "Root has no name.";
-            ASSERT_TRUE(node.value().empty()) << "Root has no value set.";
+            INFO("Visiting root");
+            REQUIRE(node.isRoot());
+            REQUIRE(node.value().empty());
         } else if (node.getName() == "A") {
-            ASSERT_EQ(node.value(), "myVal") << "First child value visited";
+            INFO("First child's value visited");
+            REQUIRE(node.value() == "myVal");
         } else if (node.getName() == "B") {
-            ASSERT_EQ(node.value(), "mySecondVal")
-                << "Second child's value visited";
+            INFO("Second child's value visited");
+            REQUIRE(node.value() == "mySecondVal");
         } else if (node.getName() == "C") {
-            ASSERT_EQ(node.value(), "myThirdVal")
-                << "Third child's value visited";
+            INFO("Third child's value visited");
+            REQUIRE(node.value() == "myThirdVal");
+
         } else if (node.getName() == "D") {
-            ASSERT_EQ(node.value(), "myFourthVal")
-                << "Fourth child's value visited";
+            INFO("Fourth child's value visited");
+            REQUIRE(node.value() == "myFourthVal");
         } else if (node.getName() == "E") {
-            ASSERT_EQ(node.value(), "myFifthVal")
-                << "Fourth child's value visited";
+            INFO("Fourth child's value visited");
+            REQUIRE(node.value() == "myFifthVal");
         } else {
-            FAIL() << "Should only have the root and four child nodes!";
+            INFO("Should only have the root and four child nodes!");
+            FAIL();
         }
         nodes++;
     }
 
-    void assertNodeCount() { ASSERT_EQ(nodes, 6); }
+    void assertNodeCount() { REQUIRE(nodes == 6); }
 
   private:
     size_t nodes;
@@ -264,24 +320,24 @@ StringTreePtr getFullTree() {
     return tree;
 }
 
-TEST(TreeNode, Comparisons) {
+TEST_CASE("TreeNode-Comparisons") {
     StringTreePtr tree = getFullTree();
-    ASSERT_EQ(*tree, *tree);
-    ASSERT_NE(*tree, tree->getOrCreateChildByName("A"));
-    ASSERT_EQ(tree->getOrCreateChildByName("A"),
-              tree->getOrCreateChildByName("A"));
-    ASSERT_NE(tree->getOrCreateChildByName("A"),
-              tree->getOrCreateChildByName("B"));
+    REQUIRE(*tree == *tree);
+    REQUIRE_FALSE(*tree == tree->getOrCreateChildByName("A"));
+    REQUIRE(tree->getOrCreateChildByName("A") ==
+            tree->getOrCreateChildByName("A"));
+    REQUIRE_FALSE(tree->getOrCreateChildByName("A") ==
+                  tree->getOrCreateChildByName("B"));
 }
 
-TEST(TreeNode, Visitor) {
+TEST_CASE("TreeNode-Visitor") {
     StringTreePtr tree = getFullTree();
     ValueVisitor visitor;
     visitor(*tree);
     visitor.checker.assertNodeCount();
 }
 
-TEST(TreeNode, ConstVisitor) {
+TEST_CASE("TreeNode-ConstVisitor") {
     StringTreePtr tree = getFullTree();
     ConstValueVisitor visitor;
     visitor(*tree);
@@ -294,13 +350,13 @@ class ParentCheckerVisitor {
     void operator()(StringTree const &node) {
         if (nodes == 0) {
             // root
-            ASSERT_TRUE(node.isRoot());
-            ASSERT_EQ(node.getParent(), nullptr);
+            REQUIRE(node.isRoot());
+            REQUIRE(node.getParent() == nullptr);
             root = &node;
         } else {
             // not root
-            ASSERT_FALSE(node.isRoot());
-            ASSERT_EQ(node.getParent(), root);
+            REQUIRE_FALSE(node.isRoot());
+            REQUIRE(node.getParent() == root);
         }
         nodes++;
         node.visitConstChildren(*this);
@@ -309,7 +365,7 @@ class ParentCheckerVisitor {
     StringTree const *root;
 };
 
-TEST(TreeNode, ParentPointers) {
+TEST_CASE("TreeNode-ParentPointers") {
     StringTreePtr tree = getFullTree();
     ParentCheckerVisitor visitor;
     visitor(*tree);

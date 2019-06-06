@@ -25,13 +25,13 @@
 
 // Internal Includes
 #include "IsType.h"
-#include <osvr/Common/PathTree.h>
 #include <osvr/Common/AddDevice.h>
+#include <osvr/Common/PathTree.h>
 #include <osvr/Common/RoutingExceptions.h>
 
 // Library/third-party includes
 #include <boost/variant/get.hpp>
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 // - none
@@ -39,69 +39,94 @@
 using std::string;
 using namespace osvr::common;
 
-TEST(addDevice, normalConditions) {
+TEST_CASE("addDevice-normalConditions") {
     PathTree tree;
     PathNode *dev = nullptr;
-    ASSERT_NO_THROW(dev = &addDevice(tree, "/com_osvr_sample/MyDevice"));
+    REQUIRE_NOTHROW(dev = &addDevice(tree, "/com_osvr_sample/MyDevice"));
 
     // Check Device
-    ASSERT_EQ(dev->getName(), "MyDevice");
-    ASSERT_FALSE(dev->hasChildren()) << "Make sure it has no children.";
-    ASSERT_TRUE(isNodeType<elements::DeviceElement>(*dev)) << "Check type";
-    ASSERT_NE(dev->getParent(), nullptr) << "Make sure it has a parent.";
+    SECTION("Check device") {
+        REQUIRE(dev->getName() == "MyDevice");
+        REQUIRE_FALSE(dev->hasChildren());
+        REQUIRE(isNodeType<elements::DeviceElement>(*dev));
+        REQUIRE_FALSE(dev->getParent() == nullptr);
+    }
 
     // Check com_osvr_sample
     auto plugin = dev->getParent();
-    ASSERT_EQ(plugin->getName(), "com_osvr_sample");
-    ASSERT_TRUE(isNodeType<elements::PluginElement>(*plugin)) << "Check type";
-    ASSERT_NE(plugin->getParent(), nullptr) << "Make sure it has a parent.";
+    SECTION("Check com_osvr_sample") {
+        REQUIRE(plugin->getName() == "com_osvr_sample");
+        REQUIRE(isNodeType<elements::PluginElement>(*plugin));
+        REQUIRE_FALSE(plugin->getParent() == nullptr);
+    }
     auto root = plugin->getParent();
 
-    ASSERT_TRUE(root->isRoot());
-    ASSERT_EQ(tree.getNodeByPath("/"), *root)
-        << "Root identity should be preserved";
-    ASSERT_EQ(tree.getNodeByPath("/com_osvr_sample/MyDevice"), *dev)
-        << "Identity should be preserved";
+    REQUIRE(root->isRoot());
+    {
+        INFO("Root identity should be preserved");
+        REQUIRE(tree.getNodeByPath("/") == *root);
+    }
+    {
+        INFO("Identity should be preserved");
+        REQUIRE(tree.getNodeByPath("/com_osvr_sample/MyDevice") == *dev);
+    }
 }
 
-TEST(addDevice, missingLeadingSlash) {
+TEST_CASE("addDevice-missingLeadingSlash") {
     PathTree tree;
 
     PathNode *dev = nullptr;
-    ASSERT_NO_THROW(dev = &addDevice(tree, "com_osvr_sample/MyDevice"))
-        << "Should forgive a missing leading slash";
-    ASSERT_EQ(tree.getNodeByPath("/com_osvr_sample/MyDevice"), *dev)
-        << "Should be the same as if the slash had been present";
+    INFO("Should forgive a missing leading slash");
+    REQUIRE_NOTHROW(dev = &addDevice(tree, "com_osvr_sample/MyDevice"));
+
+    INFO("Should be the same as if the slash had been present");
+    REQUIRE(tree.getNodeByPath("/com_osvr_sample/MyDevice") == *dev);
 }
 
-TEST(addDevice, BadInput) {
+TEST_CASE("addDevice-BadInput") {
     PathTree tree;
+    SECTION("Should reject an empty path") {
+        REQUIRE_THROWS_AS(addDevice(tree, ""), exceptions::InvalidDeviceName);
+    }
 
-    ASSERT_THROW(addDevice(tree, ""), exceptions::InvalidDeviceName)
-        << "Should reject an empty path";
-    ASSERT_THROW(addDevice(tree, "/"), exceptions::InvalidDeviceName)
-        << "Should reject the root";
-    ASSERT_THROW(addDevice(tree, "/com_osvr_sample"),
-                 exceptions::InvalidDeviceName)
-        << "Should reject just a single level";
-    ASSERT_THROW(addDevice(tree, "/com_osvr_sample/"),
-                 exceptions::InvalidDeviceName)
-        << "Should reject just a single level with trailing slash";
-    ASSERT_THROW(addDevice(tree, "com_osvr_sample"),
-                 exceptions::InvalidDeviceName)
-        << "Should reject just a single level w/o leading slash";
-    ASSERT_THROW(addDevice(tree, "com_osvr_sample/"),
-                 exceptions::InvalidDeviceName)
-        << "Should reject just a single level with trailing but w/o leading "
-           "slash";
+    SECTION("Should reject the root") {
+        REQUIRE_THROWS_AS(addDevice(tree, "/"), exceptions::InvalidDeviceName);
+    }
 
-    ASSERT_THROW(addDevice(tree, "/com_osvr_sample//"),
-                 exceptions::EmptyPathComponent)
-        << "Should reject empty second level";
-    ASSERT_THROW(addDevice(tree, "com_osvr_sample//"),
-                 exceptions::EmptyPathComponent)
-        << "Should reject empty second level";
-    ASSERT_THROW(addDevice(tree, "//"), exceptions::InvalidDeviceName)
-        << "Too short to be legit.";
-    ASSERT_THROW(addDevice(tree, "///"), exceptions::EmptyPathComponent);
+    SECTION("Should reject just a single level") {
+        REQUIRE_THROWS_AS(addDevice(tree, "/com_osvr_sample"),
+                          exceptions::InvalidDeviceName);
+    }
+
+    SECTION("Should reject just a single level with trailing slash") {
+        REQUIRE_THROWS_AS(addDevice(tree, "/com_osvr_sample/"),
+                          exceptions::InvalidDeviceName);
+    }
+    SECTION("Should reject just a single level "
+            "w/o leading slash") {
+        REQUIRE_THROWS_AS(addDevice(tree, "com_osvr_sample"),
+                          exceptions::InvalidDeviceName);
+    }
+
+    SECTION("Should reject just a single level with trailing but w/o leading "
+            "slash") {
+        REQUIRE_THROWS_AS(addDevice(tree, "com_osvr_sample/"),
+                          exceptions::InvalidDeviceName);
+    }
+
+    SECTION("Should reject empty second level") {
+        REQUIRE_THROWS_AS(addDevice(tree, "/com_osvr_sample//"),
+                          exceptions::EmptyPathComponent);
+
+        REQUIRE_THROWS_AS(addDevice(tree, "com_osvr_sample//"),
+                          exceptions::EmptyPathComponent);
+    }
+
+    SECTION("Too short to be legit.")
+    REQUIRE_THROWS_AS(addDevice(tree, "//"), exceptions::InvalidDeviceName);
+
+    SECTION("Should reject empty level") {
+        REQUIRE_THROWS_AS(addDevice(tree, "///"),
+                          exceptions::EmptyPathComponent);
+    }
 }

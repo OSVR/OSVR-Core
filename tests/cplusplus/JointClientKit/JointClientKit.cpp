@@ -24,18 +24,18 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/JointClientKit/JointClientKitC.h>
 #include <osvr/ClientKit/ContextC.h>
+#include <osvr/JointClientKit/JointClientKitC.h>
 
 // Library/third-party includes
 // - none
 
 // Standard includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
-TEST(BasicJointClientKit, ConstructDestruct) {
+TEST_CASE("BasicJointClientKit-ConstructDestruct") {
     auto ctx = osvrJointClientInit("org.osvr.test.jointclientkit", nullptr);
-    ASSERT_NE(nullptr, ctx);
-    ASSERT_EQ(OSVR_RETURN_SUCCESS, osvrClientUpdate(ctx));
-    ASSERT_EQ(OSVR_RETURN_SUCCESS, osvrClientShutdown(ctx));
+    REQUIRE_FALSE(nullptr == ctx);
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientUpdate(ctx));
+    REQUIRE(OSVR_RETURN_SUCCESS == osvrClientShutdown(ctx));
 }

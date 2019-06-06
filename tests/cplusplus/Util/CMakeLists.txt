@@ -1,8 +1,11 @@
 foreach(testname TreeNode ContainerWrapper UniqueContainer Projection QuatExpMap)
-    add_executable(${testname} ${testname}.cpp)
+    add_executable(${testname}
+        ${testname}.cpp)
+    target_link_libraries(${testname} osvr-catch-main)
     target_link_libraries(${testname} osvrUtilCpp)
-    osvr_setup_gtest(${testname})
+    add_test(NAME ${testname} COMMAND ${testname})
 endforeach()
 
 target_link_libraries(Projection eigen-headers)
 target_link_libraries(QuatExpMap eigen-headers vendored-vrpn)
+target_compile_definitions(QuatExpMap PRIVATE HAVE_QUATLIB)

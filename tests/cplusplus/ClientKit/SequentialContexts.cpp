@@ -30,9 +30,9 @@
 // - none
 
 // Standard includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
-TEST(SequentialClient, TwoContexts) {
+TEST_CASE("SequentialClient-TwoContexts") {
     {
         osvr::clientkit::ClientContext firstContext(
             "com.osvr.test.firstContext");

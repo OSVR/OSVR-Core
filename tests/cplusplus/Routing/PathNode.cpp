@@ -24,29 +24,27 @@
 // limitations under the License.
 
 // Internal Includes
-#include <osvr/Common/PathTreeFull.h>
 #include <osvr/Common/PathNode.h>
+#include <osvr/Common/PathTreeFull.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 // - none
 
 using namespace osvr::common;
 
-TEST(PathNode, getFullPath) {
+TEST_CASE("PathNode-getFullPath") {
     PathTree tree;
-    ASSERT_EQ(getFullPath(tree.getNodeByPath("/")), "/") << "Root";
-    ASSERT_EQ(getFullPath(tree.getNodeByPath("/test")), "/test")
-        << "First level";
-    ASSERT_EQ(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice")),
-              "/com_osvr_sample/MyDevice")
-        << "Second level";
+    REQUIRE(getFullPath(tree.getNodeByPath("/")) == "/");
+    REQUIRE(getFullPath(tree.getNodeByPath("/test")) == "/test");
+    REQUIRE(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice")) ==
+            "/com_osvr_sample/MyDevice");
 }
 
-TEST(PathNode, getFullPathNormalizes) {
+TEST_CASE("PathNode-getFullPathNormalizes") {
     PathTree tree;
-    ASSERT_EQ(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice/")),
-              "/com_osvr_sample/MyDevice");
+    REQUIRE(getFullPath(tree.getNodeByPath("/com_osvr_sample/MyDevice/")) ==
+            "/com_osvr_sample/MyDevice");
 }

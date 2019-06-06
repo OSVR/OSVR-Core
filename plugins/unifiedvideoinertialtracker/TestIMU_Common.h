@@ -9,6 +9,7 @@
 */
 
 // Copyright 2016 Sensics, Inc.
+// Copyright 2019 Collabora, Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +30,6 @@
 #include "TestIMU.h"
 
 #include "ConfigParams.h"
-#include "IMUStateMeasurements.h"
 #include "IMUStateMeasurements.h"
 
 // Library/third-party includes
@@ -94,18 +94,6 @@ inline std::ostream &operator<<(std::ostream &os, Quaterniond const &q) {
 }
 } // namespace Eigen
 
-namespace Catch {
-template <> struct TypelistTypeNameTrait<kalman::QFirst> {
-    static const char *get() { return "kalman::QFirst"; }
-};
-template <> struct TypelistTypeNameTrait<kalman::QLast> {
-    static const char *get() { return "kalman::QLast"; }
-};
-template <> struct TypelistTypeNameTrait<kalman::SplitQ> {
-    static const char *get() { return "kalman::SplitQ"; }
-};
-} // namespace Catch
-
 static const double SMALL_VALUE = 0.1;
 
 template <typename MeasurementType, typename InProgressType>
@@ -152,8 +140,7 @@ inline void commonSmallPositiveYChecks(TestData *data,
     AND_THEN("state correction should not contain any translational/linear "
              "velocity components") {
         REQUIRE(inProgress.stateCorrection.template head<3>().isZero());
-        REQUIRE(
-            inProgress.stateCorrection.template segment<3>(6).isZero());
+        REQUIRE(inProgress.stateCorrection.template segment<3>(6).isZero());
     }
     AND_WHEN("the correction is applied") {
         auto errorCovarianceCorrectionWasFinite = inProgress.finishCorrection();

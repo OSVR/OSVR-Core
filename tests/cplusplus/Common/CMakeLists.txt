@@ -11,8 +11,9 @@ if(HAVE_OSVR_JSON_TO_C)
         PathTreeJSON.cpp
         "${CMAKE_CURRENT_BINARY_DIR}/test_path_tree_json.h")
 endif()
-
-add_executable(TestCommon
+get_filename_component(LIB_TO_TEST ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+set(TEST_EXE Test${LIB_TO_TEST})
+add_executable(${TEST_EXE}
     DummyTree.h
     CommonComponent.cpp
     PathTreeResolution.cpp
@@ -22,6 +23,8 @@ add_executable(TestCommon
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Simple.h"
     "${PROJECT_SOURCE_DIR}/examples/internals/SerializationTraitExample_Complicated.h"
     ${PATHTREEJSON_SOURCES})
+target_link_libraries(${TEST_EXE} osvr-catch-main osvr${LIB_TO_TEST})
+target_link_libraries(${TEST_EXE} osvrCommon JsonCpp::JsonCpp vendored-vrpn)
 
-target_link_libraries(TestCommon osvrCommon JsonCpp::JsonCpp vendored-vrpn)
-osvr_setup_gtest(TestCommon)
+add_test(NAME ${LIB_TO_TEST}
+    COMMAND ${TEST_EXE})

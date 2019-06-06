@@ -29,7 +29,7 @@
 #include <osvr/TypePack/TypePack.h>
 
 // Library/third-party includes
-#include "gtest/gtest.h"
+#include <catch2/catch.hpp>
 
 // Standard includes
 #include <type_traits>

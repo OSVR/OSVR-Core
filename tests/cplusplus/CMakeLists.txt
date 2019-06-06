@@ -1,3 +1,8 @@
+
+add_library(osvr-catch-main STATIC CatchMain.cpp)
+target_link_libraries(osvr-catch-main PUBLIC osvr-catch2-interface osvr_cxx11_flags)
+target_compile_definitions(osvr-catch-main PUBLIC CATCH_CONFIG_CONSOLE_WIDTH=120)
+
 if(TARGET osvrTypePack)
     add_subdirectory(TypePack)
 endif()

@@ -168,7 +168,6 @@ if(BUILD_TESTING)
         vbtracker-core)
     set_target_properties(vbtracker-cam PROPERTIES
         FOLDER "OSVR Plugins/Video-Based Tracker")
-    #osvr_setup_gtest(vbtracker-cam)
 
     if(WIN32)
         target_link_libraries(vbtracker-cam PRIVATE directshow-camera)
