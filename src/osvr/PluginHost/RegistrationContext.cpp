@@ -51,9 +51,6 @@
 namespace osvr {
 namespace pluginhost {
     static const auto PLUGIN_HOST_LOGGER_NAME = "PluginHost";
-#ifdef _MSC_VER
-    static const auto PLUGIN_HOST_DEBUG_SUFFIX = ".debug";
-#endif
     namespace fs = boost::filesystem;
 
     struct RegistrationContext::Impl : private boost::noncopyable {
@@ -88,16 +85,11 @@ namespace pluginhost {
                                         std::string const &name,
                                         OSVR_PluginRegContext ctx,
                                         bool shouldRethrow = false) {
-#if defined(_MSC_VER) && !defined(NDEBUG)
-        // Visual C++ debug runtime: we append to the plugin name.
-        const std::string decoratedPluginName = name + PLUGIN_HOST_DEBUG_SUFFIX;
-#else
-        const std::string &decoratedPluginName = name;
-#endif
+
         log.debug() << "Trying to load a plugin with the name "
-                    << decoratedPluginName;
+                    << name;
         try {
-            plugin = libfunc::loadPluginByName(decoratedPluginName, ctx);
+            plugin = libfunc::loadPluginByName(name, ctx);
             return true;
         } catch (std::runtime_error const &e) {
             log.debug() << "Failed: " << e.what();
@@ -175,7 +167,7 @@ namespace pluginhost {
             // Visual C++ debug runtime: we append to the plugin name. Must only
             // load debug plugins iff we're a debug server
             const auto isDebugRuntimePlugin =
-                boost::iends_with(pluginBaseName, PLUGIN_HOST_DEBUG_SUFFIX);
+                boost::iends_with(pluginBaseName, OSVR_PLUGIN_DEBUG_SUFFIX);
 #if defined(NDEBUG)
             /// This is a non-debug build.
             if (isDebugRuntimePlugin) {
