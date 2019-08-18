@@ -13,6 +13,7 @@ set(OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE
 set(OSVR_EXAMPLE_DEVICE_PLUGINS
     com_osvr_example_selfcontained
     org_osvr_example_SampleCPlugin
+    com_osvr_example_TrackerSpin
     ${OSVR_EXAMPLE_DEVICE_PLUGINS_SIMPLE}
     CACHE INTERNAL "" FORCE)
 
@@ -72,6 +73,22 @@ osvr_add_plugin(NAME org_osvr_example_SampleCPlugin
     org_osvr_example_SampleCPlugin.c
     "${CMAKE_CURRENT_BINARY_DIR}/org_osvr_example_SampleCPlugin_json.h")
 set_target_properties(org_osvr_example_SampleCPlugin PROPERTIES
+    FOLDER "OSVR Example Plugins")
+
+## Build the TrackerSpin example
+osvr_convert_json(com_osvr_example_TrackerSpin_json
+    com_osvr_example_TrackerSpin.json
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_TrackerSpin_json.h")
+osvr_add_plugin(com_osvr_example_TrackerSpin
+    NO_INSTALL MANUAL_LOAD CPP
+    SOURCES
+    com_osvr_example_TrackerSpin.cpp
+    "${CMAKE_CURRENT_BINARY_DIR}/com_osvr_example_TrackerSpin_json.h")
+target_link_libraries(com_osvr_example_TrackerSpin
+    JsonCpp::JsonCpp
+    vendored-vrpn
+    osvr_cxx11_flags)
+set_target_properties(com_osvr_example_TrackerSpin PROPERTIES
     FOLDER "OSVR Example Plugins")
 
 

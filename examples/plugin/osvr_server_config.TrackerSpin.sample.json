@@ -1,0 +1,15 @@
+{
+    "desciprtion" : "This plugin is adapter from VRPN Tracker Spin, which is a virtual plugin for a tracker that stays around the origin and spin around the specified axis at the specified rate of rotation, reporting orientation at specified rate. It can be used to test the smoothness of rendering for VR system."
+	"drivers": [{
+		"plugin": "com_osvr_example_TrackerSpin",
+		"driver": "TrackerSpin",
+		"params": {
+			"report_rate": 400.0, /* (default 200.0) - Rate at which reports will be sent */
+			"x_of_axis_to_spin_around": 0.0, /* (default 0.0) - How much to spin around X axis */
+			"y_of_axis_to_spin_around": 1.0, /* (default 1.0) - How much to spin around Y axis */
+			"z_of_axis_to_spin_around": 0.0, /* (default 0.0) - How much to spin around Z axis */
+			"rotation_rate_around_axis_in_Hz": 0.1, /* (default 0.1) - How fast to spin the tracker */
+            "name": "TrackerSpin" /* (optional) */
+		}
+	}]
+}

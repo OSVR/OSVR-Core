@@ -8,7 +8,7 @@
     "tracker": {
       "count": 1,
       "bounded": true,
-      "position": false,
+      "position": true,
       "orientation": true
     }
   },
