@@ -24,11 +24,5 @@
             "cameraIsForward": true
         }
     }],
-    "aliases": {
-        "/headSpace": {
-            "translate": [0.0, 0.0, 0.04141],
-            "child": "/org_osvr_filter_videoimufusion/HeadFusion/semantic/fused"
-        },
-        "/me/head": "/headSpace"
-    }
+    "aliases": { "/me/head":"/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd" }
 }

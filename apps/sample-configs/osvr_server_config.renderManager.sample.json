@@ -86,5 +86,6 @@
 				}
 			]
 			}
-		}
+	},
+	"aliases": { "/me/head":"/com_osvr_Multiserver/OSVRHackerDevKit0/semantic/hmd" }
 }
