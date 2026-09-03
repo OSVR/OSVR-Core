@@ -6,7 +6,7 @@ Startup Functionality
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-file_search_maxima : cons(sconcat("C:/Users/Ryan/Desktop/src/OSVR-Core/plugins/videobasedtracker/math/###.{lisp,mac,mc}"), file_search_maxima)$
+file_search_maxima : cons(sconcat("C:/Users/Rylie/Desktop/src/OSVR-Core/plugins/videobasedtracker/math/###.{lisp,mac,mc}"), file_search_maxima)$
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -22,7 +22,7 @@ This is the "simple" version without distortion in it.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-projectPointRotMatrix(rot, translation, objPt, fl, c) := 
+projectPointRotMatrix(rot, translation, objPt, fl, c) :=
 block([xformed],
     xformed : rot . transpose(objPt) + transpose(translation),
     print(xformed),
@@ -43,7 +43,7 @@ right now only handling up through k3, k4-k6 go on the bottom instead...
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-projectDistortedPoint(quat, translation, objPt, fx, fy, cx, cy, k, p) := 
+projectDistortedPoint(quat, translation, objPt, fx, fy, cx, cy, k, p) :=
 block([xformed, xp, yp, r2, radDistort, xpp, ypp, x, y, z, u, v],
     xformed : quatToRotMatrix(quat) . objPt + translation,
     xp : (xformed[1]/xformed[3])[1],
@@ -67,7 +67,7 @@ Comparing
 /* [wxMaxima: fold    start ] */
 
 /* [wxMaxima: input   start ] */
-distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) :=
 buildq([quat, translation, fx, fy, cx, cy, k, p],
     projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy));
 /* [wxMaxima: input   end   ] */
@@ -77,8 +77,8 @@ distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, 
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-distortionDifference(quat, translation, fx, fy, cx, cy, k, p) := 
-buildq([quat, translation, fx, fy, cx, cy, k, p],lambda([point], 
+distortionDifference(quat, translation, fx, fy, cx, cy, k, p) :=
+buildq([quat, translation, fx, fy, cx, cy, k, p],lambda([point],
     projectDistortedPoint(quat, translation, point, fx, fy, cx, cy, k, p) - projectPoint(quat, translation, point, fx, fy, cx, cy)));
 distortionDifference([1,0,0,0], [0,0,0], 452.9, 452.9, 320, 240, [1.252916e-06, -1.752020e-11, 6.405327e-17], [0, 0]);
 /* [wxMaxima: input   end   ] */
@@ -260,7 +260,7 @@ m_rotatedObjPoint[1] * zRecip * fl])
 
 /* [wxMaxima: input   start ] */
 block([rotXlated, m_rotatedObjPoint, pos, zRecip, zSqRecip, fl, m_rotatedObjPoint, myMat],
-    
+
     myMat: (zRecip * fl) * matrix(
         [-rotXlated[1]*m_rotatedObjPoint[2]*zRecip
         ,m_rotatedObjPoint[1]*rotXlated[1]*zRecip+m_rotatedObjPoint[3],-m_rotatedObjPoint[2]],

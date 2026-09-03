@@ -1,7 +1,7 @@
 {
     "deviceVendor": "OSVR",
     "deviceName": "Unified Video-Based and Inertial Tracker",
-    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "author": "Rylie Pavlik <rylie@ryliepavlik.com>",
     "version": 2,
     "lastModified": "2016-06-30T13:58:45.079Z",
     "interfaces": {

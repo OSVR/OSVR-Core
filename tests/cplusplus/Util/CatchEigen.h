@@ -3,7 +3,7 @@
 
     @date 2019
 
-    @author Ryan Pavlik <ryan.pavlik@collabora.com>
+    @author Rylie Pavlik <rylie.pavlik@collabora.com>
 
     Based in part on catch_approx.h from the Catch2 distribution
 */

@@ -175,7 +175,7 @@ namespace vbtracker {
         SBDBlobExtractor m_blobExtractor;
         cv::SimpleBlobDetector::Params m_sbdParams;
 
-        /// @brief Test (with asserts) what Ryan thinks are the invariants. Will
+        /// @brief Test (with asserts) what Rylie thinks are the invariants. Will
         /// inline right out of existence in non-debug builds.
         void m_assertInvariants() const {
             BOOST_ASSERT_MSG(
