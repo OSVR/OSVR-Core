@@ -1,7 +1,7 @@
 # Help CMake find recent Boost MSVC binaries without manual configuration.
 #
 # Original Author:
-# 2014-2016 Ryan Pavlik <ryan.pavlik@gmail.com>
+# 2014-2016 Rylie Pavlik <rylie@ryliepavlik.com>
 #
 # Copyright Sensics, Inc. 2014-2016.
 # Distributed under the Boost Software License, Version 1.0.

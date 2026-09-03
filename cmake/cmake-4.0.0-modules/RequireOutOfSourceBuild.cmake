@@ -4,14 +4,17 @@
 #
 #
 # Original Author:
-# 2009-2010 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
-# http://academic.cleardefinition.com
+# 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+# https://ryliepavlik.com/
 # Iowa State University HCI Graduate Program/VRAC
 #
-# Copyright Iowa State University 2009-2010.
+# Copyright 2009-2010, Iowa State University
+#
 # Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file ../LICENSE_1_0.txt or copy at
+# (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 get_filename_component(_src "${CMAKE_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(_cur_src "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
@@ -39,6 +42,6 @@ foreach(_var ${_test})
 	if("${_bin}" STREQUAL "${_chopped}")
 		get_filename_component(_parent "${CMAKE_SOURCE_DIR}/.." ABSOLUTE)
 		message(FATAL_ERROR
-			"You must set a binary directory that is different from your source directory.  You might consider ${CMAKE_SOURCE_DIR}/build or ${_parent}/build-${CMAKE_PROJECT_NAME}")
+			"You must set a binary directory that is different from your source directory.  You might consider cmake options: -B${CMAKE_SOURCE_DIR}/build or -B${_parent}/build-${CMAKE_PROJECT_NAME}")
 	endif()
 endforeach()

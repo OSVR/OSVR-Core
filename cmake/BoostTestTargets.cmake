@@ -27,14 +27,17 @@
 # 	CopyResourcesToBuildTree
 #
 # Original Author:
-# 2009-2010 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
-# http://academic.cleardefinition.com
-# Iowa State University HCI Graduate Program/VRAC
+# 2009-2021, Rylie Pavlik <rylie.pavlik@collabora.com> <rylie@ryliepavlik.com>
+# https://ryliepavlik.com/
 #
-# Copyright Iowa State University 2009-2010.
+# Copyright 2021, Collabora, Ltd.
+# Copyright 2009-2010, Iowa State University
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 if(__add_boost_test)
 	return()
@@ -46,7 +49,9 @@ set(BOOST_TEST_TARGET_PREFIX "boosttest")
 if(NOT Boost_FOUND)
 	find_package(Boost 1.34.0 QUIET)
 endif()
-if("${Boost_VERSION}0" LESS "1034000")
+if("${Boost_VERSION}" MATCHES "[0-9][.].*")
+	# we are OK
+elseif("${Boost_VERSION}0" LESS "1034000")
 	set(_shared_msg
 		"NOTE: boost::test-based targets and tests cannot "
 		"be added: boost >= 1.34.0 required but not found. "

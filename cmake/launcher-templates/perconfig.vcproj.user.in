@@ -1,8 +1,13 @@
+<!--
+Copyright 2010, 2014, Iowa State University
+Copyright 2020, caseymcc
+SPDX-License-Identifier: BSL-1.0
+-->
 		<Configuration
 			Name="@USERFILE_CONFIGNAME@|@USERFILE_PLATFORM@"
 			>
 			<DebugSettings
-				Command="${USERFILE_@USERFILE_CONFIGNAME@_COMMAND}"
+				Command="@USERFILE_COMMAND@"
 				WorkingDirectory="@USERFILE_WORKING_DIRECTORY@"
 				CommandArguments="@USERFILE_COMMAND_ARGUMENTS@"
 				Attach="false"

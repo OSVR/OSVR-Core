@@ -30,7 +30,7 @@
 # The variable is not modified if not building with MSVC.
 
 #=============================================================================
-# Copyright 2015 Ryan Pavlik <ryan.pavlik@gmail.com>
+# Copyright 2015 Rylie Pavlik <rylie@ryliepavlik.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see below.
@@ -38,6 +38,8 @@
 # This software is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 #=============================================================================
 #
 # Redistribution and use in source and binary forms, with or without
@@ -102,7 +104,7 @@ function(get_msvc_major_version _var)
     if(NOT MSVC)
         return()
     endif()
-    get_msvc_major_minor_version(_vs_ver _dummy)
+    get_msvc_major_minor_version(_vs_ver _unused)
     set(${_var} ${_vs_ver} PARENT_SCOPE)
 endfunction()
 
@@ -110,7 +112,7 @@ function(get_msvc_minor_version _var)
     if(NOT MSVC)
         return()
     endif()
-    get_msvc_major_minor_version(_dummy _vs_ver)
+    get_msvc_major_minor_version(_unused _vs_ver)
     set(${_var} ${_vs_ver} PARENT_SCOPE)
 endfunction()
 
