@@ -26,14 +26,17 @@
 # and trigger an automatic re-run.
 #
 # Original Author:
-# 2009-2012 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
-# http://academic.cleardefinition.com
+# 2009-2012 Rylie Pavlik <rylie@ryliepavlik.com>
+# https://ryliepavlik.com/
 # Iowa State University HCI Graduate Program/VRAC
 #
-# Copyright Iowa State University 2009-2012.
+# Copyright 2009-2012, Iowa State University
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 set(_HUMAN "cppdom")
 set(_HEADER cppdom/cppdom.h)

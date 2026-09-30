@@ -45,14 +45,17 @@
 #  FindPackageHandleStandardArgs (known included with CMake >=2.6.2)
 #
 # Original Author:
-# 2012 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
-# http://academic.cleardefinition.com
+# 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+# https://ryliepavlik.com/
 # Iowa State University HCI Graduate Program/VRAC
 #
-# Copyright Iowa State University 2012.
+# Copyright 2012, Iowa State University
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 set(_preferred_sdk_dirs) # pre-output
 set(_win_sdk_dirs) # pre-output
@@ -72,8 +75,21 @@ macro(_winsdk_announce)
 	endif()
 endmacro()
 
+# See https://developer.microsoft.com/en-us/windows/downloads/sdk-archive -
+# although version numbers listed on that page don't necessarily match the directory
+# used by the installer.
 set(_winsdk_win10vers
-	10.0.15063.0 # Redstone 2 aka Win10 1703 "Creators' Update"
+	10.0.26100.0
+	10.0.22621.0
+	10.0.22000.0
+	10.0.20348.0
+	10.0.19041.0
+	10.0.18362.0 # Win10 1903 "19H1"
+	10.0.17763.0 # Win10 1809 "October 2018 Update"
+	10.0.17134.0 # Redstone 4 aka Win10 1803 "April 2018 Update"
+	10.0.17133.0 # Redstone 4 aka Win10 1803 "April 2018 Update"
+	10.0.16299.0 # Redstone 3 aka Win10 1709 "Fall Creators Update"
+	10.0.15063.0 # Redstone 2 aka Win10 1703 "Creators Update"
 	10.0.14393.0 # Redstone aka Win10 1607 "Anniversary Update"
 	10.0.10586.0 # TH2 aka Win10 1511
 	10.0.10240.0 # Win10 RTM
@@ -613,7 +629,7 @@ if(WINDOWSSDK_FOUND)
 		set(_dirs)
 		foreach(_sdkdir ${ARGN})
 			get_windowssdk_include_dirs("${_sdkdir}" _current_sdk_incdirs)
-			if(_current_sdk_libdirs)
+			if(_current_sdk_incdirs)
 				list(APPEND _dirs ${_current_sdk_incdirs})
 			endif()
 		endforeach()

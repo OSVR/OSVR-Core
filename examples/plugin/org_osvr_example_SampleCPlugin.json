@@ -1,7 +1,7 @@
 {
     "deviceVendor": "Sensics",
     "deviceName": "Sample C Plugin",
-    "author": "Ryan Pavlik <ryan@sensics.com>",
+    "author": "Rylie Pavlik <rylie@ryliepavlik.com>",
     "version": 1,
     "lastModified": "2015-11-12T23:00:24.431Z",
     "interfaces": {

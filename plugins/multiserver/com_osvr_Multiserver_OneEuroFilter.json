@@ -1,7 +1,7 @@
 {
   "deviceVendor": "OSVR/VRPN",
   "deviceName": "'One Euro' Tracking Filter",
-  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "author": "Rylie Pavlik <rylie@ryliepavlik.com>",
   "version": 1,
   "lastModified": "2015-04-10T17:42:17.563Z",
   "interfaces": {

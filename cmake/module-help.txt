@@ -113,8 +113,8 @@ a few.
 
        Requires: 	GetForceIncludeDefinitions 	CopyResourcesToBuildTree
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -149,8 +149,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -176,8 +176,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -201,8 +201,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -226,8 +226,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -253,8 +253,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -273,8 +273,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -292,8 +292,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -323,8 +323,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -342,8 +342,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -371,8 +371,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -410,8 +410,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -433,8 +433,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -484,8 +484,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -517,8 +517,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -538,8 +538,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -559,8 +559,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -593,8 +593,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -637,8 +637,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -702,8 +702,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -736,8 +736,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -778,8 +778,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2012.  Distributed under the
@@ -809,7 +809,7 @@ a few.
 
        
 
-       2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
+       2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
        http://academic.cleardefinition.com Iowa State University HCI Graduate
        Program/VRAC
 
@@ -845,8 +845,8 @@ a few.
 
        
 
-       Original Author: 2011 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2011 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2011.  Distributed under the Boost
@@ -873,8 +873,8 @@ a few.
        Initially in VRPN - Distributed under the Boost Software License,
        Version 1.0.
 
-       Almost entirely re-written by: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Almost entirely re-written by: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -913,8 +913,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -962,8 +962,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -990,8 +990,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1014,8 +1014,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1042,8 +1042,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1099,8 +1099,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2012.  Distributed under the
@@ -1133,8 +1133,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1179,8 +1179,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1225,8 +1225,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -1266,8 +1266,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1300,8 +1300,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1345,8 +1345,8 @@ a few.
        You may wish to add the IDL file to your list of sources if you want
        it to appear in your IDE, but it is not necessary.
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -1383,9 +1383,9 @@ a few.
        Author: 2013 Eric Marsh <bits@wemarsh.com> http://wemarsh.com/
        Kognitiv Neuroinformatik, Universität Bremen
 
-       (building on Ryan Pavlik's templates)
+       (building on Rylie Pavlik's templates)
 
-       2013 Ryan Pavlik <rpavlik@iastate.edu> <abiryan@ryand.net>
+       2013 Rylie Pavlik <rylie@ryliepavlik.com>
        http://academic.cleardefinition.com Iowa State University HCI Graduate
        Program/VRAC
 
@@ -1430,8 +1430,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1475,8 +1475,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -1511,8 +1511,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1535,8 +1535,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1570,8 +1570,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1604,8 +1604,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1658,8 +1658,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1697,8 +1697,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1728,8 +1728,8 @@ a few.
 
        
 
-       Original Author: 2011 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2011 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2011.  Distributed under the Boost
@@ -1762,7 +1762,7 @@ a few.
 
           to handle multiple installed versions gracefully by Jan Woetzel
 
-       2010/02 Ryan Pavlik (Iowa State University) - partial rewrite to
+       2010/02 Rylie Pavlik (Iowa State University) - partial rewrite to
        standardize
 
        tested with:
@@ -1826,8 +1826,8 @@ a few.
 
        
 
-       Original Author: 2009-2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1862,8 +1862,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -1906,8 +1906,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -1931,8 +1931,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -1973,8 +1973,8 @@ a few.
        Refactored from FindVRPN.cmake by: Juan Sebastian Casallas
        <casallas@iastate.edu>
 
-       FindVRPN.cmake Original Author: 2009-2010 Ryan Pavlik
-       <rpavlik@iastate.edu> <abiryan@ryand.net>
+       FindVRPN.cmake Original Author: 2009-2010 Rylie Pavlik
+       <rylie@ryliepavlik.com>
        http://academic.cleardefinition.com Iowa State University HCI Graduate
        Program/VRAC
 
@@ -2019,8 +2019,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2064,8 +2064,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2085,8 +2085,8 @@ a few.
        If TR1 features are not built-in, we will try to use Boost to
        substitute for them.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2124,8 +2124,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2164,8 +2164,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2209,8 +2209,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2254,8 +2254,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2299,8 +2299,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2347,8 +2347,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2374,8 +2374,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2421,8 +2421,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2468,8 +2468,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2514,8 +2514,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2559,8 +2559,8 @@ a few.
        change this environment variable, because it cannot auto-detect this
        change and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2633,8 +2633,8 @@ a few.
        this environment variable, because it cannot auto-detect this change
        and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
        Brandon Newendorp <brandon@newendorp.com>
 
@@ -2713,8 +2713,8 @@ a few.
        this environment variable, because it cannot auto-detect this change
        and trigger an automatic re-run.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2792,10 +2792,10 @@ a few.
        this environment variable, because it cannot auto-detect this change
        and trigger an automatic re-run.
 
-       Original Author: 2009-2011 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2011 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC Updated for VR Juggler 3.0 by:
-       Brandon Newendorp <brandon@newendorp.com> and Ryan Pavlik
+       Brandon Newendorp <brandon@newendorp.com> and Rylie Pavlik
 
        Copyright Iowa State University 2009-2011.  Distributed under the
        Boost Software License, Version 1.0.  (See accompanying file
@@ -2833,8 +2833,8 @@ a few.
 
        
 
-       Original Author: 2009-2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2012.  Distributed under the
@@ -2870,8 +2870,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -2937,8 +2937,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -2973,8 +2973,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3010,8 +3010,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3052,8 +3052,8 @@ a few.
 
        
 
-       Original Author: 2012 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2012 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2012.  Distributed under the Boost
@@ -3092,8 +3092,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3132,8 +3132,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3167,8 +3167,8 @@ a few.
 
        
 
-       Original Author: 2009-2011 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2011 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2011.  Distributed under the
@@ -3192,8 +3192,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3225,8 +3225,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3258,8 +3258,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3277,8 +3277,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3309,8 +3309,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3350,8 +3350,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3365,7 +3365,7 @@ a few.
        Schneider <mail@cynapses.org> Copyright 2007 Wengo Copyright 2007 Mike
        Jackson Copyright 2008 Andreas Pakulat <apaku@gmx.de> Copyright
        2008-2009 Philip Lowman <philip@yhbt.com> Copyright 2010 Iowa State
-       University (Ryan Pavlik <abiryan@ryand.net>)
+       University (Rylie Pavlik <rylie@ryliepavlik.com>)
 
        Distributed under the OSI-approved BSD License (the "License"); see
        accompanying file Copyright.txt for details.
@@ -3426,8 +3426,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3445,8 +3445,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3468,8 +3468,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3507,8 +3507,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3528,8 +3528,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3541,8 +3541,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3561,8 +3561,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3588,8 +3588,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3620,8 +3620,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3643,8 +3643,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3666,8 +3666,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3692,8 +3692,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3709,8 +3709,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3724,8 +3724,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3745,8 +3745,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3765,8 +3765,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3795,8 +3795,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3814,8 +3814,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3834,8 +3834,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3891,8 +3891,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3908,8 +3908,8 @@ a few.
        	TCHAR_WORKAROUND, automatically set to on when not on win32
        	TCHAR_INCLUDE_DIR, location of our fake tchar.h file
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3937,8 +3937,8 @@ a few.
 
        
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -3968,8 +3968,8 @@ a few.
 
        Requires CMake 2.6 or newer (uses the 'function' command)
 
-       Original Author: 2011 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2011 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2011-2012.  Distributed under the
@@ -3984,8 +3984,8 @@ a few.
        This calls include_directories and link_directories as needed to
        permit TR1 support.
 
-       Original Author: 2009-2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2009-2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the
@@ -4001,8 +4001,8 @@ a few.
 
        
 
-       Original Author: 2010 Ryan Pavlik <rpavlik@iastate.edu>
-       <abiryan@ryand.net> http://academic.cleardefinition.com Iowa State
+       Original Author: 2010 Rylie Pavlik <rylie@ryliepavlik.com>
+       <rylie@ryliepavlik.com> http://academic.cleardefinition.com Iowa State
        University HCI Graduate Program/VRAC
 
        Copyright Iowa State University 2009-2010.  Distributed under the

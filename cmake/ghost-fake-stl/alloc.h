@@ -4,11 +4,13 @@
 	@date	2012
 
 	@author
-	Ryan Pavlik
-	<rpavlik@iastate.edu> and <abiryan@ryand.net>
-	http://academic.cleardefinition.com/
+	Rylie Pavlik
+	<rylie@ryliepavlik.com> and <rylie@ryliepavlik.com>
+	https://ryliepavlik.com/
 	Iowa State University Virtual Reality Applications Center
 	Human-Computer Interaction Graduate Program
 */
+// Copyright 2012, Iowa State University
+// SPDX-License-Identifier: BSL-1.0
 
 #pragma once

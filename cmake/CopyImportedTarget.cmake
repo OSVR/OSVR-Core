@@ -8,12 +8,15 @@
 # Likely requires CMake 2.8.12 or newer to work well.
 #
 # Original Author:
-# 2015 Ryan Pavlik <ryan.pavlik@gmail.com> <abiryan@ryand.net>
+# 2015 Rylie Pavlik <rylie@ryliepavlik.com>
 #
-# Copyright Sensics, Inc. 2015.
+# Copyright 2015, Sensics, Inc.
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 function(copy_imported_targets _target)
     foreach(_dep ${ARGN})

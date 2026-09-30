@@ -1,7 +1,7 @@
 {
   "deviceVendor": "OSVR",
   "deviceName": "'One Euro' Tracking Filter",
-  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "author": "Rylie Pavlik <rylie@ryliepavlik.com>",
   "version": 1,
   "lastModified": "2015-10-12T21:13:07.585Z",
   "interfaces": {

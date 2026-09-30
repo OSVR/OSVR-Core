@@ -216,11 +216,13 @@
 # Copyright 2014 Stephen Kelly <steveire@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# see below.
 #
 # This software is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 #=============================================================================
 # 
 # Redistribution and use in source and binary forms, with or without

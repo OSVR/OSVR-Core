@@ -1,7 +1,7 @@
 {
   "deviceVendor": "Generic",
   "deviceName": "OpenCV Video Capture",
-  "author": "Ryan Pavlik <ryan@sensics.com>",
+  "author": "Rylie Pavlik <rylie@ryliepavlik.com>",
   "version": 1,
   "lastModified": "2015-05-21T18:41:56.009Z",
   "interfaces": {

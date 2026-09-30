@@ -25,7 +25,7 @@
   derivatives", which is available at www.damtp.cam.ac.uk, for more
   information.
   Updated version from https://github.com/elsid/newuoa-cpp - further updated by
-  Ryan Pavlik.
+  Rylie Pavlik.
  */
 /*
   The original fortran codes are distributed without restrictions. The

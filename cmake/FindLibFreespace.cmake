@@ -13,13 +13,16 @@
 #  FindPackageHandleStandardArgs (known included with CMake >=2.6.2)
 #
 # Original Author:
-# 2014 Ryan Pavlik <ryan@sensics.com> <abiryan@ryand.net>
-# http://academic.cleardefinition.com
+# 2014 Rylie Pavlik <rylie@ryliepavlik.com>
+# https://ryliepavlik.com/
 #
-# Copyright Sensics, Inc. 2014.
+# Copyright 2014, Sensics, Inc.
+#
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
+#
+# SPDX-License-Identifier: BSL-1.0
 
 set(LIBFREESPACE_ROOT_DIR
 	"${LIBFREESPACE_ROOT_DIR}"

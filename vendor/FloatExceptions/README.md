@@ -20,4 +20,4 @@ The following additional files are excerpts of `FloatExceptions.cpp`, with tidy 
 - `FPExceptionEnabler.h`
 
 
-Ryan Pavlik, Sensics, Inc. - October 27, 2015
+Rylie Pavlik, Sensics, Inc. - October 27, 2015
